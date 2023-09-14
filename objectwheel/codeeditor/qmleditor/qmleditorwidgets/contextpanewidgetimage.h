@@ -1,45 +1,17 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmleditorwidgets_global.h"
 #include "contextpanewidget.h"
 #include <qdrawutil.h>
 
 #include <QLabel>
 #include <QPointer>
 
-QT_BEGIN_NAMESPACE
-namespace Ui {
-    class ContextPaneWidgetImage;
-    class ContextPaneWidgetBorderImage;
-}
 class QLabel;
+class QRadioButton;
 class QSlider;
-QT_END_NAMESPACE
 
 namespace QmlJS { class PropertyReader; }
 
@@ -52,7 +24,7 @@ class PreviewLabel : public QLabel
     Q_OBJECT
 
 public:
-    PreviewLabel(QWidget *parent = 0);
+    PreviewLabel(QWidget *parent = nullptr);
     void setZoom(int);
     void setIsBorderImage(bool b);
     void setMargins(int left, int top, int right, int bottom);
@@ -68,11 +40,11 @@ signals:
     void rightMarginChanged();
 
 protected:
-    void paintEvent(QPaintEvent *event);
-    void mousePressEvent(QMouseEvent * event);
-    void mouseReleaseEvent(QMouseEvent * event);
-    void mouseMoveEvent(QMouseEvent * event);
-    void leaveEvent(QEvent* event );
+    void paintEvent(QPaintEvent *event) final;
+    void mousePressEvent(QMouseEvent * event) final;
+    void mouseReleaseEvent(QMouseEvent * event) final;
+    void mouseMoveEvent(QMouseEvent * event) final;
+    void leaveEvent(QEvent* event ) final;
 private:
     bool m_showBorders;
     int m_left, m_right, m_top, m_bottom;
@@ -82,7 +54,7 @@ private:
     bool m_dragging_bottom;
     QPoint m_startPos;
     int m_zoom;
-    bool m_borderImage;
+    bool m_isBorderImage;
     QLabel *m_hooverInfo;
 };
 
@@ -91,7 +63,7 @@ class PreviewDialog : public DragWidget
     Q_OBJECT
 
 public:
-    PreviewDialog(QWidget *parent = 0);
+    PreviewDialog(QWidget *parent = nullptr);
     void setPixmap(const QPixmap &p, int zoom = 1);
     void setZoom(int z);
     void setIsBorderImage(bool b);
@@ -102,7 +74,7 @@ public:
     void onSliderMoved(int value);
 
 protected:
-    void wheelEvent(QWheelEvent* event);
+    void wheelEvent(QWheelEvent* event) final;
 
 private:
     PreviewLabel *m_label;
@@ -110,16 +82,15 @@ private:
     QLabel *m_zoomLabel;
     int m_zoom;
     QPixmap m_pixmap;
-    bool m_borderImage;
+    bool m_isBorderImage;
 };
 
-class QMLEDITORWIDGETS_EXPORT ContextPaneWidgetImage : public QWidget
+class ContextPaneWidgetImage : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ContextPaneWidgetImage(QWidget *parent = 0, bool borderImage = false);
-    ~ContextPaneWidgetImage();
+    explicit ContextPaneWidgetImage(QWidget *parent = nullptr, bool borderImage = false);
     void setProperties(QmlJS::PropertyReader *propertyReader);
     void setPath(const QString& path);
     PreviewDialog* previewDialog();
@@ -142,40 +113,55 @@ public:
     void onRightMarginsChanged();
 
 protected:
-    void changeEvent(QEvent *e);
-    void hideEvent(QHideEvent* event);
-    void showEvent(QShowEvent* event);
+    void hideEvent(QHideEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 
 private:
-    Ui::ContextPaneWidgetImage *ui;
-    Ui::ContextPaneWidgetBorderImage *uiBorderImage;
+    FileWidget *m_fileWidget;
+    QLabel *m_previewLabel;
+    QLabel *m_sizeLabel;
+    struct {
+        QRadioButton *verticalTileRadioButton;
+        QRadioButton *verticalStretchRadioButton;
+        QRadioButton *verticalTileRadioButtonNoCrop;
+        QRadioButton *horizontalTileRadioButton;
+        QRadioButton *horizontalStretchRadioButton;
+        QRadioButton *horizontalTileRadioButtonNoCrop;
+    } m_borderImage;
+    struct {
+        QRadioButton *stretchRadioButton;
+        QRadioButton *tileRadioButton;
+        QRadioButton *horizontalStretchRadioButton;
+        QRadioButton *verticalStretchRadioButton;
+        QRadioButton *preserveAspectFitRadioButton;
+        QRadioButton *cropAspectFitRadioButton;
+    } m_image;
+
     QString m_path;
     QPointer<PreviewDialog> m_previewDialog;
-    FileWidget *m_fileWidget;
-    QLabel *m_sizeLabel;
-    bool m_borderImage;
-    bool previewWasVisible;
+    bool m_isBorderImage;
+    bool m_previewWasVisible = false;
 };
 
 class LabelFilter: public QObject {
 
     Q_OBJECT
 public:
-    LabelFilter(QObject* parent =0) : QObject(parent) {}
+    LabelFilter(QObject* parent =nullptr) : QObject(parent) {}
 signals:
     void doubleClicked();
 protected:
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) final;
 };
 
 class WheelFilter: public QObject {
 
     Q_OBJECT
 public:
-    WheelFilter(QObject* parent =0) : QObject(parent) {}
+    WheelFilter(QObject* parent =nullptr) : QObject(parent) {}
     void setTarget(QObject *target) { m_target = target; }
 protected:
-    bool eventFilter(QObject *obj, QEvent *event);
+    bool eventFilter(QObject *obj, QEvent *event) final;
     QObject *m_target;
 };
 

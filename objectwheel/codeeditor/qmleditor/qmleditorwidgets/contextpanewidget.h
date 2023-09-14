@@ -1,40 +1,15 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmleditorwidgets_global.h"
 #include <QFrame>
 #include <QPointer>
 
-QT_BEGIN_NAMESPACE
 class QToolButton;
 class QVariant;
 class QGraphicsDropShadowEffect;
 class QGraphicsOpacityEffect;
-QT_END_NAMESPACE
 
 namespace QmlJS { class PropertyReader; }
 
@@ -46,23 +21,23 @@ class EasingContextPane;
 class ContextPaneWidgetRectangle;
 class ContextPaneWidgetImage;
 
-class QMLEDITORWIDGETS_EXPORT DragWidget : public QFrame
+class DragWidget : public QFrame
 {
     Q_OBJECT
 
 public:
-    explicit DragWidget(QWidget *parent = 0);
+    explicit DragWidget(QWidget *parent = nullptr);
     void setSecondaryTarget(QWidget* w)
     { m_secondaryTarget = w; }
 
 protected:
     QPoint m_pos;
-    void mousePressEvent(QMouseEvent * event);
-    void mouseReleaseEvent(QMouseEvent * event);
-    void mouseMoveEvent(QMouseEvent * event);
+    void mousePressEvent(QMouseEvent * event) override;
+    void mouseReleaseEvent(QMouseEvent * event) override;
+    void mouseMoveEvent(QMouseEvent * event) override;
     void virtual protectedMoved();
-    void leaveEvent(QEvent *);
-    void enterEvent(QEvent *);
+    void leaveEvent(QEvent *) override;
+    void enterEvent(QEnterEvent *) override;
 
 private:
     QGraphicsDropShadowEffect *m_dropShadowEffect;
@@ -71,13 +46,13 @@ private:
     QPointer<QWidget> m_secondaryTarget;
 };
 
-class QMLEDITORWIDGETS_EXPORT ContextPaneWidget : public DragWidget
+class ContextPaneWidget : public DragWidget
 {
     Q_OBJECT
 
 public:
-    explicit ContextPaneWidget(QWidget *parent = 0);
-    ~ContextPaneWidget();
+    explicit ContextPaneWidget(QWidget *parent = nullptr);
+    ~ContextPaneWidget() override;
     void activate(const QPoint &pos, const QPoint &alternative, const QPoint &alternative2, bool pinned);
     void rePosition(const QPoint &pos, const QPoint &alternative , const QPoint &alternative3, bool pinned);
     void deactivate();
@@ -109,7 +84,7 @@ private:
     void onResetPosition(bool toggle);
 
 protected:
-    void protectedMoved();
+    void protectedMoved() override;
 
     QToolButton *m_toolButton;
     QWidget *createFontWidget();

@@ -1,36 +1,15 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
-#include <QSharedPointer>
+#include "../utils_global.h"
+
 #include <QObject>
 #include <QPointer>
 #include <QTimer>
 #include <QRect>
+#include <QVariant>
 
 /*
  * In its current form QToolTip is not extensible. So this is an attempt to provide a more
@@ -41,15 +20,13 @@
  * not be changed.
  */
 
-QT_BEGIN_NAMESPACE
 class QPoint;
 class QVariant;
 class QLayout;
 class QWidget;
-QT_END_NAMESPACE
 
 namespace Utils {
-namespace Internal { class QTipLabel; }
+namespace Internal { class TipLabel; }
 
 class UTILS_EXPORT ToolTip : public QObject
 {
@@ -58,7 +35,7 @@ protected:
     ToolTip();
 
 public:
-    ~ToolTip();
+    ~ToolTip() override;
 
     enum {
         ColorContent = 0,
@@ -66,19 +43,28 @@ public:
         WidgetContent = 42
     };
 
-    bool eventFilter(QObject *o, QEvent *event);
+    bool eventFilter(QObject *o, QEvent *event) override;
 
     static ToolTip *instance();
 
-    static void show(const QPoint &pos, const QString &content, QWidget *w = 0,
-                     const QString &helpId = QString(), const QRect &rect = QRect());
-    static void show(const QPoint &pos, const QColor &color, QWidget *w = 0,
-                     const QString &helpId = QString(), const QRect &rect = QRect());
-    static void show(const QPoint &pos, QWidget *content, QWidget *w = 0,
-                     const QString &helpId = QString(), const QRect &rect = QRect());
-    static void show(const QPoint &pos, QLayout *content, QWidget *w = 0,
-                     const QString &helpId = QString(), const QRect &rect = QRect());
-    static void move(const QPoint &pos, QWidget *w);
+    static void show(const QPoint &pos, const QString &content, QWidget *w = nullptr,
+                     const QVariant &contextHelp = {}, const QRect &rect = QRect());
+    static void show(const QPoint &pos,
+                     const QString &content,
+                     Qt::TextFormat format,
+                     QWidget *w = nullptr,
+                     const QVariant &contextHelp = {},
+                     const QRect &rect = QRect());
+    static void show(const QPoint &pos,
+                     const QColor &color,
+                     QWidget *w = nullptr,
+                     const QVariant &contextHelp = {},
+                     const QRect &rect = QRect());
+    static void show(const QPoint &pos, QWidget *content, QWidget *w = nullptr,
+                     const QVariant &contextHelp = {}, const QRect &rect = QRect());
+    static void show(const QPoint &pos, QLayout *content, QWidget *w = nullptr,
+                     const QVariant &contextHelp = {}, const QRect &rect = QRect());
+    static void move(const QPoint &pos);
     static void hide();
     static void hideImmediately();
     static bool isVisible();
@@ -89,7 +75,7 @@ public:
     // using WidgetContent
     static bool pinToolTip(QWidget *w, QWidget *parent);
 
-    static QString contextHelpId();
+    static QVariant contextHelp();
 
 signals:
     void shown();
@@ -97,24 +83,24 @@ signals:
 
 private:
     void showInternal(const QPoint &pos, const QVariant &content, int typeId, QWidget *w,
-                      const QString &helpId, const QRect &rect);
+                      const QVariant &contextHelp, const QRect &rect);
     void hideTipImmediately();
     bool acceptShow(const QVariant &content, int typeId, const QPoint &pos, QWidget *w,
-                    const QString &helpId, const QRect &rect);
+                    const QVariant &contextHelp, const QRect &rect);
     void setUp(const QPoint &pos, QWidget *w, const QRect &rect);
     bool tipChanged(const QPoint &pos, const QVariant &content, int typeId, QWidget *w,
-                    const QString &helpId) const;
+                    const QVariant &contextHelp) const;
     void setTipRect(QWidget *w, const QRect &rect);
-    void placeTip(const QPoint &pos, QWidget *w);
+    void placeTip(const QPoint &pos);
     void showTip();
     void hideTipWithDelay();
 
-    QPointer<Internal::QTipLabel> m_tip;
+    QPointer<Internal::TipLabel> m_tip;
     QWidget *m_widget;
     QRect m_rect;
     QTimer m_showTimer;
     QTimer m_hideDelayTimer;
-    QString m_helpId;
+    QVariant m_contextHelp;
 };
 
 } // namespace Utils

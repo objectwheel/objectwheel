@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 /*
     This file is a self-contained interactive indenter for Qt Script.
@@ -79,11 +57,11 @@ using namespace QmlJS;
 
 
 QmlJSIndenter::QmlJSIndenter()
-    : caseOrDefault(QRegExp(QLatin1String(
-            "\\s*(?:"
+    : caseOrDefault(QRegularExpression(QLatin1String(
+            "^\\s*(?:"
             "case\\b[^:]+|"
             "default)"
-            "\\s*:.*")))
+            "\\s*:.*$")))
 
 {
 
@@ -339,7 +317,7 @@ int QmlJSIndenter::indentForContinuationLine()
 
                 If there is no such token, we use a continuation indent:
 
-                    static QRegExp foo(QString(
+                    static QRegularExpression foo(QString(
                             "foo foo foo foo foo foo foo foo foo"));
             */
             hook++;
@@ -534,7 +512,7 @@ int QmlJSIndenter::indentForStandaloneLine()
                 readLine();
 
             int indentChange = - *yyBraceDepth;
-            if (caseOrDefault.exactMatch(*yyLine))
+            if (caseOrDefault.match(*yyLine).hasMatch())
                 ++indentChange;
 
             /*
@@ -598,7 +576,7 @@ int QmlJSIndenter::indentForBottomLine(QTextBlock begin, QTextBlock end, QChar t
             */
             indent -= ppIndentSize;
         } else if (okay(typedIn, QLatin1Char(':'))) {
-            if (caseOrDefault.exactMatch(bottomLine)) {
+            if (caseOrDefault.match(bottomLine).hasMatch()) {
                 /*
                     Move a case label (or the ':' in front of a
                     constructor initialization list) one level to the

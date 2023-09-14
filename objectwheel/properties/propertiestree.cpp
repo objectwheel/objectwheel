@@ -68,7 +68,7 @@ PropertiesTree::PropertiesTree(QWidget* parent) : QTreeWidget(parent)
                     .arg(palette().dark().color().name())
                     .arg(palette().brightText().color().name()));
     };
-    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+//    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 }
 

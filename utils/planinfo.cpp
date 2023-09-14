@@ -19,7 +19,7 @@ PlanInfo parse(const QByteArray& planData)
 {
     PlanInfo info;
     QTextStream stream(planData);
-    stream.setCodec("UTF-8");
+    stream.setEncoding(QStringConverter::Utf8);
     QChar c;
     QString word;
     QVector<QString> row;

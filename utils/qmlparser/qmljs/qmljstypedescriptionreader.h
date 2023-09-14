@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -30,28 +8,21 @@
 
 #include <languageutils/fakemetaobject.h>
 
-// for Q_DECLARE_TR_FUNCTIONS
-#include <QCoreApplication>
-
-QT_BEGIN_NAMESPACE
 class QIODevice;
 class QBuffer;
-QT_END_NAMESPACE
 
 namespace QmlJS {
+class SourceLocation;
 
 class ModuleApiInfo;
 namespace AST {
 class UiProgram;
 class UiObjectDefinition;
 class UiScriptBinding;
-class SourceLocation;
 }
 
 class UTILS_EXPORT TypeDescriptionReader
 {
-    Q_DECLARE_TR_FUNCTIONS(QmlJS::TypeDescriptionReader)
-
 public:
     explicit TypeDescriptionReader(const QString &fileName, const QString &data);
     ~TypeDescriptionReader();
@@ -83,8 +54,8 @@ private:
     void readMetaObjectRevisions(AST::UiScriptBinding *ast, LanguageUtils::FakeMetaObject::Ptr fmo);
     void readEnumValues(AST::UiScriptBinding *ast, LanguageUtils::FakeMetaEnum *fme);
 
-    void addError(const AST::SourceLocation &loc, const QString &message);
-    void addWarning(const AST::SourceLocation &loc, const QString &message);
+    void addError(const SourceLocation &loc, const QString &message);
+    void addWarning(const SourceLocation &loc, const QString &message);
 
     QString _fileName;
     QString _source;

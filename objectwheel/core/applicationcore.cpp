@@ -301,9 +301,9 @@ void ApplicationCore::prepare()
 
     QSettings settings(settingsPath(), QSettings::IniFormat);
     if (settings.value("General/Interface.HdpiEnabled", InterfaceSettings(0).hdpiEnabled).toBool()) {
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+//        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+//        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
 }
 

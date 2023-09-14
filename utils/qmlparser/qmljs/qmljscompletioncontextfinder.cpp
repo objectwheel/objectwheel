@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljscompletioncontextfinder.h"
 #include "qmljsscanner.h"
@@ -126,6 +104,8 @@ void CompletionContextFinder::checkBinding()
 {
     YY_SAVE();
 
+    //qCDebug(qmljsLog) << "Start line:" << *yyLine << m_startTokenIndex;
+
     int i = m_startTokenIndex;
     int colonCount = 0;
     bool delimiterFound = false;
@@ -159,7 +139,7 @@ void CompletionContextFinder::checkBinding()
             break;
 
         case Token::Identifier: {
-            QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
+            const QStringView tokenString = QStringView(*yyLine).mid(token.begin(), token.length);
             dotExpected = false;
             if (identifierExpected) {
                 m_bindingPropertyName.prepend(tokenString.toString());
@@ -229,7 +209,7 @@ void CompletionContextFinder::checkImport()
 
         switch (token.kind) {
         case Token::Identifier: {
-            const QStringRef tokenString = yyLine->midRef(token.begin(), token.length);
+            const QStringView tokenString = QStringView(*yyLine).mid(token.begin(), token.length);
             if (tokenString == QLatin1String("as")) {
                 isInLibVersionImport = 0;
                 if (state == Unknown) {
@@ -268,7 +248,7 @@ void CompletionContextFinder::checkImport()
         case Token::Number:
             if (state == Unknown || (state & ExpectVersion)) {
                 state = ExpectAnyTarget;
-                libVersionImport.prepend(yyLine->midRef(token.begin(), token.length).toString());
+                libVersionImport.prepend(yyLine->mid(token.begin(), token.length));
                 libVersionImport.prepend(QLatin1String(" "));
                 if (isInLibVersionImport == -1)
                     isInLibVersionImport = 1;
@@ -300,7 +280,7 @@ void CompletionContextFinder::checkImport()
     if (m_inImport && isInLibVersionImport == 1) {
         m_libVersion = libVersionImport.join(QString());
         if (m_libVersion.isNull())
-            m_libVersion = QString();
+            m_libVersion = QLatin1String("");
     } else {
         m_libVersion.clear();
     }

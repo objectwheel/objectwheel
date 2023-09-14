@@ -1,33 +1,13 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsevaluate.h"
 #include "qmljscontext.h"
 #include "qmljsscopechain.h"
 #include "qmljsvalueowner.h"
 #include "parser/qmljsast_p.h"
+
+#include <QDebug>
 
 using namespace QmlJS;
 
@@ -61,7 +41,7 @@ Evaluate::Evaluate(const ScopeChain *scopeChain, ReferenceContext *referenceCont
       _context(scopeChain->context()),
       _referenceContext(referenceContext),
       _scopeChain(scopeChain),
-      _result(0)
+      _result(nullptr)
 {
 }
 
@@ -95,7 +75,7 @@ const Value *Evaluate::value(AST::Node *ast)
 const Value *Evaluate::reference(AST::Node *ast)
 {
     // save the result
-    const Value *previousResult = switchResult(0);
+    const Value *previousResult = switchResult(nullptr);
 
     // process the expression
     accept(ast);
@@ -122,11 +102,6 @@ bool Evaluate::visit(AST::UiProgram *)
 }
 
 bool Evaluate::visit(AST::UiHeaderItemList *)
-{
-    return false;
-}
-
-bool Evaluate::visit(AST::UiQualifiedPragmaId *)
 {
     return false;
 }
@@ -214,6 +189,13 @@ bool Evaluate::visit(AST::UiQualifiedId *ast)
     return false;
 }
 
+bool Evaluate::visit(AST::TemplateLiteral *ast)
+{
+    Q_UNUSED(ast)
+    _result = _valueOwner->stringValue();
+    return false;
+}
+
 bool Evaluate::visit(AST::ThisExpression *)
 {
     return false;
@@ -264,20 +246,20 @@ bool Evaluate::visit(AST::RegExpLiteral *)
     return false;
 }
 
-bool Evaluate::visit(AST::ArrayLiteral *)
+bool Evaluate::visit(AST::ArrayPattern *)
 {
     _result = _valueOwner->arrayCtor()->returnValue();
     return false;
 }
 
-bool Evaluate::visit(AST::ObjectLiteral *)
+bool Evaluate::visit(AST::ObjectPattern *)
 {
     // ### properties
     _result = _valueOwner->newObject();
     return false;
 }
 
-bool Evaluate::visit(AST::ElementList *)
+bool Evaluate::visit(AST::PatternElementList *)
 {
     return false;
 }
@@ -287,17 +269,12 @@ bool Evaluate::visit(AST::Elision *)
     return false;
 }
 
-bool Evaluate::visit(AST::PropertyAssignmentList *)
+bool Evaluate::visit(AST::PatternPropertyList *)
 {
     return false;
 }
 
-bool Evaluate::visit(AST::PropertyGetterSetter *)
-{
-    return false;
-}
-
-bool Evaluate::visit(AST::PropertyNameAndValue *)
+bool Evaluate::visit(AST::PatternProperty *)
 {
     return false;
 }
@@ -436,8 +413,8 @@ bool Evaluate::visit(AST::NotExpression *)
 
 bool Evaluate::visit(AST::BinaryExpression *ast)
 {
-    const Value *lhs = 0;
-    const Value *rhs = 0;
+    const Value *lhs = nullptr;
+    const Value *rhs = nullptr;
     switch (ast->op) {
     case QSOperator::Add:
     case QSOperator::InplaceAdd:
@@ -529,11 +506,6 @@ bool Evaluate::visit(AST::Block *)
     return false;
 }
 
-bool Evaluate::visit(AST::StatementList *)
-{
-    return false;
-}
-
 bool Evaluate::visit(AST::VariableStatement *)
 {
     return false;
@@ -544,7 +516,7 @@ bool Evaluate::visit(AST::VariableDeclarationList *)
     return false;
 }
 
-bool Evaluate::visit(AST::VariableDeclaration *)
+bool Evaluate::visit(AST::PatternElement *)
 {
     return false;
 }
@@ -579,17 +551,7 @@ bool Evaluate::visit(AST::ForStatement *)
     return false;
 }
 
-bool Evaluate::visit(AST::LocalForStatement *)
-{
-    return false;
-}
-
 bool Evaluate::visit(AST::ForEachStatement *)
-{
-    return false;
-}
-
-bool Evaluate::visit(AST::LocalForEachStatement *)
 {
     return false;
 }
@@ -679,27 +641,12 @@ bool Evaluate::visit(AST::FormalParameterList *)
     return false;
 }
 
-bool Evaluate::visit(AST::FunctionBody *)
-{
-    return false;
-}
-
 bool Evaluate::visit(AST::Program *)
 {
     return false;
 }
 
-bool Evaluate::visit(AST::SourceElements *)
-{
-    return false;
-}
-
-bool Evaluate::visit(AST::FunctionSourceElement *)
-{
-    return false;
-}
-
-bool Evaluate::visit(AST::StatementSourceElement *)
+bool Evaluate::visit(AST::StatementList *)
 {
     return false;
 }
@@ -707,4 +654,9 @@ bool Evaluate::visit(AST::StatementSourceElement *)
 bool Evaluate::visit(AST::DebuggerStatement *)
 {
     return false;
+}
+
+void Evaluate::throwRecursionDepthError()
+{
+    qWarning("Evaluate hit maximum recursion error when visiting AST");
 }

@@ -1,37 +1,17 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "contextpanewidget.h"
 
+#include "qmleditorwidgetstr.h"
+
 #include <utils/hostosinfo.h>
+#include <utils/utilsicons.h>
 
 #include <QToolButton>
+#include <QFontComboBox>
 #include <QComboBox>
 #include <QSpinBox>
-#include <QHBoxLayout>
-#include <QVBoxLayout>
 #include <QLabel>
 #include <QMouseEvent>
 #include <QGridLayout>
@@ -64,7 +44,7 @@ DragWidget::DragWidget(QWidget *parent) : QFrame(parent)
 void DragWidget::mousePressEvent(QMouseEvent * event)
 {
     if (event->button() ==  Qt::LeftButton) {
-        m_startPos = event->globalPos() - parentWidget()->mapToGlobal((pos()));
+        m_startPos = event->globalPosition().toPoint() - parentWidget()->mapToGlobal((pos()));
         m_opacityEffect = new QGraphicsOpacityEffect;
         setGraphicsEffect(m_opacityEffect);
         event->accept();
@@ -97,7 +77,7 @@ void DragWidget::mouseMoveEvent(QMouseEvent * event)
 {
     if (event->buttons() &  Qt::LeftButton) {
         if (m_startPos != QPoint(-1, -1)) {
-            QPoint newPos = parentWidget()->mapFromGlobal(event->globalPos() - m_startPos);
+            QPoint newPos = parentWidget()->mapFromGlobal(event->globalPosition().toPoint() - m_startPos);
 
             newPos.setX(limit(newPos.x(), 20, parentWidget()->width() - 20 - width()));
             newPos.setY(limit(newPos.y(), 2, parentWidget()->height() - 20 - height()));
@@ -128,13 +108,13 @@ void DragWidget::leaveEvent(QEvent *)
         unsetCursor();
 }
 
-void DragWidget::enterEvent(QEvent *)
+void DragWidget::enterEvent(QEnterEvent *)
 {
     if (HostOsInfo::isMacHost())
         setCursor(Qt::ArrowCursor);
 }
 
-ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_currentWidget(0)
+ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_currentWidget(nullptr)
 {
     QGridLayout *layout = new QGridLayout(this);
     layout->setContentsMargins(1, 1, 1, 1);
@@ -142,12 +122,11 @@ ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_cu
     m_toolButton = new QToolButton(this);
     m_toolButton->setAutoRaise(false);
 
-    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, m_toolButton));
+    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
     m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    m_toolButton->setCursor(Qt::PointingHandCursor);
-    m_toolButton->setFixedSize(16, 16);
+    m_toolButton->setFixedSize(20, 20);
 
-    m_toolButton->setToolTip(tr("Hides this toolbar."));
+    m_toolButton->setToolTip(Tr::tr("Hides this toolbar."));
     connect(m_toolButton, &QToolButton::clicked, this, &ContextPaneWidget::onTogglePane);
     layout->addWidget(m_toolButton, 0, 0, 1, 1);
     colorDialog();
@@ -167,12 +146,12 @@ ContextPaneWidget::ContextPaneWidget(QWidget *parent) : DragWidget(parent), m_cu
     setAutoFillBackground(true);
     setContextMenuPolicy(Qt::ActionsContextMenu);
 
-    m_resetAction = new QAction(tr("Pin Toolbar"), this);
+    m_resetAction = new QAction(Tr::tr("Pin Toolbar"), this);
     m_resetAction->setCheckable(true);
     addAction(m_resetAction.data());
     connect(m_resetAction.data(), &QAction::triggered, this, &ContextPaneWidget::onResetPosition);
 
-    m_disableAction = new QAction(tr("Show Always"), this);
+    m_disableAction = new QAction(Tr::tr("Show Always"), this);
     addAction(m_disableAction.data());
     m_disableAction->setCheckable(true);
     connect(m_disableAction.data(), &QAction::toggled, this, &ContextPaneWidget::onDisable);
@@ -186,15 +165,16 @@ ContextPaneWidget::~ContextPaneWidget()
     //if the pane was never activated the widget is not in a widget tree
     if (!m_bauhausColorDialog.isNull()) {
         delete m_bauhausColorDialog.data();
-        m_bauhausColorDialog = 0;
+        m_bauhausColorDialog = nullptr;
     }
 }
 
 void ContextPaneWidget::activate(const QPoint &pos, const QPoint &alternative, const QPoint &alternative2, bool pinned)
 {
     //uncheck all color buttons
-    foreach (ColorButton *colorButton, findChildren<ColorButton*>()) {
-            colorButton->setChecked(false);
+    const QList<ColorButton *> children = findChildren<ColorButton*>();
+    for (ColorButton *colorButton : children) {
+        colorButton->setChecked(false);
     }
     show();
     update();
@@ -370,7 +350,7 @@ void ContextPaneWidget::onShowColorDialog(bool checked, const QPoint &p)
 
 void ContextPaneWidget::onDisable(bool b)
 {
-    enabledChanged(b);
+    emit enabledChanged(b);
     if (!b) {
         hide();
         colorDialog()->hide();
@@ -465,12 +445,10 @@ void ContextPaneWidget::setPinButton()
     m_toolButton->setAutoRaise(true);
     m_pinned = true;
 
-    m_toolButton->setIcon(QIcon(QStringLiteral(":/images/designer/unpin.svg")));
-    m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    m_toolButton->setFixedSize(20, 20);
-    m_toolButton->setToolTip(tr("Unpins the toolbar and moves it to the default position."));
+    m_toolButton->setIcon(Utils::Icons::PINNED_SMALL.icon());
+    m_toolButton->setToolTip(Tr::tr("Unpins the toolbar and moves it to the default position."));
 
-    pinnedChanged(true);
+    emit pinnedChanged(true);
     if (m_resetAction) {
         QSignalBlocker blocker(m_resetAction);
         m_resetAction->setChecked(true);
@@ -481,14 +459,11 @@ void ContextPaneWidget::setLineButton()
 {
     m_pinned = false;
     m_toolButton->setAutoRaise(true);
-    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton, 0, m_toolButton));
-    m_toolButton->setToolButtonStyle(Qt::ToolButtonIconOnly);
-    m_toolButton->setFixedSize(20, 20);
-    m_toolButton->setToolTip(tr("Hides this toolbar. This toolbar can be"
-                                " permanently disabled in the options"
-                                " page or in the context menu."));
+    m_toolButton->setIcon(style()->standardIcon(QStyle::SP_DockWidgetCloseButton));
+    m_toolButton->setToolTip(Tr::tr("Hides this toolbar. This toolbar can be"
+                                " permanently disabled in the options page or in the context menu."));
 
-    pinnedChanged(false);
+    emit pinnedChanged(false);
     if (m_resetAction) {
         QSignalBlocker blocker(m_resetAction);
         m_resetAction->setChecked(false);

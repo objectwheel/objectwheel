@@ -213,7 +213,7 @@ void DesignerController::charge()
     m_designerPane->themeComboBox()->setCurrentIndex(0);
     m_designerPane->themeComboBox1()->setCurrentIndex(0);
 
-    const QJsonObject& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
+    const QJsonObject& object = QJsonDocument::fromJson(SaveUtils::projectTheme(ProjectManager::dir())).object();
     const QString& theme = object.value("stylev2").toString();
     const QString& theme1 = object.value("stylev1").toString();
 

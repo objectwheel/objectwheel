@@ -185,8 +185,8 @@ DesignerPane::DesignerPane(QWidget* parent) : QWidget(parent)
 
     m_selectAllAction->setShortcut(QKeySequence::SelectAll);
     m_refreshAction->setShortcut(Qt::Key_R);
-    m_sendBackAction->setShortcut(Qt::CTRL + Qt::Key_Down);
-    m_bringFrontAction->setShortcut(Qt::CTRL + Qt::Key_Up);
+    m_sendBackAction->setShortcut(Qt::CTRL | Qt::Key_Down);
+    m_bringFrontAction->setShortcut(Qt::CTRL | Qt::Key_Up);
     m_cutAction->setShortcut(QKeySequence::Cut);
     m_copyAction->setShortcut(QKeySequence::Copy);
     m_pasteAction->setShortcut(QKeySequence::Paste);

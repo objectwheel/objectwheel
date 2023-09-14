@@ -1,42 +1,22 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "easinggraph.h"
-
 #include <QWidget>
 
-QT_BEGIN_NAMESPACE
+class QPushButton;
+class QComboBox;
+class QSpinBox;
+class QDoubleSpinBox;
+class QGraphicsView;
 class QVariant;
-namespace Ui { class EasingContextPane; }
-QT_END_NAMESPACE
+class EasingGraph;
 
 namespace QmlJS { class PropertyReader; }
 
 namespace QmlEditorWidgets {
+
 class EasingSimulation;
 
 class EasingContextPane : public QWidget
@@ -45,8 +25,7 @@ class EasingContextPane : public QWidget
 
     enum GraphDisplayMode { GraphMode, SimulationMode };
 public:
-    explicit EasingContextPane(QWidget *parent = 0);
-    ~EasingContextPane();
+    explicit EasingContextPane(QWidget *parent = nullptr);
 
     void setProperties(QmlJS::PropertyReader *propertyReader);
     void setGraphDisplayMode(GraphDisplayMode newMode);
@@ -67,19 +46,27 @@ protected:
     void setBounce();
 
 private:
-    Ui::EasingContextPane *ui;
+    QGraphicsView *m_graphicsView;
+    QPushButton *m_playButton;
+    QComboBox *m_easingShapeComboBox;
+    QSpinBox *m_durationSpinBox;
+    QDoubleSpinBox *m_periodSpinBox;
+    QComboBox *m_easingExtremesComboBox;
+    QDoubleSpinBox *m_amplitudeSpinBox;
+    QDoubleSpinBox *m_overshootSpinBox;
+
     GraphDisplayMode m_displayMode;
     EasingGraph *m_easingGraph;
     EasingSimulation *m_simulation;
 
 private slots:
-    void on_playButton_clicked();
-    void on_overshootSpinBox_valueChanged(double);
-    void on_periodSpinBox_valueChanged(double);
-    void on_amplitudeSpinBox_valueChanged(double);
-    void on_easingExtremesComboBox_currentIndexChanged(const QString &);
-    void on_easingShapeComboBox_currentIndexChanged(const QString &);
-    void on_durationSpinBox_valueChanged(int);
+    void playClicked();
+    void overshootChanged(double);
+    void periodChanged(double);
+    void amplitudeChanged(double);
+    void easingExtremesChanged(int);
+    void easingShapeChanged(int);
+    void durationChanged(int);
 
     void switchToGraph();
 };

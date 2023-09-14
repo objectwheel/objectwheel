@@ -1,118 +1,101 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
+#include "../utils_global.h"
+
 #include <QLabel>
 #include <QPixmap>
-#include <QSharedPointer>
 #include <QVariant>
-#include <QVBoxLayout>
 
-#ifndef Q_MOC_RUN
+class QVBoxLayout;
+
 namespace Utils {
 namespace Internal {
-#endif
 
-// Please do not change the name of this class. Detailed comments in tooltip.h.
-class QTipLabel : public QLabel
+class TipLabel : public QLabel
 {
-    Q_OBJECT
 public:
-    QTipLabel(QWidget *parent);
+    TipLabel(QWidget *parent);
 
     virtual void setContent(const QVariant &content) = 0;
     virtual bool isInteractive() const { return false; }
     virtual int showTime() const = 0;
-    virtual void configure(const QPoint &pos, QWidget *w) = 0;
+    virtual void configure(const QPoint &pos) = 0;
     virtual bool canHandleContentReplacement(int typeId) const = 0;
-    virtual bool equals(int typeId, const QVariant &other, const QString &helpId) const = 0;
-    virtual void setHelpId(const QString &id);
-    virtual QString helpId() const;
+    virtual bool equals(int typeId, const QVariant &other, const QVariant &contextHelp) const = 0;
+    virtual void setContextHelp(const QVariant &help);
+    virtual QVariant contextHelp() const;
+
+protected:
+    const QMetaObject *metaObject() const override;
 
 private:
-    QString m_helpId;
+    QVariant m_contextHelp;
 };
 
-class TextTip : public QTipLabel
-{
-public:
-    TextTip(QWidget *parent = nullptr);
+using TextItem = std::pair<QString, Qt::TextFormat>;
 
-    virtual void setContent(const QVariant &content);
-    virtual bool isInteractive() const;
-    virtual void configure(const QPoint &pos, QWidget *w);
-    virtual bool canHandleContentReplacement(int typeId) const;
-    virtual int showTime() const;
-    virtual bool equals(int typeId, const QVariant &other, const QString &otherHelpId) const;
-    virtual void paintEvent(QPaintEvent *event);
-    virtual void resizeEvent(QResizeEvent *event);
+class TextTip : public TipLabel
+{
+    Q_OBJECT
+public:
+    TextTip(QWidget *parent);
+
+    void setContent(const QVariant &content) override;
+    bool isInteractive() const override;
+    void configure(const QPoint &pos) override;
+    bool canHandleContentReplacement(int typeId) const override;
+    int showTime() const override;
+    bool equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
 
 private:
     QString m_text;
+    Qt::TextFormat m_format = Qt::AutoText;
 };
 
-class ColorTip : public QTipLabel
+class ColorTip : public TipLabel
 {
+    Q_OBJECT
 public:
-    ColorTip(QWidget *parent = nullptr);
+    ColorTip(QWidget *parent);
 
-    virtual void setContent(const QVariant &content);
-    virtual void configure(const QPoint &pos, QWidget *w);
-    virtual bool canHandleContentReplacement(int typeId) const;
-    virtual int showTime() const { return 4000; }
-    virtual bool equals(int typeId, const QVariant &other, const QString &otherHelpId) const;
-    virtual void paintEvent(QPaintEvent *event);
+    void setContent(const QVariant &content) override;
+    void configure(const QPoint &pos) override;
+    bool canHandleContentReplacement(int typeId) const override;
+    int showTime() const override { return 4000; }
+    bool equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const override;
+    void paintEvent(QPaintEvent *event) override;
 
 private:
     QColor m_color;
     QPixmap m_tilePixmap;
 };
 
-class WidgetTip : public QTipLabel
+class WidgetTip : public TipLabel
 {
     Q_OBJECT
 
 public:
-    explicit WidgetTip(QWidget *parent = 0);
+    explicit WidgetTip(QWidget *parent = nullptr);
     void pinToolTipWidget(QWidget *parent);
 
-    virtual void setContent(const QVariant &content);
-    virtual void configure(const QPoint &pos, QWidget *w);
-    virtual bool canHandleContentReplacement(int typeId) const;
-    virtual int showTime() const { return 30000; }
-    virtual bool equals(int typeId, const QVariant &other, const QString &otherHelpId) const;
-    virtual bool isInteractive() const { return true; }
+    void setContent(const QVariant &content) override;
+    void configure(const QPoint &pos) override;
+    bool canHandleContentReplacement(int typeId) const override;
+    int showTime() const override { return 30000; }
+    bool equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const override;
+    bool isInteractive() const override { return true; }
 
 private:
     QWidget *m_widget;
     QVBoxLayout *m_layout;
 };
 
-#ifndef Q_MOC_RUN
 } // namespace Internal
 } // namespace Utils
-#endif
+
+Q_DECLARE_METATYPE(Utils::Internal::TextItem)

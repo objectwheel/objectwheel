@@ -353,7 +353,7 @@ void FontColorsSettingsWidget::fill()
     for (const QString& fileName : customStyleDir.entryList())
         colorSchemes.append(TextEditor::ColorSchemeEntry(customStyleDir.filePath(fileName), false));
     m_schemeListModel->setColorSchemes(colorSchemes);
-    m_fontFamilyBox->addItems(QFontDatabase().families());
+    m_fontFamilyBox->addItems(QFontDatabase::families());
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
                              "18", "24", "36", "48", "64", "72", "96", "144"});
 }

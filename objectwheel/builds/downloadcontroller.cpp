@@ -68,5 +68,5 @@ void DownloadController::onOpenFolderButtonClick(const QModelIndex& index) const
     auto model = static_cast<const BuildModel*>(m_downloadWidget->downloadList()->model());
     const QVariant& state = model->data(index, BuildModel::PathRole);
     if (state.isValid())
-        Utils::FileUtils::showInFolder(m_downloadWidget, state.toString());
+        Utils::FileUtils::showInGraphicalShell(m_downloadWidget, state.toString());
 }

@@ -17,6 +17,7 @@
 #include <QScrollBar>
 #include <QStyledItemDelegate>
 #include <QPainter>
+#include <QPainterPath>
 #include <QDebug>
 #include <QDateTime>
 #include <QScreen>

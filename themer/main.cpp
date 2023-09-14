@@ -19,9 +19,9 @@ int main(int argc, char *argv[])
     qputenv("QML_DISABLE_DISK_CACHE", "true");
 
     if (argc > 1 && QString::fromUtf8(argv[1]).toInt()) {
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+//        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+//        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
 
 #ifdef Q_OS_MACOS // Disable focus stealing on macOS

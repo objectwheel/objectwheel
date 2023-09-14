@@ -8,6 +8,7 @@
 #include <QScreen>
 #include <QTextDocument>
 #include <QTextCursor>
+#include <QPainterPath>
 
 static QImage renderFilledImage(const QSizeF& size, const QColor& fillColor, qreal dpr)
 {
@@ -99,19 +100,18 @@ bool PaintUtils::isBlankImage(const QImage& image)
     return totalAlpha > 0;
 }
 
+QPixmap PaintUtils::pixmap(const QIcon& icon, const QSize& size, const QWidget* widget,
+                           QIcon::Mode mode, QIcon::State state)
+{
+    if (widget)
+        return icon.pixmap(size, widget->devicePixelRatioF(), mode, state);
+    return icon.pixmap(size, QGuiApplication::primaryScreen()->devicePixelRatio(), mode, state);
+}
+
 QPixmap PaintUtils::pixmap(const QString& imagePath, const QSize& size, const QWidget* widget,
                            QIcon::Mode mode, QIcon::State state)
 {
     return pixmap(QIcon(imagePath), size, widget, mode, state);
-}
-
-QPixmap PaintUtils::pixmap(const QIcon& icon, const QSize& size, const QWidget* widget,
-                           QIcon::Mode mode, QIcon::State state)
-{
-    if (QWindow* window = widget ? UtilityFunctions::window(widget) : nullptr)
-        return icon.pixmap(window, size, mode, state);
-    QWindow fakeWindow; // This makes QIcon to use primary screen's dpr
-    return icon.pixmap(&fakeWindow, size, mode, state);
 }
 
 QIcon PaintUtils::renderButtonIcon(const QString& imagePath, const QSize& size, const QWidget* widget)

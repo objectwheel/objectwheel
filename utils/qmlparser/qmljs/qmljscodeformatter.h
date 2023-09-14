@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -34,10 +12,8 @@
 #include <QVector>
 #include <QMetaObject>
 
-QT_BEGIN_NAMESPACE
 class QTextDocument;
 class QTextBlock;
-QT_END_NAMESPACE
 
 namespace QmlJS {
 
@@ -104,10 +80,15 @@ public: // must be public to make Q_GADGET introspection work
         import_as,
 
         property_start, // after 'property'
-        default_property_start, // after 'default'
+        property_modifiers, // after 'default' or readonly
+        required_property, // after required
         property_list_open, // after 'list' as a type
         property_name, // after the type
         property_maybe_initializer, // after the identifier
+        component_start, // after component
+        component_name, // after component Name
+
+        enum_start, // after 'enum'
 
         signal_start, // after 'signal'
         signal_maybe_arglist, // after identifier
@@ -116,6 +97,7 @@ public: // must be public to make Q_GADGET introspection work
         function_start, // after 'function'
         function_arglist_open, // after '(' starting function argument list
         function_arglist_closed, // after ')' in argument list, expecting '{'
+        function_type_annotated_return, // after ':' expecting a type
 
         binding_or_objectdefinition, // after an identifier
 
@@ -174,7 +156,7 @@ public: // must be public to make Q_GADGET introspection work
         case_start, // after a 'case' or 'default' token
         case_cont // after the colon in a case/default
     };
-    Q_ENUMS(StateType)
+    Q_ENUM(StateType)
 
 protected:
     // extends Token::Kind from qmljsscanner.h
@@ -197,6 +179,7 @@ protected:
         Comma,
         Dot,
         Delimiter,
+        RegExp,
 
         EndOfExistingTokenKinds,
 
@@ -209,6 +192,7 @@ protected:
         Delete,
         Do,
         Else,
+        Enum,
         Finally,
         For,
         Function,
@@ -233,6 +217,9 @@ protected:
         As,
         List,
         Property,
+        Required,
+        Component,
+        Readonly,
 
         Question,
         PlusPlus,
@@ -272,12 +259,15 @@ protected:
     bool isBracelessState(int type) const;
     bool isExpressionEndState(int type) const;
 
+    void dump() const;
+    QString stateToString(int type) const;
+
 private:
     void recalculateStateAfter(const QTextBlock &block);
     void saveCurrentState(const QTextBlock &block);
     void restoreCurrentState(const QTextBlock &block);
 
-    QStringRef currentTokenText() const;
+    QStringView currentTokenText() const;
 
     int tokenizeBlock(const QTextBlock &block);
 

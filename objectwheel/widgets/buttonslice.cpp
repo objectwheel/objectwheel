@@ -2,6 +2,7 @@
 #include <QPushButton>
 #include <QHBoxLayout>
 #include <QPainter>
+#include <QPainterPath>
 
 #define ADJUST(x) ((x).adjusted(\
     1 + 0.5, 1 + 0.5,\

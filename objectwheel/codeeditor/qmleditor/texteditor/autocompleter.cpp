@@ -1,30 +1,8 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "autocompleter.h"
-#include <qmlcodedocument.h>
+#include "textdocumentlayout.h"
 #include "tabsettings.h"
 
 #include <QDebug>
@@ -37,11 +15,11 @@ AutoCompleter::AutoCompleter() :
     m_autoInsertBrackets(true),
     m_surroundWithBrackets(true),
     m_autoInsertQuotes(true),
-    m_surroundWithQuotes(true)
+    m_surroundWithQuotes(true),
+    m_overwriteClosingChars(false)
 {}
 
-AutoCompleter::~AutoCompleter()
-{}
+AutoCompleter::~AutoCompleter() = default;
 
 static void countBracket(QChar open, QChar close, QChar c, int *errors, int *stillopen)
 {
@@ -62,8 +40,8 @@ static void countBrackets(QTextCursor cursor, int from, int end, QChar open, QCh
     cursor.setPosition(from);
     QTextBlock block = cursor.block();
     while (block.isValid() && block.position() < end) {
-        Parentheses parenList = QmlCodeDocument::parentheses(block);
-        if (!parenList.isEmpty() /*&& !TextDocumentLayout::ifdefedOut(block)*/) {
+        Parentheses parenList = TextDocumentLayout::parentheses(block);
+        if (!parenList.isEmpty() && !TextDocumentLayout::ifdefedOut(block)) {
             for (int i = 0; i < parenList.count(); ++i) {
                 Parenthesis paren = parenList.at(i);
                 int position = block.position() + paren.pos;
@@ -98,10 +76,10 @@ static bool fixesBracketsError(const QString &textToInsert, const QTextCursor &c
         return false;
 
     QTextCursor tmp = cursor;
-    bool foundBlockStart = QmlCodeDocument::findPreviousBlockOpenParenthesis(&tmp);
+    bool foundBlockStart = TextBlockUserData::findPreviousBlockOpenParenthesis(&tmp);
     int blockStart = foundBlockStart ? tmp.position() : 0;
     tmp = cursor;
-    bool foundBlockEnd = QmlCodeDocument::findNextBlockClosingParenthesis(&tmp);
+    bool foundBlockEnd = TextBlockUserData::findNextBlockClosingParenthesis(&tmp);
     int blockEnd = foundBlockEnd ? tmp.position() : (cursor.document()->characterCount() - 1);
     const QChar openChar = charType(character, CharType::OpenChar);
     const QChar closeChar = charType(character, CharType::CloseChar);
@@ -158,7 +136,7 @@ bool AutoCompleter::isNextBlockIndented(const QTextBlock &currentBlock) const
     if (block.next().isValid()) { // not the last block
         block = block.next();
         //skip all empty blocks
-        while (block.isValid() && m_tabSettings.onlySpace(block.text()))
+        while (block.isValid() && TabSettings::onlySpace(block.text()))
             block = block.next();
         if (block.isValid()
                 && m_tabSettings.indentationColumn(block.text()) > indentation)
@@ -191,6 +169,9 @@ QString AutoCompleter::autoComplete(QTextCursor &cursor, const QString &textToIn
 
     QTextDocument *doc = cursor.document();
     const QChar lookAhead = doc->characterAt(cursor.selectionEnd());
+
+    if (m_overwriteClosingChars && (textToInsert == lookAhead))
+        skipChars = true;
 
     int skippedChars = 0;
 
@@ -250,10 +231,10 @@ bool AutoCompleter::autoBackspace(QTextCursor &cursor)
             || character == QLatin1Char('[')
             || character == QLatin1Char('{')) {
         QTextCursor tmp = cursor;
-        QmlCodeDocument::findPreviousBlockOpenParenthesis(&tmp);
+        TextBlockUserData::findPreviousBlockOpenParenthesis(&tmp);
         int blockStart = tmp.isNull() ? 0 : tmp.position();
         tmp = cursor;
-        QmlCodeDocument::findNextBlockClosingParenthesis(&tmp);
+        TextBlockUserData::findNextBlockClosingParenthesis(&tmp);
         int blockEnd = tmp.isNull() ? (cursor.document()->characterCount()-1) : tmp.position();
         QChar openChar = character;
         QChar closeChar = charType(character, CharType::CloseChar);
@@ -306,7 +287,7 @@ int AutoCompleter::paragraphSeparatorAboutToBeInserted(QTextCursor &cursor)
     // verify that we indeed do have an extra opening brace in the document
     QTextBlock block = cursor.block();
     const QString textFromCusror = block.text().mid(cursor.positionInBlock()).trimmed();
-    int braceDepth = QmlCodeDocument::braceDepth(doc->lastBlock());
+    int braceDepth = TextDocumentLayout::braceDepth(doc->lastBlock());
 
     if (braceDepth <= 0 && (textFromCusror.isEmpty() || textFromCusror.at(0) != QLatin1Char('}')))
         return 0; // braces are all balanced or worse, no need to do anything and separator inserted not between '{' and '}'
@@ -339,15 +320,15 @@ int AutoCompleter::paragraphSeparatorAboutToBeInserted(QTextCursor &cursor)
 bool AutoCompleter::contextAllowsAutoBrackets(const QTextCursor &cursor,
                                               const QString &textToInsert) const
 {
-    Q_UNUSED(cursor);
-    Q_UNUSED(textToInsert);
+    Q_UNUSED(cursor)
+    Q_UNUSED(textToInsert)
     return false;
 }
 
 bool AutoCompleter::contextAllowsAutoQuotes(const QTextCursor &cursor, const QString &textToInsert) const
 {
-    Q_UNUSED(cursor);
-    Q_UNUSED(textToInsert);
+    Q_UNUSED(cursor)
+    Q_UNUSED(textToInsert)
     return false;
 }
 
@@ -358,13 +339,13 @@ bool AutoCompleter::contextAllowsElectricCharacters(const QTextCursor &cursor) c
 
 bool AutoCompleter::isInComment(const QTextCursor &cursor) const
 {
-    Q_UNUSED(cursor);
+    Q_UNUSED(cursor)
     return false;
 }
 
 bool AutoCompleter::isInString(const QTextCursor &cursor) const
 {
-    Q_UNUSED(cursor);
+    Q_UNUSED(cursor)
     return false;
 }
 
@@ -374,11 +355,11 @@ QString AutoCompleter::insertMatchingBrace(const QTextCursor &cursor,
                                            bool skipChars,
                                            int *skippedChars) const
 {
-    Q_UNUSED(cursor);
-    Q_UNUSED(text);
-    Q_UNUSED(lookAhead);
-    Q_UNUSED(skipChars);
-    Q_UNUSED(skippedChars);
+    Q_UNUSED(cursor)
+    Q_UNUSED(text)
+    Q_UNUSED(lookAhead)
+    Q_UNUSED(skipChars)
+    Q_UNUSED(skippedChars)
     return QString();
 }
 
@@ -388,16 +369,16 @@ QString AutoCompleter::insertMatchingQuote(const QTextCursor &cursor,
                                            bool skipChars,
                                            int *skippedChars) const
 {
-    Q_UNUSED(cursor);
-    Q_UNUSED(text);
-    Q_UNUSED(lookAhead);
-    Q_UNUSED(skipChars);
-    Q_UNUSED(skippedChars);
+    Q_UNUSED(cursor)
+    Q_UNUSED(text)
+    Q_UNUSED(lookAhead)
+    Q_UNUSED(skipChars)
+    Q_UNUSED(skippedChars)
     return QString();
 }
 
 QString AutoCompleter::insertParagraphSeparator(const QTextCursor &cursor) const
 {
-    Q_UNUSED(cursor);
+    Q_UNUSED(cursor)
     return QString();
 }

@@ -5,14 +5,16 @@
 #include <QTimeLine>
 #include <QPointer>
 #include <QBasicTimer>
+#include <QRegularExpression>
+#include <QFutureWatcher>
 
 #include <utils/link.h>
 #include <utils/filesearch.h>
+#include <utils/id.h>
 #include <texteditor/codeassist/assistenums.h>
 #include <texteditor/texteditorconstants.h>
 #include <qmljs/qmljsdocument.h>
 #include <qmljseditor/qmljsautocompleter.h>
-#include <coreplugin/id.h>
 #include <coreplugin/find/textfindconstants.h>
 
 class QLabel;
@@ -153,8 +155,8 @@ public:
     void setAutoCompleteSkipPosition(const QTextCursor& cursor);
     void updateCurrentLineHighlight();
     void setCodeStyle(TextEditor::ICodeStylePreferences* preferences);
-    void setLanguageSettingsId(Core::Id settingsId);
-    Core::Id languageSettingsId() const;
+    void setLanguageSettingsId(Utils::Id settingsId);
+    Utils::Id languageSettingsId() const;
     bool inFindScope(int selectionStart, int selectionEnd);
     bool isValid() const;
 
@@ -198,7 +200,7 @@ private:
     QString wordUnderCursor() const;
     bool openLink(const Utils::Link& link);
     void openLinkUnderCursor();
-    void findLinkAt(const QTextCursor &cursor, Utils::ProcessLinkCallback &&processLinkCallback);
+    void findLinkAt(const QTextCursor &cursor, Utils::LinkHandler &&processLinkCallback);
     void showLink(const Utils::Link& link);
     void clearLink();
     void updateLink();
@@ -273,9 +275,9 @@ private:
     QLabel* m_noDocsLabel;
     RowBar* m_rowBar;
     QmlCodeEditorToolBar* m_toolBar;
-    QRegExp m_searchExpr;
+    QRegularExpression m_searchExpr;
     Core::FindFlags m_findFlags;
-    Core::Id m_tabSettingsId;
+    Utils::Id m_tabSettingsId;
     bool m_linkPressed;
     bool m_fontSettingsNeedsApply;
     bool m_parenthesesMatchingEnabled;
@@ -298,7 +300,7 @@ private:
     QTextCursor m_findScopeEnd;
     int m_suggestedVisibleFoldedBlockNumber = -1;
     QVector<SearchResult> m_searchResults;
-    QFutureWatcher<Utils::FileSearchResultList> *m_searchWatcher = nullptr;
+    QFutureWatcher<Utils::SearchResultItems> *m_searchWatcher = nullptr;
     int m_findScopeVerticalBlockSelectionFirstColumn = -1;
     int m_findScopeVerticalBlockSelectionLastColumn = -1;
     QList<QTextCursor> m_autoCompleteHighlightPos;

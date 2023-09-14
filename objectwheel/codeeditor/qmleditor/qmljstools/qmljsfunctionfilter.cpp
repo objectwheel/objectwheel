@@ -1,118 +1,89 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsfunctionfilter.h"
-
 #include "qmljslocatordata.h"
+#include "qmljstoolstr.h"
 
-//#include <coreplugin/editormanager/editormanager.h>
+#include <extensionsystem/pluginmanager.h>
+
 #include <utils/algorithm.h>
+#include <utils/async.h>
 
 #include <QRegularExpression>
 
+using namespace Core;
 using namespace QmlJSTools::Internal;
+using namespace Utils;
 
 Q_DECLARE_METATYPE(LocatorData::Entry)
 
-FunctionFilter::FunctionFilter(LocatorData *data, QObject *parent)
-    : Core::ILocatorFilter(parent)
-    , m_data(data)
+QmlJSFunctionsFilter::QmlJSFunctionsFilter(LocatorData *data)
+    : m_data(data)
 {
     setId("Functions");
-    setDisplayName(tr("QML Functions"));
-    setShortcutString("m");
-    setIncludedByDefault(false);
+    setDisplayName(Tr::tr("QML Functions"));
+    setDescription(Tr::tr("Locates QML functions in any open project."));
+    setDefaultShortcutString("m");
 }
 
-FunctionFilter::~FunctionFilter()
-{ }
-
-void FunctionFilter::refresh(QFutureInterface<void> &)
+static void matches(QPromise<void> &promise, const LocatorStorage &storage,
+                    const QHash<FilePath, QList<LocatorData::Entry>> &locatorEntries)
 {
-}
-
-QList<Core::LocatorFilterEntry> FunctionFilter::matchesFor(
-        QFutureInterface<Core::LocatorFilterEntry> &future,
-        const QString &entry)
-{
-    QList<Core::LocatorFilterEntry> goodEntries;
-    QList<Core::LocatorFilterEntry> betterEntries;
-    QList<Core::LocatorFilterEntry> bestEntries;
-    const Qt::CaseSensitivity caseSensitivityForPrefix = caseSensitivity(entry);
-
-    const QRegularExpression regexp = createRegExp(entry);
+    const QString input = storage.input();
+    const Qt::CaseSensitivity caseSensitivityForPrefix = ILocatorFilter::caseSensitivity(input);
+    const QRegularExpression regexp = ILocatorFilter::createRegExp(input);
     if (!regexp.isValid())
-        return goodEntries;
+        return;
 
-    QHashIterator<QString, QList<LocatorData::Entry> > it(m_data->entries());
-    while (it.hasNext()) {
-        if (future.isCanceled())
-            break;
-
-        it.next();
-
-        const QList<LocatorData::Entry> items = it.value();
+    LocatorFilterEntries entries[int(ILocatorFilter::MatchLevel::Count)];
+    for (const QList<LocatorData::Entry> &items : locatorEntries) {
         for (const LocatorData::Entry &info : items) {
+            if (promise.isCanceled())
+                return;
+
             if (info.type != LocatorData::Function)
                 continue;
 
             const QRegularExpressionMatch match = regexp.match(info.symbolName);
             if (match.hasMatch()) {
-                QVariant id = QVariant::fromValue(info);
-                Core::LocatorFilterEntry filterEntry(this, info.displayName, id/*, info.icon*/);
+                LocatorFilterEntry filterEntry;
+                filterEntry.displayName = info.displayName;
+                filterEntry.linkForEditor = {info.fileName, info.line, info.column};
                 filterEntry.extraInfo = info.extraInfo;
-                filterEntry.highlightInfo = highlightInfo(match);
+                filterEntry.highlightInfo = ILocatorFilter::highlightInfo(match);
 
-                if (filterEntry.displayName.startsWith(entry, caseSensitivityForPrefix))
-                    bestEntries.append(filterEntry);
-                else if (filterEntry.displayName.contains(entry, caseSensitivityForPrefix))
-                    betterEntries.append(filterEntry);
+                if (filterEntry.displayName.startsWith(input, caseSensitivityForPrefix))
+                    entries[int(ILocatorFilter::MatchLevel::Best)].append(filterEntry);
+                else if (filterEntry.displayName.contains(input, caseSensitivityForPrefix))
+                    entries[int(ILocatorFilter::MatchLevel::Better)].append(filterEntry);
                 else
-                    goodEntries.append(filterEntry);
+                    entries[int(ILocatorFilter::MatchLevel::Good)].append(filterEntry);
             }
         }
     }
 
-    if (goodEntries.size() < 1000)
-        Utils::sort(goodEntries, Core::LocatorFilterEntry::compareLexigraphically);
-    if (betterEntries.size() < 1000)
-        Utils::sort(betterEntries, Core::LocatorFilterEntry::compareLexigraphically);
-    if (bestEntries.size() < 1000)
-        Utils::sort(bestEntries, Core::LocatorFilterEntry::compareLexigraphically);
+    for (auto &entry : entries) {
+        if (promise.isCanceled())
+            return;
 
-    bestEntries += betterEntries;
-    bestEntries += goodEntries;
-    return bestEntries;
+        if (entry.size() < 1000)
+            Utils::sort(entry, LocatorFilterEntry::compareLexigraphically);
+    }
+    storage.reportOutput(std::accumulate(std::begin(entries), std::end(entries),
+                                         LocatorFilterEntries()));
 }
 
-void FunctionFilter::accept(Core::LocatorFilterEntry selection,
-                            QString *newText, int *selectionStart, int *selectionLength) const
+LocatorMatcherTasks QmlJSFunctionsFilter::matchers()
 {
-    Q_UNUSED(newText)
-    Q_UNUSED(selectionStart)
-    Q_UNUSED(selectionLength)
-    const LocatorData::Entry entry = qvariant_cast<LocatorData::Entry>(selection.internalData);
-//    Core::EditorManager::openEditorAt(entry.fileName, entry.line, entry.column); // BUG
+    using namespace Tasking;
+
+    TreeStorage<LocatorStorage> storage;
+
+    const auto onSetup = [storage, entries = m_data->entries()](Async<void> &async) {
+        async.setFutureSynchronizer(ExtensionSystem::PluginManager::futureSynchronizer());
+        async.setConcurrentCallData(matches, *storage, entries);
+    };
+
+    return {{AsyncTask<void>(onSetup), storage}};
 }

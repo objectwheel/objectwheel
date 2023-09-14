@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -32,18 +10,17 @@
 #include <QString>
 #include <QList>
 
-QT_FORWARD_DECLARE_CLASS(QRegExp)
+QT_FORWARD_DECLARE_CLASS(QRegularExpression)
 
 namespace QmlJS {
 class DiagnosticMessage;
 
 namespace StaticAnalysis {
 
-enum Type
-{
+enum Type {
     // Changing the numbers can break user code.
     // When adding a new check, also add it to the documentation, currently
-    // in creator-editors.qdoc.
+    // in creator-code-syntax.qdoc.
     UnknownType = 0,
     ErrInvalidEnumValue = 1,
     ErrEnumValueMustBeStringOrNumber = 2,
@@ -89,6 +66,7 @@ enum Type
     MaybeWarnEqualityTypeCoercion = 126,
     WarnConfusingExpressionStatement = 127,
     StateCannotHaveChildItem = 128,
+    ErrTypeIsInstantiatedRecursively = 129,
     HintDeclarationsShouldBeAtStartOfFunction = 201,
     HintOneStatementPerLine = 202,
     WarnImperativeCodeNotEditableInVisualDesigner = 203,
@@ -105,6 +83,7 @@ enum Type
     ErrBehavioursNotSupportedInQmlUi = 224,
     ErrStatesOnlyInRootItemInQmlUi = 225,
     ErrReferenceToParentItemNotSupportedInQmlUi = 226,
+    ErrDoNotMixTranslationFunctionsInQmlUi = 227,
     ErrUnknownComponent = 300,
     ErrCouldNotResolvePrototypeOf = 301,
     ErrCouldNotResolvePrototype = 302,
@@ -128,7 +107,14 @@ enum Type
     ErrInvalidStringValuePattern = 320,
     ErrLongerStringValueExpected = 321,
     ErrShorterStringValueExpected = 322,
-    ErrInvalidArrayValueLength = 323
+    ErrInvalidArrayValueLength = 323,
+    ErrHitMaximumRecursion = 324,
+    WarnLogicalValueDoesNotDependOnValues = 325,
+    ErrToManyComponentChildren = 326,
+    WarnComponentRequiresChildren = 327,
+    WarnDuplicateImport = 400,
+    ErrAliasReferRoot = 401,
+    WarnAliasReferRootHierarchy = 402
 };
 
 class UTILS_EXPORT PrototypeMessageData {
@@ -143,7 +129,7 @@ class UTILS_EXPORT Message
 {
 public:
     Message();
-    Message(Type type, AST::SourceLocation location,
+    Message(Type type, SourceLocation location,
             const QString &arg1 = QString(),
             const QString &arg2 = QString(),
             bool appendTypeId = true);
@@ -154,9 +140,9 @@ public:
     DiagnosticMessage toDiagnosticMessage() const;
 
     QString suppressionString() const;
-    static QRegExp suppressionPattern();
+    static QRegularExpression suppressionPattern();
 
-    AST::SourceLocation location;
+    SourceLocation location;
     QString message;
     Type type;
     Severity::Enum severity = Severity::Enum::Hint;

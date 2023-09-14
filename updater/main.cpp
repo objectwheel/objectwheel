@@ -50,7 +50,7 @@ int main(int argc, char* argv[])
     }
 
     g_diffFilePath = argv[2];
-    g_myInfo = QCoreApplication::applicationFilePath();
+    g_myInfo = QFileInfo(QCoreApplication::applicationFilePath());
     g_updateCacheDir = QFileInfo(g_diffFilePath).dir().absoluteFilePath(QLatin1String("Downloads"));
     g_installationDir = detectInstallationDir();
 
@@ -110,9 +110,9 @@ static void load(int argc, char* argv[])
     std::signal(SIGTERM, SIG_IGN);
 
     if (argc > 1 && QString::fromUtf8(argv[1]).toInt()) {
-        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
-        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
-        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
+//        QApplication::setAttribute(Qt::AA_EnableHighDpiScaling);
+//        QApplication::setAttribute(Qt::AA_UseHighDpiPixmaps);
+//        QApplication::setHighDpiScaleFactorRoundingPolicy(Qt::HighDpiScaleFactorRoundingPolicy::PassThrough);
     }
 }
 

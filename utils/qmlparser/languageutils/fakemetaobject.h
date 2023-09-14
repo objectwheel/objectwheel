@@ -1,31 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
+#include "utils_global.h"
 #include "componentversion.h"
 
 #include <QString>
@@ -34,16 +12,13 @@
 #include <QHash>
 #include <QSharedPointer>
 
-
 class QCryptographicHash;
-
 
 namespace LanguageUtils {
 
 class UTILS_EXPORT FakeMetaEnum {
     QString m_name;
     QStringList m_keys;
-    QList<int> m_values;
 
 public:
     FakeMetaEnum();
@@ -54,7 +29,7 @@ public:
     QString name() const;
     void setName(const QString &name);
 
-    void addKey(const QString &key, int value);
+    void addKey(const QString &key);
     QString key(int index) const;
     int keyCount() const;
     QStringList keys() const;
@@ -171,6 +146,7 @@ private:
     QList<FakeMetaMethod> m_methods;
     QString m_defaultPropertyName;
     QString m_attachedTypeName;
+    QString m_extensionTypeName;
     QByteArray m_fingerprint;
     bool m_isSingleton;
     bool m_isCreatable;
@@ -184,7 +160,7 @@ public:
 
     void addExport(const QString &name, const QString &package, ComponentVersion version);
     void setExportMetaObjectRevision(int exportIndex, int metaObjectRevision);
-    QList<Export> exports() const;
+    const QList<Export> exports() const;
     Export exportInPackage(const QString &package) const;
 
     void setSuperclassName(const QString &superclass);
@@ -213,6 +189,8 @@ public:
 
     QString attachedTypeName() const;
     void setAttachedTypeName(const QString &name);
+    QString extensionTypeName() const;
+    void setExtensionTypeName(const QString &name);
     QByteArray calculateFingerprint() const;
     void updateFingerprint();
     QByteArray fingerprint() const;

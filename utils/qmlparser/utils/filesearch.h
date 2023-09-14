@@ -1,50 +1,28 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
-#include <QDir>
-#include <QFuture>
+#include "utils_global.h"
+
+#include "filepath.h"
+#include "searchresultitem.h"
+
 #include <QMap>
+#include <QSet>
 #include <QStack>
 #include <QTextDocument>
 
 #include <functional>
 
-QT_FORWARD_DECLARE_CLASS(QTextCodec)
+template <typename T>
+class QFuture;
 
 namespace Utils {
 
 UTILS_EXPORT
-std::function<bool(const QString &)>
-filterFileFunction(const QStringList &filterRegs, const QStringList &exclusionRegs);
-
-UTILS_EXPORT
-std::function<QStringList(const QStringList &)>
-filterFilesFunction(const QStringList &filters, const QStringList &exclusionFilters);
+std::function<FilePaths(const FilePaths &)> filterFilesFunction(const QStringList &filters,
+                                                                const QStringList &exclusionFilters);
 
 UTILS_EXPORT
 QStringList splitFilterUiText(const QString &text);
@@ -55,8 +33,13 @@ QString msgFilePatternLabel();
 UTILS_EXPORT
 QString msgExclusionPatternLabel();
 
+enum class InclusionType {
+    Included,
+    Excluded
+};
+
 UTILS_EXPORT
-QString msgFilePatternToolTip();
+QString msgFilePatternToolTip(InclusionType inclusionType = InclusionType::Included);
 
 class UTILS_EXPORT FileIterator
 {
@@ -64,26 +47,25 @@ public:
     class Item
     {
     public:
-        Item() : encoding(nullptr) { }
-        Item(const QString &path, QTextCodec *codec)
-            : filePath(path), encoding(codec)
+        Item() = default;
+        Item(const FilePath &path)
+            : filePath(path)
         {}
-        QString filePath;
-        QTextCodec *encoding;
+        FilePath filePath;
     };
 
-    typedef Item value_type;
+    using value_type = Item;
 
     class const_iterator
     {
     public:
-        typedef std::forward_iterator_tag iterator_category;
-        typedef Item value_type;
-        typedef std::ptrdiff_t difference_type;
-        typedef const value_type *pointer;
-        typedef const value_type &reference;
+        using iterator_category = std::forward_iterator_tag;
+        using value_type = Item;
+        using difference_type = std::ptrdiff_t;
+        using pointer = const value_type*;
+        using reference = const value_type&;
 
-        const_iterator() : m_parent(nullptr), m_index(-1) { }
+        const_iterator() = default;
         const_iterator(const FileIterator *parent, int id)
             : m_parent(parent), m_index(id)
         {}
@@ -99,11 +81,11 @@ public:
         }
         bool operator!=(const const_iterator &other) const { return !operator==(other); }
 
-        const FileIterator *m_parent;
-        int m_index; // -1 == end
+        const FileIterator *m_parent = nullptr;
+        int m_index = -1; // -1 == end
     };
 
-    virtual ~FileIterator() {}
+    virtual ~FileIterator() = default;
     const_iterator begin() const;
     const_iterator end() const;
 
@@ -121,8 +103,7 @@ protected:
 class UTILS_EXPORT FileListIterator : public FileIterator
 {
 public:
-    explicit FileListIterator(const QStringList &fileList,
-                              const QList<QTextCodec *> encodings);
+    explicit FileListIterator(const FilePaths &fileList = {});
 
     int maxProgress() const override;
     int currentProgress() const override;
@@ -133,18 +114,17 @@ protected:
     const Item &itemAt(int index) const override;
 
 private:
-    QVector<Item> m_items;
-    int m_maxIndex;
+    const QList<Item> m_items;
+    int m_maxIndex = -1;
 };
 
 class UTILS_EXPORT SubDirFileIterator : public FileIterator
 {
 public:
-    SubDirFileIterator(const QStringList &directories,
+    SubDirFileIterator(const FilePaths &directories,
                        const QStringList &filters,
-                       const QStringList &exclusionFilters,
-                       QTextCodec *encoding = 0);
-    ~SubDirFileIterator();
+                       const QStringList &exclusionFilters);
+    ~SubDirFileIterator() override;
 
     int maxProgress() const override;
     int currentProgress() const override;
@@ -155,9 +135,9 @@ protected:
     const Item &itemAt(int index) const override;
 
 private:
-    std::function<QStringList(const QStringList &)> m_filterFiles;
-    QTextCodec *m_encoding;
-    QStack<QDir> m_dirs;
+    std::function<FilePaths(const FilePaths &)> m_filterFiles;
+    QStack<FilePath> m_dirs;
+    QSet<FilePath> m_knownDirs;
     QStack<qreal> m_progressValues;
     QStack<bool> m_processedValues;
     qreal m_progress;
@@ -165,38 +145,20 @@ private:
     QList<Item *> m_items;
 };
 
-class UTILS_EXPORT FileSearchResult
-{
-public:
-    FileSearchResult() {}
-    FileSearchResult(const QString &fileName, int lineNumber, const QString &matchingLine,
-                     int matchStart, int matchLength,
-                     const QStringList &regexpCapturedTexts)
-            : fileName(fileName),
-            lineNumber(lineNumber),
-            matchingLine(matchingLine),
-            matchStart(matchStart),
-            matchLength(matchLength),
-            regexpCapturedTexts(regexpCapturedTexts)
-    {
-    }
-    QString fileName;
-    int lineNumber;
-    QString matchingLine;
-    int matchStart;
-    int matchLength;
-    QStringList regexpCapturedTexts;
-};
+UTILS_EXPORT QFuture<SearchResultItems> findInFiles(const QString &searchTerm,
+    FileIterator *files,
+    QTextDocument::FindFlags flags,
+    const QMap<FilePath, QString> &fileToContentsMap = {});
 
-typedef QList<FileSearchResult> FileSearchResultList;
+UTILS_EXPORT QFuture<SearchResultItems> findInFilesRegExp(
+    const QString &searchTerm,
+    FileIterator *files,
+    QTextDocument::FindFlags flags,
+    const QMap<FilePath, QString> &fileToContentsMap = {});
 
-UTILS_EXPORT QFuture<FileSearchResultList> findInFiles(const QString &searchTerm, FileIterator *files,
-    QTextDocument::FindFlags flags, const QMap<QString, QString> &fileToContentsMap = QMap<QString, QString>());
-
-UTILS_EXPORT QFuture<FileSearchResultList> findInFilesRegExp(const QString &searchTerm, FileIterator *files,
-    QTextDocument::FindFlags flags, const QMap<QString, QString> &fileToContentsMap = QMap<QString, QString>());
-
-UTILS_EXPORT QString expandRegExpReplacement(const QString &replaceText, const QStringList &capturedTexts);
-UTILS_EXPORT QString matchCaseReplacement(const QString &originalText, const QString &replaceText);
+UTILS_EXPORT QString expandRegExpReplacement(const QString &replaceText,
+                                                       const QStringList &capturedTexts);
+UTILS_EXPORT QString matchCaseReplacement(const QString &originalText,
+                                                    const QString &replaceText);
 
 } // namespace Utils

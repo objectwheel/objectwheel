@@ -1,33 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljscontext.h"
 
 #include "parser/qmljsast_p.h"
 #include "parser/qmljsengine_p.h"
 #include "qmljsvalueowner.h"
+#include "qmljsbind.h"
+
+#include <qmljs/qmljsmodelmanagerinterface.h>
+
+#include <QLibraryInfo>
 
 using namespace QmlJS;
 using namespace QmlJS::AST;
@@ -97,53 +80,63 @@ ViewerContext Context::viewerContext() const
 const Imports *Context::imports(const QmlJS::Document *doc) const
 {
     if (!doc)
-        return 0;
+        return nullptr;
     return _imports.value(doc).data();
+}
+
+template<typename Iter, typename NextF, typename EndF, typename StrF>
+const ObjectValue *contextLookupType(const Context *ctx, const QmlJS::Document *doc, Iter qmlTypeName,
+                                       EndF atEnd, NextF next, StrF getStr)
+{
+    if (atEnd(qmlTypeName))
+        return nullptr;
+
+    const Imports *importsObj = ctx->imports(doc);
+    if (!importsObj)
+        return nullptr;
+    const ObjectValue *objectValue = importsObj->typeScope();
+    if (!objectValue)
+        return nullptr;
+
+    auto iter = qmlTypeName;
+    if (const ObjectValue *value = importsObj->aliased(getStr(iter))) {
+        objectValue = value;
+        next(iter);
+    } else if (doc && doc->bind()) {
+        // check inline component defined in doc
+        auto iComp = doc->bind()->inlineComponents();
+        if (const ObjectValue *value = iComp.value(getStr(iter))) {
+            objectValue = value;
+            next(iter);
+        }
+    }
+
+    for ( ; objectValue && !atEnd(iter); next(iter)) {
+        const Value *value = objectValue->lookupMember(getStr(iter), ctx, nullptr, false);
+        if (!value)
+            return nullptr;
+
+        objectValue = value->asObjectValue();
+    }
+
+    return objectValue;
 }
 
 const ObjectValue *Context::lookupType(const QmlJS::Document *doc, UiQualifiedId *qmlTypeName,
                                        UiQualifiedId *qmlTypeNameEnd) const
 {
-    const Imports *importsObj = imports(doc);
-    if (!importsObj)
-        return 0;
-    const ObjectValue *objectValue = importsObj->typeScope();
-    if (!objectValue)
-        return 0;
-
-    for (UiQualifiedId *iter = qmlTypeName; objectValue && iter && iter != qmlTypeNameEnd;
-         iter = iter->next) {
-        const Value *value = objectValue->lookupMember(iter->name.toString(), this, 0, false);
-        if (!value)
-            return 0;
-
-        objectValue = value->asObjectValue();
-    }
-
-    return objectValue;
+    return contextLookupType(this, doc, qmlTypeName,
+                      [qmlTypeNameEnd](UiQualifiedId *it){ return !it || it == qmlTypeNameEnd; },
+                      [](UiQualifiedId *&it){ it = it->next; },
+                      [](UiQualifiedId *it){ return it->name.toString(); });
 }
 
 const ObjectValue *Context::lookupType(const QmlJS::Document *doc, const QStringList &qmlTypeName) const
 {
-    const Imports *importsObj = imports(doc);
-    if (!importsObj)
-        return 0;
-    const ObjectValue *objectValue = importsObj->typeScope();
-    if (!objectValue)
-        return 0;
-
-    foreach (const QString &name, qmlTypeName) {
-        if (!objectValue)
-            return 0;
-
-        const Value *value = objectValue->lookupMember(name, this);
-        if (!value)
-            return 0;
-
-        objectValue = value->asObjectValue();
-    }
-
-    return objectValue;
+    return contextLookupType(this, doc, qmlTypeName.cbegin(),
+                             [qmlTypeName](QStringList::const_iterator it){ return it == qmlTypeName.cend(); },
+                             [](QStringList::const_iterator &it){ ++it; },
+                             [](QStringList::const_iterator it){ return *it; });
 }
 
 const Value *Context::lookupReference(const Value *value) const

@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "texteditorconstants.h"
 
@@ -39,6 +17,9 @@ const char *nameForStyle(TextStyle style)
     case C_SELECTION:           return "Selection";
     case C_LINE_NUMBER:         return "LineNumber";
     case C_SEARCH_RESULT:       return "SearchResult";
+    case C_SEARCH_RESULT_ALT1:  return "SearchResultAlt1";
+    case C_SEARCH_RESULT_ALT2:  return "SearchResultAlt2";
+    case C_SEARCH_RESULT_CONTAINING_FUNCTION: return "SearchResultContainingFunction";
     case C_SEARCH_SCOPE:        return "SearchScope";
     case C_PARENTHESES:         return "Parentheses";
     case C_PARENTHESES_MISMATCH:return "ParenthesesMismatch";
@@ -52,7 +33,10 @@ const char *nameForStyle(TextStyle style)
     case C_NUMBER:              return "Number";
     case C_STRING:              return "String";
     case C_TYPE:                return "Type";
+    case C_CONCEPT:             return "Concept";
+    case C_NAMESPACE:           return "Namespace";
     case C_LOCAL:               return "Local";
+    case C_PARAMETER:           return "Parameter";
     case C_GLOBAL:              return "Global";
     case C_FIELD:               return "Field";
     // TODO: Rename "Static" to "Enumeration" in next major update,
@@ -63,7 +47,10 @@ const char *nameForStyle(TextStyle style)
     case C_KEYWORD:             return "Keyword";
     case C_PRIMITIVE_TYPE:      return "PrimitiveType";
     case C_OPERATOR:            return "Operator";
+    case C_OVERLOADED_OPERATOR: return "Overloaded Operator";
+    case C_PUNCTUATION:         return "Punctuation";
     case C_PREPROCESSOR:        return "Preprocessor";
+    case C_MACRO:               return "Macro";
     case C_LABEL:               return "Label";
     case C_COMMENT:             return "Comment";
     case C_DOXYGEN_COMMENT:     return "Doxygen.Comment";
@@ -95,6 +82,11 @@ const char *nameForStyle(TextStyle style)
     case C_DIFF_DEST_CHAR:      return "DiffDestChar";
 
     case C_LOG_CHANGE_LINE:     return "LogChangeLine";
+    case C_LOG_AUTHOR_NAME:     return "LogAuthorName";
+    case C_LOG_COMMIT_DATE:     return "LogCommitDate";
+    case C_LOG_COMMIT_HASH:     return "LogCommitHash";
+    case C_LOG_COMMIT_SUBJECT:  return "LogCommitSubject";
+    case C_LOG_DECORATION:      return "LogDecoration";
 
     case C_ERROR:               return "Error";
     case C_ERROR_CONTEXT:       return "ErrorContext";
@@ -104,6 +96,19 @@ const char *nameForStyle(TextStyle style)
     case C_DECLARATION:         return "Declaration";
     case C_FUNCTION_DEFINITION: return "FunctionDefinition";
     case C_OUTPUT_ARGUMENT:     return "OutputArgument";
+    case C_STATIC_MEMBER:       return "StaticMember";
+
+    case C_COCO_CODE_ADDED: return "CocoCodeAdded";
+    case C_COCO_PARTIALLY_COVERED: return "CocoPartiallyCovered";
+    case C_COCO_NOT_COVERED: return "CocoNotCovered";
+    case C_COCO_FULLY_COVERED: return "CocoFullyCovered";
+    case C_COCO_MANUALLY_VALIDATED: return "CocoManuallyValidated";
+    case C_COCO_DEAD_CODE: return "CocoDeadCode";
+    case C_COCO_EXECUTION_COUNT_TOO_LOW: return "CocoExecutionCountTooLow";
+    case C_COCO_NOT_COVERED_INFO: return "CocoNotCoveredInfo";
+    case C_COCO_COVERED_INFO: return "CocoCoveredInfo";
+    case C_COCO_MANUALLY_VALIDATED_INFO: return "CocoManuallyValidatedInfo";
+
 
     case C_LAST_STYLE_SENTINEL: return "LastStyleSentinel";
     }

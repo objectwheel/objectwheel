@@ -1,33 +1,19 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsbind.h"
+
 #include "parser/qmljsast_p.h"
-#include "qmljsutils.h"
+
 #include "qmljsdocument.h"
 #include "qmljsmodelmanagerinterface.h"
+#include "qmljstr.h"
+#include "qmljsutils.h"
+
+#include <QtCore/QVersionNumber>
+#include <QtCore/QLibraryInfo>
+
+#include <utils/algorithm.h>
 
 using namespace LanguageUtils;
 using namespace QmlJS;
@@ -51,9 +37,9 @@ using namespace QmlJS::AST;
 
 Bind::Bind(Document *doc, QList<DiagnosticMessage> *messages, bool isJsLibrary, const QList<ImportInfo> &jsImports)
     : _doc(doc),
-      _currentObjectValue(0),
-      _idEnvironment(0),
-      _rootObjectValue(0),
+      _currentObjectValue(nullptr),
+      _idEnvironment(nullptr),
+      _rootObjectValue(nullptr),
       _isJsLibrary(isJsLibrary),
       _imports(jsImports),
       _diagnosticMessages(messages)
@@ -71,7 +57,7 @@ bool Bind::isJsLibrary() const
     return _isJsLibrary;
 }
 
-QList<ImportInfo> Bind::imports() const
+const QList<ImportInfo> Bind::imports() const
 {
     return _imports;
 }
@@ -103,7 +89,8 @@ bool Bind::usesQmlPrototype(ObjectValue *prototype,
     if (componentName.isEmpty())
         return false;
 
-    foreach (const ObjectValue *object, _qmlObjectsByPrototypeName.values(componentName)) {
+    QList<const ObjectValue *> values = _qmlObjectsByPrototypeName.values(componentName);
+    for (const ObjectValue *object : values) {
         // resolve and check the prototype
         const ObjectValue *resolvedPrototype = object->prototype(context);
         if (resolvedPrototype == prototype)
@@ -132,7 +119,7 @@ ObjectValue *Bind::switchObjectValue(ObjectValue *newObjectValue)
 
 ObjectValue *Bind::bindObject(UiQualifiedId *qualifiedTypeNameId, UiObjectInitializer *initializer)
 {
-    ObjectValue *parentObjectValue = 0;
+    ObjectValue *parentObjectValue = nullptr;
 
     // normal component instance
     ASTObjectValue *objectValue = new ASTObjectValue(qualifiedTypeNameId, initializer, _doc, &_valueOwner);
@@ -147,17 +134,41 @@ ObjectValue *Bind::bindObject(UiQualifiedId *qualifiedTypeNameId, UiObjectInitia
     }
 
     parentObjectValue = switchObjectValue(objectValue);
-
-    if (parentObjectValue) {
-        objectValue->setMember(QLatin1String("parent"), parentObjectValue);
-    } else if (!_rootObjectValue) {
+    ObjectValue *nextRoot = _rootObjectValue;
+    QString parentComponentName = _currentComponentName;
+    if (!_rootObjectValue) {
         _rootObjectValue = objectValue;
-        _rootObjectValue->setClassName(_doc->componentName());
+        _inlineComponents[_currentComponentName] = objectValue;
+        if (!_currentComponentName.isEmpty()) {
+            if (_currentComponentName.contains('.')) {
+                parentComponentName = _currentComponentName.mid(0,_currentComponentName.lastIndexOf('.'));
+                nextRoot = _inlineComponents.value(parentComponentName);
+            } else {
+                parentComponentName = "";
+                nextRoot = _rootObjectValue;
+            }
+            // we add the inline component inside its parent
+            nextRoot->setMember(_currentComponentName.mid(_currentComponentName.lastIndexOf('.') + 1), objectValue);
+            _rootObjectValue->setClassName(_doc->componentName() + "." + _currentComponentName); // use :: instead of .?
+        } else {
+            nextRoot = _rootObjectValue;
+            _rootObjectValue->setClassName(_doc->componentName());
+        }
+    } else if (parentObjectValue) {
+        objectValue->setMember(QLatin1String("parent"), parentObjectValue);
     }
 
     accept(initializer);
 
+    _rootObjectValue = nextRoot;
+    _currentComponentName = parentComponentName;
     return switchObjectValue(parentObjectValue);
+}
+
+void Bind::throwRecursionDepthError()
+{
+    _diagnosticMessages->append(DiagnosticMessage(Severity::Error, SourceLocation(),
+                                                  Tr::tr("Hit maximal recursion depth in AST visit.")));
 }
 
 void Bind::accept(Node *node)
@@ -167,52 +178,65 @@ void Bind::accept(Node *node)
 
 bool Bind::visit(AST::UiProgram *)
 {
-    _idEnvironment = _valueOwner.newObject(/*prototype =*/ 0);
+    _idEnvironment = _valueOwner.newObject(/*prototype =*/ nullptr);
     return true;
 }
 
 bool Bind::visit(AST::Program *)
 {
-    _currentObjectValue = _valueOwner.newObject(/*prototype =*/ 0);
+    _currentObjectValue = _valueOwner.newObject(/*prototype =*/ nullptr);
     _rootObjectValue = _currentObjectValue;
     return true;
+}
+
+void Bind::endVisit(UiProgram *)
+{
+    if (_doc->language() == Dialect::QmlQbs) {
+        static const QString qbsBaseImport = QStringLiteral("qbs");
+        static auto isQbsBaseImport = [] (const ImportInfo &ii) {
+            return ii.name() == qbsBaseImport; };
+        if (!Utils::anyOf(_imports, isQbsBaseImport))
+            _imports += ImportInfo::moduleImport(qbsBaseImport, ComponentVersion(), QString());
+    }
 }
 
 bool Bind::visit(UiImport *ast)
 {
     ComponentVersion version;
-    if (ast->versionToken.isValid()) {
-        const QString versionString = _doc->source().mid(ast->versionToken.offset, ast->versionToken.length);
-        version = ComponentVersion(versionString);
-        if (!version.isValid()) {
-            _diagnosticMessages->append(
-                        errorMessage(ast->versionToken, tr("expected two numbers separated by a dot")));
-        }
-    }
+    if (ast->version)
+        version = ComponentVersion(ast->version->majorVersion, ast->version->minorVersion);
 
-    if (ast->importUri) {
-        if (!version.isValid()) {
+    if (auto importUri = ast->importUri) {
+        QVersionNumber qtVersion;
+        QString uri = toString(importUri);
+        if (ModelManagerInterface *model = ModelManagerInterface::instance()) {
+            ModelManagerInterface::ProjectInfo pInfo = model->projectInfoForPath(_doc->fileName());
+            qtVersion = QVersionNumber::fromString(pInfo.qtVersionString);
+            uri = pInfo.moduleMappings.value(uri, uri);
+        }
+        if (!version.isValid() && (!qtVersion.isNull() && qtVersion.majorVersion() < 6)) {
             _diagnosticMessages->append(
-                        errorMessage(ast, tr("package import requires a version number")));
+                        errorMessage(ast, Tr::tr("package import requires a version number")));
         }
         const QString importId = ast->importId.toString();
-        ImportInfo import = ImportInfo::moduleImport(toString(ast->importUri), version,
-                                                     importId, ast);
+
+        ImportInfo import = ImportInfo::moduleImport(uri, version, importId, ast);
         if (_doc->language() == Dialect::Qml) {
             const QString importStr = import.name() + importId;
             if (ModelManagerInterface::instance()) {
                 QmlLanguageBundles langBundles = ModelManagerInterface::instance()->extendedBundles();
-                QmlBundle qq1 = langBundles.bundleForLanguage(Dialect::QmlQtQuick1);
                 QmlBundle qq2 = langBundles.bundleForLanguage(Dialect::QmlQtQuick2);
-                bool isQQ1 = qq1.supportedImports().contains(importStr);
                 bool isQQ2 = qq2.supportedImports().contains(importStr);
-                if (isQQ1 && ! isQQ2)
-                    _doc->setLanguage(Dialect::QmlQtQuick1);
-                if (isQQ2 && ! isQQ1)
+                if (isQQ2)
                     _doc->setLanguage(Dialect::QmlQtQuick2);
             }
         }
-        _imports += import;
+
+        // Make sure QtQuick import is in the list before imports that might depend on it
+        if (import.name() == QLatin1String("QtQuick"))
+            _imports.prepend(import);
+        else
+            _imports += import;
     } else if (!ast->fileName.isEmpty()) {
         _imports += ImportInfo::pathImport(_doc->path(), ast->fileName.toString(),
                                            version, ast->importId.toString(), ast);
@@ -227,7 +251,7 @@ bool Bind::visit(UiPublicMember *ast)
     const Block *block = AST::cast<const Block*>(ast->statement);
     if (block) {
         // build block scope
-        ObjectValue *blockScope = _valueOwner.newObject(/*prototype=*/0);
+        ObjectValue *blockScope = _valueOwner.newObject(/*prototype=*/nullptr);
         _attachedJSScopes.insert(ast, blockScope); // associated with the UiPublicMember, not with the block
         ObjectValue *parent = switchObjectValue(blockScope);
         accept(ast->statement);
@@ -250,7 +274,7 @@ bool Bind::visit(UiObjectDefinition *ast)
         _qmlObjects.insert(ast, value);
     } else {
         _groupedPropertyBindings.insert(ast);
-        ObjectValue *oldObjectValue = switchObjectValue(0);
+        ObjectValue *oldObjectValue = switchObjectValue(nullptr);
         accept(ast->initializer);
         switchObjectValue(oldObjectValue);
     }
@@ -263,7 +287,7 @@ bool Bind::visit(UiObjectBinding *ast)
 //    const QString name = serialize(ast->qualifiedId);
     ObjectValue *value = bindObject(ast->qualifiedTypeNameId, ast->initializer);
     _qmlObjects.insert(ast, value);
-    // ### fixme: we don't handle dot-properties correctly (i.e. font.size)
+    // ### FIXME: we don't handle dot-properties correctly (i.e. font.size)
 //    _currentObjectValue->setProperty(name, value);
 
     return false;
@@ -280,7 +304,7 @@ bool Bind::visit(UiScriptBinding *ast)
     const Block *block = AST::cast<const Block*>(ast->statement);
     if (block) {
         // build block scope
-        ObjectValue *blockScope = _valueOwner.newObject(/*prototype=*/0);
+        ObjectValue *blockScope = _valueOwner.newObject(/*prototype=*/nullptr);
         _attachedJSScopes.insert(ast, blockScope); // associated with the UiScriptBinding, not with the block
         ObjectValue *parent = switchObjectValue(blockScope);
         accept(ast->statement);
@@ -292,25 +316,43 @@ bool Bind::visit(UiScriptBinding *ast)
 
 bool Bind::visit(UiArrayBinding *)
 {
-    // ### fixme: do we need to store the members into the property? Or, maybe the property type is an JS Array?
+    // ### FIXME: do we need to store the members into the property? Or, maybe the property type is an JS Array?
 
     return true;
 }
 
-bool Bind::visit(VariableDeclaration *ast)
+bool Bind::visit(UiInlineComponent *ast)
 {
-    if (ast->name.isEmpty())
+    if (!_currentComponentName.isEmpty()) {
+        _currentComponentName += ".";
+        _diagnosticMessages->append(
+            errorMessage(ast, Tr::tr("Nested inline components are not supported.")));
+    }
+    _currentComponentName += ast->name.toString();
+    _rootObjectValue = nullptr;
+    return true;
+}
+
+bool Bind::visit(AST::TemplateLiteral *ast)
+{
+    Node::accept(ast->expression, this);
+    return true;
+}
+
+bool Bind::visit(PatternElement *ast)
+{
+    if (ast->bindingIdentifier.isEmpty() || !ast->isVariableDeclaration())
         return false;
 
     ASTVariableReference *ref = new ASTVariableReference(ast, _doc, &_valueOwner);
     if (_currentObjectValue)
-        _currentObjectValue->setMember(ast->name.toString(), ref);
+        _currentObjectValue->setMember(ast->bindingIdentifier, ref);
     return true;
 }
 
 bool Bind::visit(FunctionExpression *ast)
 {
-    // ### fixme: the first declaration counts
+    // ### FIXME: the first declaration counts
     //if (_currentObjectValue->property(ast->name->asString(), 0))
     //    return false;
 
@@ -319,7 +361,7 @@ bool Bind::visit(FunctionExpression *ast)
         _currentObjectValue->setMember(ast->name.toString(), function);
 
     // build function scope
-    ObjectValue *functionScope = _valueOwner.newObject(/*prototype=*/0);
+    ObjectValue *functionScope = _valueOwner.newObject(/*prototype=*/nullptr);
     _attachedJSScopes.insert(ast, functionScope);
     ObjectValue *parent = switchObjectValue(functionScope);
 
@@ -328,15 +370,15 @@ bool Bind::visit(FunctionExpression *ast)
 
     // 1. Function formal arguments
     for (FormalParameterList *it = ast->formals; it; it = it->next) {
-        if (!it->name.isEmpty())
-            functionScope->setMember(it->name.toString(), _valueOwner.unknownValue());
+        if (!it->element->bindingIdentifier.isEmpty())
+            functionScope->setMember(it->element->bindingIdentifier, _valueOwner.unknownValue());
     }
 
     // 2. Functions defined inside the function body
     // ### TODO, currently covered by the accept(body)
 
     // 3. Arguments object
-    ObjectValue *arguments = _valueOwner.newObject(/*prototype=*/0);
+    ObjectValue *arguments = _valueOwner.newObject(/*prototype=*/nullptr);
     arguments->setMember(QLatin1String("callee"), function);
     arguments->setMember(QLatin1String("length"), _valueOwner.numberValue());
     functionScope->setMember(QLatin1String("arguments"), arguments);

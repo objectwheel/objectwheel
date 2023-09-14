@@ -1,35 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
+#include "utils_global.h"
+
 #include "algorithm.h"
 #include "runextensions.h"
 
 #include <QFutureWatcher>
+
+#include <iterator>
 
 namespace Utils {
 
@@ -52,10 +33,11 @@ class MapReduceBase : public MapReduceObject
 protected:
     static const int MAX_PROGRESS = 1000000;
     // either const or non-const reference wrapper for items from the iterator
-    using ItemReferenceWrapper = std::reference_wrapper<std::remove_reference_t<typename ForwardIterator::reference>>;
+    using ItemReferenceWrapper = std::reference_wrapper<
+        std::remove_reference_t<typename std::iterator_traits<ForwardIterator>::reference>>;
 
 public:
-    MapReduceBase(QFutureInterface<ReduceResult> futureInterface, ForwardIterator begin, ForwardIterator end,
+    MapReduceBase(QFutureInterface<ReduceResult> &futureInterface, ForwardIterator begin, ForwardIterator end,
                   MapFunction &&map, State &state, ReduceFunction &&reduce,
                   MapReduceOption option, QThreadPool *pool, int size)
         : m_futureInterface(futureInterface),
@@ -75,7 +57,7 @@ public:
             m_futureInterface.setProgressRange(0, MAX_PROGRESS);
         connect(&m_selfWatcher, &QFutureWatcher<void>::canceled,
                 this, &MapReduceBase::cancelAll);
-        m_selfWatcher.setFuture(futureInterface.future());
+        m_selfWatcher.setFuture(QFuture<void>(futureInterface.future()));
     }
 
     void exec()
@@ -95,7 +77,7 @@ protected:
                && m_mapWatcher.size() < std::max(m_threadPool->maxThreadCount(), 1)) {
             didSchedule = true;
             auto watcher = new QFutureWatcher<MapResult>();
-            connect(watcher, &QFutureWatcher<MapResult>::finished, this, [this, watcher]() {
+            connect(watcher, &QFutureWatcher<MapResult>::finished, this, [this, watcher] {
                 mapFinished(watcher);
             });
             if (m_handleProgress) {
@@ -146,7 +128,7 @@ protected:
             return;
         const double progressPerMap = MAX_PROGRESS / double(m_size);
         double progress = m_successfullyFinishedMapCount * progressPerMap;
-        foreach (const QFutureWatcher<MapResult> *watcher, m_mapWatcher) {
+        for (const QFutureWatcher<MapResult> *watcher : std::as_const(m_mapWatcher)) {
             if (watcher->progressMinimum() != watcher->progressMaximum()) {
                 const double range = watcher->progressMaximum() - watcher->progressMinimum();
                 progress += (watcher->progressValue() - watcher->progressMinimum()) / range * progressPerMap;
@@ -157,12 +139,12 @@ protected:
 
     void cancelAll()
     {
-        foreach (QFutureWatcher<MapResult> *watcher, m_mapWatcher)
+        for (QFutureWatcher<MapResult> *watcher : std::as_const(m_mapWatcher))
             watcher->cancel();
     }
 
     QFutureWatcher<void> m_selfWatcher;
-    QFutureInterface<ReduceResult> m_futureInterface;
+    QFutureInterface<ReduceResult> &m_futureInterface;
     ForwardIterator m_iterator;
     const ForwardIterator m_end;
     MapFunction m_map;
@@ -185,7 +167,7 @@ class MapReduce : public MapReduceBase<ForwardIterator, MapResult, MapFunction, 
 {
     using BaseType = MapReduceBase<ForwardIterator, MapResult, MapFunction, State, ReduceResult, ReduceFunction>;
 public:
-    MapReduce(QFutureInterface<ReduceResult> futureInterface, ForwardIterator begin, ForwardIterator end,
+    MapReduce(QFutureInterface<ReduceResult> &futureInterface, ForwardIterator begin, ForwardIterator end,
               MapFunction &&map, State &state, ReduceFunction &&reduce, MapReduceOption option,
               QThreadPool *pool, int size)
         : BaseType(futureInterface, begin, end, std::forward<MapFunction>(map), state,
@@ -234,7 +216,7 @@ class MapReduce<ForwardIterator, void, MapFunction, State, ReduceResult, ReduceF
 {
     using BaseType = MapReduceBase<ForwardIterator, void, MapFunction, State, ReduceResult, ReduceFunction>;
 public:
-    MapReduce(QFutureInterface<ReduceResult> futureInterface, ForwardIterator begin, ForwardIterator end,
+    MapReduce(QFutureInterface<ReduceResult> &futureInterface, ForwardIterator begin, ForwardIterator end,
               MapFunction &&map, State &state, ReduceFunction &&reduce, MapReduceOption option,
               QThreadPool *pool, int size)
         : BaseType(futureInterface, begin, end, std::forward<MapFunction>(map), state,

@@ -1,38 +1,18 @@
-/****************************************************************************
-**
-** Copyright (C) 2018 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2018 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "documentcontentcompletion.h"
 
 #include "assistinterface.h"
 #include "assistproposalitem.h"
+#include "asyncprocessor.h"
 #include "genericproposal.h"
-#include "genericproposalmodel.h"
 #include "iassistprocessor.h"
-//#include "../snippets/snippetassistcollector.h"
+#include "../snippets/snippetassistcollector.h"
+#include "../completionsettings.h"
+#include "../texteditorsettings.h"
 
-#include "utils/runextensions.h"
+#include <utils/algorithm.h>
 
 #include <QElapsedTimer>
 #include <QRegularExpression>
@@ -42,97 +22,86 @@
 
 using namespace TextEditor;
 
-class DocumentContentCompletionProcessor : public IAssistProcessor
+class DocumentContentCompletionProcessor final : public AsyncProcessor
 {
 public:
     DocumentContentCompletionProcessor(const QString &snippetGroupId);
+    ~DocumentContentCompletionProcessor() final;
 
-    IAssistProposal *perform(const AssistInterface *interface) override;
-    bool running() final { return m_running; }
+    IAssistProposal *performAsync() override;
 
 private:
-//    TextEditor::SnippetAssistCollector m_snippetCollector;
-    IAssistProposal *createProposal(const AssistInterface *interface);
-    bool m_running = false;
+    QString m_snippetGroup;
 };
 
 DocumentContentCompletionProvider::DocumentContentCompletionProvider(const QString &snippetGroup)
     : m_snippetGroup(snippetGroup)
 { }
 
-IAssistProvider::RunType DocumentContentCompletionProvider::runType() const
+IAssistProcessor *DocumentContentCompletionProvider::createProcessor(const AssistInterface *) const
 {
-    return Asynchronous;
+    return new DocumentContentCompletionProcessor(m_snippetGroup);
 }
 
-IAssistProcessor *DocumentContentCompletionProvider::createProcessor() const
-{
-    return new DocumentContentCompletionProcessor(""/*m_snippetGroup*/);
-}
-
-DocumentContentCompletionProcessor::DocumentContentCompletionProcessor(const QString &/*snippetGroupId*/)
-//    : m_snippetCollector(snippetGroupId, QIcon(":/texteditor/images/snippet.png"))
+DocumentContentCompletionProcessor::DocumentContentCompletionProcessor(const QString &snippetGroupId)
+    : m_snippetGroup(snippetGroupId)
 { }
 
-IAssistProposal *DocumentContentCompletionProcessor::perform(const AssistInterface *interface)
+DocumentContentCompletionProcessor::~DocumentContentCompletionProcessor()
 {
-    Utils::onResultReady(Utils::runAsync(
-                             &DocumentContentCompletionProcessor::createProposal, this, interface),
-                         [this](IAssistProposal *proposal){
-        m_running = false;
-        setAsyncProposalAvailable(proposal);
-    });
-    m_running = true;
-    return nullptr;
+    cancel();
 }
 
-static void generateProposalItems(const QString &text, QSet<QString> &words,
-                                  QList<AssistProposalItemInterface *> &items)
+IAssistProposal *DocumentContentCompletionProcessor::performAsync()
 {
-    static const QRegularExpression wordRE("([a-zA-Z_][a-zA-Z0-9_]{2,})");
+    int pos = interface()->position();
 
-    QRegularExpressionMatch match;
-    int index = text.indexOf(wordRE, 0, &match);
-    while (index >= 0) {
+    QChar chr;
+    // Skip to the start of a name
+    do {
+        chr = interface()->characterAt(--pos);
+    } while (chr.isLetterOrNumber() || chr == '_');
+
+    ++pos;
+    int length = interface()->position() - pos;
+
+    if (interface()->reason() == IdleEditor) {
+        QChar characterUnderCursor = interface()->characterAt(interface()->position());
+        if (characterUnderCursor.isLetterOrNumber()
+                || length < TextEditorSettings::completionSettings().m_characterThreshold) {
+            return nullptr;
+        }
+    }
+
+    const TextEditor::SnippetAssistCollector snippetCollector(
+                m_snippetGroup, QIcon(":/texteditor/images/snippet.png"));
+    QList<AssistProposalItemInterface *> items = snippetCollector.collect();
+
+    const QString wordUnderCursor = interface()->textAt(pos, length);
+    const QString text = interface()->textDocument()->toPlainText();
+
+    const QRegularExpression wordRE("([\\p{L}_][\\p{L}0-9_]{2,})");
+    QSet<QString> words;
+    QRegularExpressionMatchIterator it = wordRE.globalMatch(text);
+    int wordUnderCursorFound = 0;
+    while (it.hasNext()) {
+        if (isCanceled())
+            return nullptr;
+        QRegularExpressionMatch match = it.next();
         const QString &word = match.captured();
+        if (word == wordUnderCursor) {
+            // Only add the word under cursor if it
+            // already appears elsewhere in the text
+            if (++wordUnderCursorFound < 2)
+                continue;
+        }
+
         if (!words.contains(word)) {
             auto item = new AssistProposalItem();
             item->setText(word);
             items.append(item);
             words.insert(word);
         }
-        index += word.size();
-        index = text.indexOf(wordRE, index, &match);
-    }
-}
-
-IAssistProposal *DocumentContentCompletionProcessor::createProposal(
-        const AssistInterface *interface)
-{
-    QScopedPointer<const AssistInterface> assistInterface(interface);
-    int pos = interface->position();
-
-    QChar chr;
-    // Skip to the start of a name
-    do {
-        chr = interface->characterAt(--pos);
-    } while (chr.isLetterOrNumber() || chr == '_');
-
-    ++pos;
-
-    if (interface->reason() == IdleEditor) {
-        QChar characterUnderCursor = interface->characterAt(interface->position());
-        if (characterUnderCursor.isLetterOrNumber() || interface->position() - pos < 3)
-            return nullptr;
-    }
-
-    QSet<QString> words;
-    QList<AssistProposalItemInterface *> items /*= m_snippetCollector.collect()*/;
-    QTextBlock block = interface->textDocument()->firstBlock();
-
-    while (block.isValid()) {
-        generateProposalItems(block.text(), words, items);
-        block = block.next();
     }
 
     return new GenericProposal(pos, items);

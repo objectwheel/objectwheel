@@ -1,61 +1,40 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "assistinterface.h"
 #include "assistproposalitem.h"
 #include "genericproposal.h"
 #include "genericproposalmodel.h"
 #include "genericproposalwidget.h"
+#include "../texteditorconstants.h"
 
 namespace TextEditor {
 
 GenericProposal::GenericProposal(int cursorPos, GenericProposalModelPtr model)
-    : IAssistProposal(cursorPos)
+    : IAssistProposal(Constants::GENERIC_PROPOSAL_ID, cursorPos)
     , m_model(model)
 {}
 
 GenericProposal::GenericProposal(int cursorPos, const QList<AssistProposalItemInterface *> &items)
-    : IAssistProposal(cursorPos)
+    : IAssistProposal(Constants::GENERIC_PROPOSAL_ID, cursorPos)
     , m_model(new GenericProposalModel)
 {
     m_model->loadContent(items);
 }
 
-GenericProposal::~GenericProposal()
-{}
+GenericProposal::~GenericProposal() = default;
 
-GenericProposal *GenericProposal::createProposal(const AssistInterface *interface, const QuickFixOperations &quickFixes)
+GenericProposal *GenericProposal::createProposal(const AssistInterface *interface,
+                                                 const QuickFixOperations &quickFixes)
 {
     if (quickFixes.isEmpty())
         return nullptr;
 
     QList<AssistProposalItemInterface *> items;
-    foreach (const QuickFixOperation::Ptr &op, quickFixes) {
+    for (const QuickFixOperation::Ptr &op : quickFixes) {
         QVariant v;
         v.setValue(op);
-        AssistProposalItem *item = new AssistProposalItem;
+        auto item = new AssistProposalItem;
         item->setText(op->description());
         item->setData(v);
         item->setOrder(op->priority());

@@ -1,37 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
-#include <QHash>
-#include <QVector>
-#include <QStringList>
-#include <QDateTime>
+#include "utils_global.h"
 
-QT_FORWARD_DECLARE_CLASS(QVariant)
+#include <QDateTime>
+#include <QHash>
+#include <QStringList>
+#include <QVector>
+
+class QVariant;
 
 namespace Utils {
 
@@ -50,7 +29,7 @@ public:
 
     inline void *allocate(size_t size)
     {
-        char *obj = new char[size];
+        auto obj = new char[size];
         _objs.append(obj);
         return obj;
     }
@@ -81,13 +60,13 @@ public:
     Kind kind() const { return m_kind; }
     static QString kindToString(Kind kind);
 
-    virtual JsonStringValue *toString() { return 0; }
-    virtual JsonDoubleValue *toDouble() { return 0; }
-    virtual JsonIntValue *toInt() { return 0; }
-    virtual JsonObjectValue *toObject() { return 0; }
-    virtual JsonArrayValue *toArray() { return 0; }
-    virtual JsonBooleanValue *toBoolean() { return 0; }
-    virtual JsonNullValue *toNull() { return 0; }
+    virtual JsonStringValue *toString() { return nullptr; }
+    virtual JsonDoubleValue *toDouble() { return nullptr; }
+    virtual JsonIntValue *toInt() { return nullptr; }
+    virtual JsonObjectValue *toObject() { return nullptr; }
+    virtual JsonArrayValue *toArray() { return nullptr; }
+    virtual JsonBooleanValue *toBoolean() { return nullptr; }
+    virtual JsonNullValue *toNull() { return nullptr; }
 
     static JsonValue *create(const QString &s, JsonMemoryPool *pool);
     void *operator new(size_t size, JsonMemoryPool *pool);
@@ -115,7 +94,7 @@ public:
         , m_value(value)
     {}
 
-    virtual JsonStringValue *toString() { return this; }
+    JsonStringValue *toString() override { return this; }
 
     const QString &value() const { return m_value; }
 
@@ -135,7 +114,7 @@ public:
         , m_value(value)
     {}
 
-    virtual JsonDoubleValue *toDouble() { return this; }
+    JsonDoubleValue *toDouble() override { return this; }
 
     double value() const { return m_value; }
 
@@ -154,7 +133,7 @@ public:
         , m_value(value)
     {}
 
-    virtual JsonIntValue *toInt() { return this; }
+    JsonIntValue *toInt() override { return this; }
 
     int value() const { return m_value; }
 
@@ -173,7 +152,7 @@ public:
         : JsonValue(Object)
     {}
 
-    virtual JsonObjectValue *toObject() { return this; }
+    JsonObjectValue *toObject() override { return this; }
 
     void addMember(const QString &name, JsonValue *value) { m_members.insert(name, value); }
     bool hasMember(const QString &name) const { return m_members.contains(name); }
@@ -201,7 +180,7 @@ public:
         : JsonValue(Array)
     {}
 
-    virtual JsonArrayValue *toArray() { return this; }
+    JsonArrayValue *toArray() override { return this; }
 
     void addElement(JsonValue *value) { m_elements.append(value); }
     QList<JsonValue *> elements() const { return m_elements; }
@@ -223,7 +202,7 @@ public:
         , m_value(value)
     {}
 
-    virtual JsonBooleanValue *toBoolean() { return this; }
+    JsonBooleanValue *toBoolean() override { return this; }
 
     bool value() const { return m_value; }
 
@@ -238,7 +217,7 @@ public:
         : JsonValue(Null)
     {}
 
-    virtual JsonNullValue *toNull() { return this; }
+    JsonNullValue *toNull() override { return this; }
 };
 
 class JsonSchemaManager;
@@ -344,7 +323,7 @@ private:
 
     QStringList properties(JsonObjectValue *v) const;
     JsonObjectValue *propertySchema(const QString &property, JsonObjectValue *v) const;
-    // todo: Similar functions for other attributes which require looking into base schemas.
+    // TODO: Similar functions for other attributes which require looking into base schemas.
 
     static bool maybeSchemaName(const QString &s);
 
@@ -398,7 +377,7 @@ public:
 private:
     struct JsonSchemaData
     {
-        JsonSchemaData(const QString &absoluteFileName, JsonSchema *schema = 0)
+        JsonSchemaData(const QString &absoluteFileName, JsonSchema *schema = nullptr)
             : m_absoluteFileName(absoluteFileName)
             , m_schema(schema)
         {}

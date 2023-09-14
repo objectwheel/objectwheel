@@ -1,27 +1,5 @@
-﻿/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljscodeformatter.h"
 
@@ -29,6 +7,8 @@
 #include <QMetaEnum>
 #include <QTextBlock>
 #include <QTextDocument>
+
+static Q_LOGGING_CATEGORY(formatterLog, "qtc.qmljs.formatter", QtWarningMsg)
 
 namespace QmlJS {
 
@@ -62,9 +42,14 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
     m_tokenIndex = 0;
     m_newStates.clear();
 
+    //qCDebug(formatterLog) << "Starting to look at " << block.text() << block.blockNumber() + 1;
+
     for (; m_tokenIndex < m_tokens.size(); ) {
         m_currentToken = tokenAt(m_tokenIndex);
         const int kind = extendedTokenKind(m_currentToken);
+
+        //qCDebug(formatterLog) << "Token" << m_currentLine.mid(m_currentToken.begin(), m_currentToken.length) << m_tokenIndex << "in line" << block.blockNumber() + 1;
+        //dump();
 
         if (kind == Comment
                 && state().type != multiline_comment_cont
@@ -154,6 +139,8 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
             case Import:
             case Signal:
             case Property:
+            case Required:
+            case Readonly:
             case Identifier:    enter(expression_or_objectdefinition); break;
 
             // error recovery
@@ -166,10 +153,13 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
         case objectdefinition_open:
             switch (kind) {
             case RightBrace:    leave(true); break;
-            case Default:       enter(default_property_start); break;
+            case Default:
+            case Readonly:      enter(property_modifiers); break;
             case Property:      enter(property_start); break;
+            case Required:      enter(required_property); break;
             case Function:      enter(function_start); break;
             case Signal:        enter(signal_start); break;
+            case Enum:          enter(enum_start); break;
             case On:
             case As:
             case List:
@@ -177,12 +167,14 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
             case Identifier:    enter(binding_or_objectdefinition); break;
             } break;
 
-        case default_property_start:
-            if (kind != Property)
-                leave(true);
-            else
-                turnInto(property_start);
-            break;
+        case property_modifiers:
+            switch (kind) {
+            case Property:      turnInto(property_start); break;
+            case Default:
+            case Readonly:      break;
+            case Required:      turnInto(required_property); break;
+            default:            leave(true); break;
+            } break;
 
         case property_start:
             switch (kind) {
@@ -193,19 +185,42 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
             default:            leave(true); continue;
             } break;
 
+        case required_property:
+            switch (kind) {
+            case Property:      turnInto(property_start); break;
+            case Default:
+            case Readonly:      turnInto(property_modifiers); break;
+            case Identifier:    leave(true); break;
+            default:            leave(true); continue;
+            } break;
+
+        case component_start:
+            switch (kind) {
+            case Identifier:    turnInto(StateType::component_name); break;
+            default:            leave(true); continue;
+            } break;
+
         case property_name:
             turnInto(property_maybe_initializer);
             break;
 
-        case property_list_open:
-            if (m_currentLine.midRef(m_currentToken.begin(), m_currentToken.length) == QLatin1String(">"))
+        case property_list_open: {
+            const QStringView tok = QStringView(m_currentLine).mid(
+                                                   m_currentToken.begin(),
+                                                   m_currentToken.length);
+            if (tok == QLatin1String(">"))
                 turnInto(property_name);
             break;
-
+        }
         case property_maybe_initializer:
             switch (kind) {
             case Colon:         turnInto(binding_assignment); break;
             default:            leave(true); continue;
+            } break;
+
+        case enum_start:
+            switch (kind) {
+            case LeftBrace: enter(objectliteral_open); break;
             } break;
 
         case signal_start:
@@ -238,7 +253,14 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
         case function_arglist_closed:
             switch (kind) {
             case LeftBrace:         turnInto(jsblock_open); break;
+            case Colon:             turnInto(function_type_annotated_return); break;
             default:                leave(true); continue; // error recovery
+            } break;
+
+        case function_type_annotated_return:
+            switch (kind) {
+            case LeftBrace:         turnInto(jsblock_open); break;
+            default:                break;
             } break;
 
         case expression_or_objectdefinition:
@@ -277,7 +299,7 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
             if (tryInsideExpression())
                 break;
             switch (kind) {
-            case Comma:
+            case Comma:             leave(true); break;
             case Delimiter:         enter(expression_continuation); break;
             case RightBracket:
             case RightParenthesis:  leave(); continue;
@@ -329,11 +351,11 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
             if (tryInsideExpression())
                 break;
             switch (kind) {
+            case Comma:             leave(); break;
             case Delimiter:         enter(expression_continuation); break;
             case RightBracket:
             case RightParenthesis:  leave(); continue; // error recovery
             case RightBrace:        leave(); continue; // so we also leave objectliteral_open
-            case Comma:             leave(); break;
             } break;
 
         case bracket_element_start:
@@ -393,6 +415,7 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
 
         case else_clause:
             // ### shouldn't happen
+            dump();
             Q_ASSERT(false);
             leave(true);
             break;
@@ -512,6 +535,8 @@ void CodeFormatter::recalculateStateAfter(const QTextBlock &block)
 
 int CodeFormatter::indentFor(const QTextBlock &block)
 {
+//    qCDebug(formatterLog) << "indenting for" << block.blockNumber() + 1;
+
     restoreCurrentState(block.previous());
     correctIndentation(block);
     return m_indentDepth;
@@ -631,6 +656,8 @@ void CodeFormatter::enter(int newState)
     m_currentState.push(s);
     m_newStates.push(s);
 
+    //qCDebug(formatterLog) << "enter state" << stateToString(newState);
+
     if (newState == bracket_open)
         enter(bracket_element_start);
 }
@@ -649,6 +676,8 @@ void CodeFormatter::leave(bool statementDone)
     m_indentDepth = poppedState.savedIndentDepth;
 
     int topState = m_currentState.top().type;
+
+    //qCDebug(formatterLog) << "left state" << stateToString(poppedState.type) << ", now in state" << stateToString(topState);
 
     // if statement is done, may need to leave recursively
     if (statementDone) {
@@ -763,6 +792,8 @@ bool CodeFormatter::tryStatement()
     case As:
     case List:
     case Property:
+    case Required:
+    case Readonly:
     case Function:
     case Number:
     case String:
@@ -826,9 +857,9 @@ int CodeFormatter::column(int index) const
     return col;
 }
 
-QStringRef CodeFormatter::currentTokenText() const
+QStringView CodeFormatter::currentTokenText() const
 {
-    return m_currentLine.midRef(m_currentToken.begin(), m_currentToken.length);
+    return QStringView(m_currentLine).mid(m_currentToken.begin(), m_currentToken.length);
 }
 
 void CodeFormatter::turnInto(int newState)
@@ -902,7 +933,7 @@ int CodeFormatter::tokenizeBlock(const QTextBlock &block)
 CodeFormatter::TokenKind CodeFormatter::extendedTokenKind(const QmlJS::Token &token) const
 {
     const int kind = token.kind;
-    QStringRef text = m_currentLine.midRef(token.begin(), token.length);
+    const QStringView text = QStringView(m_currentLine).mid(token.begin(), token.length);
 
     if (kind == Identifier) {
         if (text == QLatin1String("as"))
@@ -913,10 +944,18 @@ CodeFormatter::TokenKind CodeFormatter::extendedTokenKind(const QmlJS::Token &to
             return Signal;
         if (text == QLatin1String("property"))
             return Property;
+        if (text == QLatin1String("readonly"))
+            return Readonly;
+        if (text == QLatin1String("component"))
+            return Component;
+        if (text == QLatin1String("required"))
+            return Required;
         if (text == QLatin1String("on"))
             return On;
         if (text == QLatin1String("list"))
             return List;
+        if (text == QLatin1String("enum"))
+            return Enum;
     } else if (kind == Keyword) {
         const char char1 = text.at(0).toLatin1();
         const char char2 = text.at(1).toLatin1();
@@ -985,6 +1024,22 @@ CodeFormatter::TokenKind CodeFormatter::extendedTokenKind(const QmlJS::Token &to
     }
 
     return static_cast<TokenKind>(kind);
+}
+
+void CodeFormatter::dump() const
+{
+    qCDebug(formatterLog) << "Current token index" << m_tokenIndex;
+    qCDebug(formatterLog) << "Current state:";
+    for (const State &s : m_currentState) {
+        qCDebug(formatterLog) << stateToString(s.type) << s.savedIndentDepth;
+    }
+    qCDebug(formatterLog) << "Current indent depth:" << m_indentDepth;
+}
+
+QString CodeFormatter::stateToString(int type) const
+{
+    const QMetaEnum &metaEnum = staticMetaObject.enumerator(staticMetaObject.indexOfEnumerator("StateType"));
+    return QString::fromUtf8(metaEnum.valueToKey(type));
 }
 
 QtStyleCodeFormatter::QtStyleCodeFormatter()

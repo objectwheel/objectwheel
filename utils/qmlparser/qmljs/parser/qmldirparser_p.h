@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2021 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -40,89 +18,125 @@
 #include <QtCore/QHash>
 #include <QtCore/QDebug>
 
-#include "qmljsengine_p.h"
+#include <languageutils/componentversion.h>
 
-QT_BEGIN_NAMESPACE
+#include <utils_global.h>
+#include "qmljs/parser/qmljsengine_p.h"
+#include "qmljs/parser/qmljsdiagnosticmessage_p.h"
 
-class QmlError;
 class QmlEngine;
 class UTILS_EXPORT QmlDirParser
 {
-    Q_DISABLE_COPY(QmlDirParser)
-
 public:
-    QmlDirParser();
-    ~QmlDirParser();
-
+    void clear();
     bool parse(const QString &source);
 
-    bool hasError() const;
-    void setError(const QmlError &);
-    QList<QmlError> errors(const QString &uri) const;
+    bool hasError() const { return !_errors.isEmpty(); }
+    void setError(const QmlJS::DiagnosticMessage &);
+    QList<QmlJS::DiagnosticMessage> errors(const QString &uri) const;
 
-    QString typeNamespace() const;
-    void setTypeNamespace(const QString &s);
+    QString typeNamespace() const { return _typeNamespace; }
+    void setTypeNamespace(const QString &s) { _typeNamespace = s; }
+
+    static void checkNonRelative(const char *item, const QString &typeName, const QString &fileName)
+    {
+        if (fileName.startsWith(QLatin1Char('/'))) {
+            qWarning() << item << typeName
+                       << "is specified with non-relative URL" << fileName << "in a qmldir file."
+                       << "URLs in qmldir files should be relative to the qmldir file's directory.";
+        }
+    }
 
     struct Plugin
     {
-        Plugin() {}
+        Plugin() = default;
 
-        Plugin(const QString &name, const QString &path)
-            : name(name), path(path) {}
+        Plugin(const QString &name, const QString &path, bool optional)
+            : name(name), path(path), optional(optional)
+        {
+            checkNonRelative("Plugin", name, path);
+        }
 
         QString name;
         QString path;
+        bool optional = false;
     };
 
     struct Component
     {
-        Component()
-            : majorVersion(0), minorVersion(0), internal(false), singleton(false) {}
+        Component() = default;
 
         Component(const QString &typeName, const QString &fileName, int majorVersion, int minorVersion)
             : typeName(typeName), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion),
-            internal(false), singleton(false) {}
+            internal(false), singleton(false)
+        {
+            checkNonRelative("Component", typeName, fileName);
+        }
 
         QString typeName;
         QString fileName;
-        int majorVersion;
-        int minorVersion;
-        bool internal;
-        bool singleton;
+        int majorVersion = 0;
+        int minorVersion = 0;
+        bool internal = false;
+        bool singleton = false;
     };
 
     struct Script
     {
-        Script()
-            : majorVersion(0), minorVersion(0) {}
+        Script() = default;
 
         Script(const QString &nameSpace, const QString &fileName, int majorVersion, int minorVersion)
-            : nameSpace(nameSpace), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion) {}
+            : nameSpace(nameSpace), fileName(fileName), majorVersion(majorVersion), minorVersion(minorVersion)
+        {
+            checkNonRelative("Script", nameSpace, fileName);
+        }
 
         QString nameSpace;
         QString fileName;
-        int majorVersion;
-        int minorVersion;
+        int majorVersion = 0;
+        int minorVersion = 0;
     };
 
-    QHash<QString,Component> components() const;
-    QHash<QString,Component> dependencies() const;
-    QList<Script> scripts() const;
-    QList<Plugin> plugins() const;
-    bool designerSupported() const;
-
-//#ifdef QT_CREATOR
-    struct TypeInfo
+    struct Import
     {
-        TypeInfo() {}
-        TypeInfo(const QString &fileName)
-            : fileName(fileName) {}
+        enum Flag {
+            Default = 0x0,
+            Auto = 0x1,     // forward the version of the importing module
+            Optional = 0x2, // is not automatically imported but only a tooling hint
+            OptionalDefault
+            = 0x4, // tooling hint only, denotes this entry should be imported by tooling
+        };
+        Q_DECLARE_FLAGS(Flags, Flag)
 
-        QString fileName;
+        Import() = default;
+        Import(QString module, LanguageUtils::ComponentVersion version, Flags flags)
+            : module(module), version(version), flags(flags)
+        {
+        }
+
+        QString module;
+        LanguageUtils::ComponentVersion version;     // invalid version is latest version, unless Flag::Auto
+        Flags flags;
+
+        friend bool operator==(const Import &a, const Import &b)
+        {
+            return a.module == b.module && a.version == b.version && a.flags == b.flags;
+        }
     };
 
-    QList<TypeInfo> typeInfos() const;
-//#endif
+    QMultiHash<QString,Component> components() const { return _components; }
+    QList<Import> dependencies() const { return _dependencies; }
+    QList<Import> imports() const { return _imports; }
+    QList<Script> scripts() const { return _scripts; }
+    QList<Plugin> plugins() const { return _plugins; }
+    bool designerSupported() const { return _designerSupported; }
+    bool isStaticModule() const { return _isStaticModule; }
+    bool isSystemModule() const { return _isSystemModule; }
+
+    QStringList typeInfos() const { return _typeInfos; }
+    QStringList classNames() const { return _classNames; }
+    QString preferredPath() const { return _preferredPath; }
+    QString linkTarget() const { return _linkTarget; }
 
 private:
     bool maybeAddComponent(const QString &typeName, const QString &fileName, const QString &version, QHash<QString,Component> &hash, int lineNumber = -1, bool multi = true);
@@ -131,22 +145,24 @@ private:
 private:
     QList<QmlJS::DiagnosticMessage> _errors;
     QString _typeNamespace;
-    QHash<QString,Component> _components; // multi hash
-    QHash<QString,Component> _dependencies;
+    QString _preferredPath;
+    QMultiHash<QString,Component> _components;
+    QList<Import> _dependencies;
+    QList<Import> _imports;
     QList<Script> _scripts;
     QList<Plugin> _plugins;
-    bool _designerSupported;
-//#ifdef QT_CREATOR
-    QList<TypeInfo> _typeInfos;
-//#endif
+    bool _designerSupported = false;
+    bool _isStaticModule = false;
+    bool _isSystemModule = false;
+    QStringList _typeInfos;
+    QStringList _classNames;
+    QString _linkTarget;
 };
 
-typedef QHash<QString,QmlDirParser::Component> QmlDirComponents;
-typedef QList<QmlDirParser::Script> QmlDirScripts;
-typedef QList<QmlDirParser::Plugin> QmlDirPlugins;
+using QmlDirComponents = QMultiHash<QString,QmlDirParser::Component>;
+using QmlDirScripts = QList<QmlDirParser::Script>;
+using QmlDirPlugins = QList<QmlDirParser::Plugin>;
+using QmlDirImports = QList<QmlDirParser::Import>;
 
 QDebug &operator<< (QDebug &, const QmlDirParser::Component &);
 QDebug &operator<< (QDebug &, const QmlDirParser::Script &);
-
-QT_END_NAMESPACE
-

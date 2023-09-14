@@ -1,31 +1,12 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsutils.h"
 
 #include "parser/qmljsast_p.h"
+
+#include <utils/filepath.h>
+#include <utils/stringutils.h>
 
 #include <QColor>
 #include <QDir>
@@ -81,7 +62,7 @@ QColor QmlJS::toQColor(const QString &qmlColorString)
     QColor color;
     if (qmlColorString.size() == 9 && qmlColorString.at(0) == QLatin1Char('#')) {
         bool ok;
-        const int alpha = qmlColorString.midRef(1, 2).toInt(&ok, 16);
+        const int alpha = qmlColorString.mid(1, 2).toInt(&ok, 16);
         if (ok) {
             const QString name = qmlColorString.at(0) + qmlColorString.right(6);
             if (QColor::isValidColor(name)) {
@@ -104,7 +85,7 @@ QString QmlJS::toString(UiQualifiedId *qualifiedId, QChar delimiter)
         if (iter != qualifiedId)
             result += delimiter;
 
-        result += iter->name;
+        result += iter->name.toString();
     }
 
     return result;
@@ -134,13 +115,14 @@ SourceLocation QmlJS::fullLocationForQualifiedId(AST::UiQualifiedId *qualifiedId
 }
 
 /*!
-    \returns the value of the 'id:' binding in \a object
-    \param idBinding optional out parameter to get the UiScriptBinding for the id binding
+    Returns the value of the 'id:' binding in \a object.
+
+    \a idBinding is optional out parameter to get the UiScriptBinding for the id binding.
 */
 QString QmlJS::idOfObject(Node *object, UiScriptBinding **idBinding)
 {
     if (idBinding)
-        *idBinding = 0;
+        *idBinding = nullptr;
 
     UiObjectInitializer *initializer = initializerOfObject(object);
     if (!initializer) {
@@ -179,7 +161,7 @@ UiObjectInitializer *QmlJS::initializerOfObject(Node *object)
         return definition->initializer;
     if (UiObjectBinding *binding = cast<UiObjectBinding *>(object))
         return binding->initializer;
-    return 0;
+    return nullptr;
 }
 
 UiQualifiedId *QmlJS::qualifiedTypeNameId(Node *node)
@@ -188,10 +170,10 @@ UiQualifiedId *QmlJS::qualifiedTypeNameId(Node *node)
         return binding->qualifiedTypeNameId;
     else if (UiObjectDefinition *binding = AST::cast<UiObjectDefinition *>(node))
         return binding->qualifiedTypeNameId;
-    return 0;
+    return nullptr;
 }
 
-DiagnosticMessage QmlJS::errorMessage(const AST::SourceLocation &loc, const QString &message)
+DiagnosticMessage QmlJS::errorMessage(const SourceLocation &loc, const QString &message)
 {
     return DiagnosticMessage(Severity::Error, loc, message);
 }
@@ -207,8 +189,31 @@ const QString undefinedVersion = QLatin1String("-1.-1");
  *         undefined version (-1.-1) or if it is empty.  False otherwise.
  */
 bool QmlJS::maybeModuleVersion(const QString &version) {
-    QRegularExpression re(QLatin1String("^\\d+\\.\\d+$"));
+    QRegularExpression re(QLatin1String("^\\d+\\.-?\\d+$"));
     return version.isEmpty() || version == undefinedVersion || re.match(version).hasMatch();
+}
+
+const QStringList QmlJS::splitVersion(const QString &version)
+{
+    // Successively removing minor and major version numbers.
+    QStringList result;
+    int versionEnd = version.length();
+    while (versionEnd > 0) {
+        result.append(version.left(versionEnd));
+        // remove numbers and then potential . at the end
+        const int oldVersionEnd = versionEnd;
+        while (versionEnd > 0 && version.at(versionEnd - 1).isDigit())
+            --versionEnd;
+        // handle e.g. -1, because an import "QtQuick 2" results in version "2.-1"
+        if (versionEnd > 0 && version.at(versionEnd - 1) == '-')
+            --versionEnd;
+        if (versionEnd > 0 && version.at(versionEnd - 1) == '.')
+            --versionEnd;
+        // bail out if we didn't proceed because version string contains invalid characters
+        if (versionEnd == oldVersionEnd)
+            break;
+    }
+    return result;
 }
 
 /*!
@@ -231,46 +236,43 @@ bool QmlJS::maybeModuleVersion(const QString &version) {
  * \return The module paths if found, an empty string otherwise
  * \see qmlimportscanner in qtdeclarative/tools
  */
-QString QmlJS::modulePath(const QString &name, const QString &version,
-                          const QStringList &importPaths)
+QList<Utils::FilePath> QmlJS::modulePaths(const QString &name,
+                                          const QString &version,
+                                          const QList<Utils::FilePath> &importPaths)
 {
     Q_ASSERT(maybeModuleVersion(version));
     if (importPaths.isEmpty())
-        return QString();
+        return {};
 
     const QString sanitizedVersion = version == undefinedVersion ? QString() : version;
-    const QStringList parts = name.split(QLatin1Char('.'), QString::SkipEmptyParts);
-    auto mkpath = [] (const QStringList &xs) -> QString { return xs.join(QLatin1Char('/')); };
+    const QStringList parts = name.split('.', Qt::SkipEmptyParts);
+    auto mkpath = [](const QStringList &xs) -> QString { return xs.join(QLatin1Char('/')); };
 
-    // Regular expression for building candidates by successively removing minor and major
-    // version numbers.  It does not match the undefined version, so it has to be applied to the
-    // sanitized version.
-    const QRegularExpression re("\\.?\\d+$");
+    QList<Utils::FilePath> result;
+    Utils::FilePath candidate;
 
-    QString candidate;
-
-    for (QString ver = sanitizedVersion; !ver.isEmpty(); ver.remove(re)) {
-        for (const QString &path: importPaths) {
+    for (const QString &versionPart : splitVersion(sanitizedVersion)) {
+        for (const Utils::FilePath &path : importPaths) {
             for (int i = parts.count() - 1; i >= 0; --i) {
-                candidate = QDir::cleanPath(
-                            QString::fromLatin1("%1/%2.%3/%4").arg(path,
-                                                                   mkpath(parts.mid(0, i + 1)),
-                                                                   ver,
-                                                                   mkpath(parts.mid(i + 1))));
-                if (QDir(candidate).exists())
-                    return candidate;
+                candidate = path.pathAppended(QString::fromLatin1("%2.%3/%4")
+                                                  .arg(mkpath(parts.mid(0, i + 1)),
+                                                       versionPart,
+                                                       mkpath(parts.mid(i + 1))))
+                                .cleanPath();
+                if (candidate.exists())
+                    result << candidate;
             }
         }
     }
 
     // Version is empty
-    for (const QString &path: importPaths) {
-        candidate = QDir::cleanPath(QString::fromLatin1("%1/%2").arg(path, mkpath(parts)));
-        if (QDir(candidate).exists())
-            return candidate;
+    for (const Utils::FilePath &path : importPaths) {
+        candidate = path.pathAppended(mkpath(parts)).cleanPath();
+        if (candidate.exists())
+            result << candidate;
     }
 
-    return QString();
+    return result;
 }
 
 bool QmlJS::isValidBuiltinPropertyType(const QString &name)

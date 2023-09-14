@@ -49,14 +49,14 @@ FormsTree::FormsTree(QWidget* parent) : QTreeWidget(parent)
                             background: qlineargradient(spread:pad, x1:0.5, y1:0, x2:0.5,
                                                         y2:1, stop:0 %2, stop:1 %3);
                         }
-                    )qss"}
+                    )qss" }
                     .arg(palette().dark().color().darker(140).name())
                     .arg(palette().light().color().name())
                     .arg(palette().dark().color().name())
                     .arg(palette().brightText().color().name())
         );
     };
-    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+//    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 }
 

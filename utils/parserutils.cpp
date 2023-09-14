@@ -28,18 +28,30 @@ QString moduleForImportInfo(const QString& typeName, const ImportInfo& importInf
                 importInfo.version().toString() + QStringLiteral("/") + typeName;
     } else if (importInfo.isValid() && importInfo.type() == ImportType::Directory) {
         const QString path = importInfo.path();
-        const QDir dir(document->path());
+        const QDir dir(document->path().toString());
         // should probably try to make it relatve to some import path, not to the document path
         QString relativeDir = dir.relativeFilePath(path);
         const QString name = relativeDir.replace(QLatin1Char('/'), QLatin1Char('.'));
         return name + QStringLiteral("/") + typeName;
-    } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
-        QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
-        path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
-        const QString name = path.replace(QLatin1Char('/'), QLatin1Char('.'));
-        return name + QStringLiteral("/") + typeName;
     }
+//    } else if (importInfo.isValid() && importInfo.type() == ImportType::QrcDirectory) {
+//        QString path = QrcParser::normalizedQrcDirectoryPath(importInfo.path());
+//        path = path.mid(1, path.size() - ((path.size() > 1) ? 2 : 1));
+//        const QString name = path.replace(QLatin1Char('/'), QLatin1Char('.'));
+//        return name + QStringLiteral("/") + typeName;
+//    }
     return QString();
+}
+
+QStringList importsToModules(const QString& typeName, const Document* document, const Imports* imports)
+{
+    QStringList modules;
+    foreach (const Import& import, imports->all()) {
+        const QString& module = moduleForImportInfo(typeName, import.info, document);
+        if (!module.isEmpty())
+            modules.append(module);
+    }
+    return modules;
 }
 
 QStringList importsToModules(const QString& typeName, const Document* document, const QList<ImportInfo>& importInfos)
@@ -113,14 +125,11 @@ QString resolveModule(const Document::Ptr document, const QString& typeName, con
         genericContext = link(genericDocument, nullptr);
     }
 
-    const Imports* genericImports = genericContext->imports(genericDocument.data());
-    const QList<ImportInfo>& allGenericImportInfos = genericImports->allInfos();
-    const QList<ImportInfo>& appropriateGenericImportInfos = genericImports->infos(typeName, genericContext.data());
-    const QStringList& allGenericModules = importsToModules(typeName, genericDocument.data(), allGenericImportInfos);
-    const QStringList& appropriateGenericModules = importsToModules(typeName, genericDocument.data(), appropriateGenericImportInfos);
+    const QStringList& appropriateGenericModules
+            = importsToModules(typeName, genericDocument.data(),
+                               genericContext->imports(genericDocument.data()));
 
     Q_UNUSED(document)
-    Q_UNUSED(allGenericModules)
 
     // Make sure original qml files doesn't contain
     // An import that is not available within generic
@@ -504,19 +513,18 @@ int methodPosition(QTextDocument* document, const QString& url, const QString& m
         return -1;
     }
 
-    auto jsElements = jsProgram->elements;
+    auto jsElements = jsProgram->statements;
 
     if (jsElements) {
         while (jsElements) {
-            Q_ASSERT(jsElements->element);
-            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
-                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
-                Q_ASSERT(element->declaration);
-                if (element->declaration->name == methodSign) {
+            Q_ASSERT(jsElements->statement);
+            if (jsElements->statement->kind == Node::Kind_FunctionDeclaration) {
+                auto element = static_cast<FunctionDeclaration*>(jsElements->statement);
+                if (element->name == methodSign) {
                     if (lbrace)
-                        return element->declaration->lbraceToken.end();
+                        return element->lbraceToken.end();
                     else
-                        return element->declaration->rbraceToken.begin();
+                        return element->rbraceToken.begin();
                 }
 
             }
@@ -1012,7 +1020,7 @@ int addMethod(QTextDocument* document, const QString& url, const QString& method
         return -1;
     }
 
-    auto jsElements = jsProgram->elements;
+    auto jsElements = jsProgram->statements;
 
     if (jsElements) {
         begin = jsElements->lastSourceLocation().end();
@@ -1050,17 +1058,16 @@ int methodLine(QTextDocument* document, const QString& url, const QString& metho
         return -1;
     }
 
-    auto jsElements = jsProgram->elements;
+    auto jsElements = jsProgram->statements;
 
     if (jsElements) {
         while (jsElements) {
-            Q_ASSERT(jsElements->element);
-            if (jsElements->element->kind == Node::Kind_FunctionSourceElement) {
-                auto element = static_cast<FunctionSourceElement*>(jsElements->element);
-                Q_ASSERT(element->declaration);
-                if (element->declaration->name == methodSign) {
-                    int lbrace = element->declaration->lbraceToken.startLine;
-                    int rbrace = element->declaration->rbraceToken.startLine;
+            Q_ASSERT(jsElements->statement);
+            if (jsElements->statement->kind == Node::Kind_FunctionDeclaration) {
+                auto element = static_cast<FunctionDeclaration*>(jsElements->statement);
+                if (element->name == methodSign) {
+                    int lbrace = element->lbraceToken.startLine;
+                    int rbrace = element->rbraceToken.startLine;
                     if (lbrace == rbrace || lbrace + 1 == rbrace)
                         return lbrace;
                     else

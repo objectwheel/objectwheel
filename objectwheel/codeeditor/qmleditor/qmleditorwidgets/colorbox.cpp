@@ -1,41 +1,13 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "colorbox.h"
-#include <utilityfunctions.h>
 #include <QPainter>
 #include <QMouseEvent>
 
 static inline QString properName(const QColor &color)
 {
-    QString s;
-    if (color.alpha() == 255)
-        s.asprintf("#%02x%02x%02x", color.red(), color.green(), color.blue());
-    else
-        s.asprintf("#%02x%02x%02x%02x", color.alpha(), color.red(), color.green(), color.blue());
-    return s;
+    return color.name(color.alpha() == 255 ? QColor::HexRgb : QColor::HexArgb);
 }
 
 static inline QColor properColor(const QString &str)
@@ -64,11 +36,7 @@ static inline QColor properColor(const QString &str)
 
 static inline int clamp(int x, int lower, int upper)
 {
-    if (x < lower)
-        x = lower;
-    if (x > upper)
-        x = upper;
-    return x;
+    return qBound(lower, x, upper);
 }
 
 namespace QmlEditorWidgets {
@@ -88,10 +56,7 @@ void ColorBox::setHue(int newHue)
 
 int ColorBox::hue() const
 {
-    int retval = m_color.hsvHue();
-    if (retval<0) retval=0;
-    if (retval>359) retval=359;
-    return retval;
+    return clamp(m_color.hsvHue(), 0, 359);
 }
 
 void ColorBox::setAlpha(int newAlpha)
@@ -194,7 +159,7 @@ void ColorBox::paintEvent(QPaintEvent *event)
                 cache.setPixel(x, y, c.rgb());
             }
         }
-        m_cache = UtilityFunctions::imageToPixmap(cache);
+        m_cache = QPixmap::fromImage(cache);
     }
 
     p.drawPixmap(5, 5, m_cache);

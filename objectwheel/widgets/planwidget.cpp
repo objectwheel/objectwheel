@@ -5,6 +5,7 @@
 #include <QGridLayout>
 #include <QRadioButton>
 #include <QEvent>
+#include <QPainterPath>
 
 static const char g_planIdentifierProperty[] = "q_PlanWidget_planIdentifierProperty";
 

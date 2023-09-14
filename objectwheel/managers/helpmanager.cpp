@@ -305,9 +305,9 @@ static QUrl buildQUrl(const QString &ns, const QString &folder,
 }
 
 // This should go into Qt 4.8 once we start using it for Qt Creator
-QMap<QString, QUrl> HelpManager::linksForKeyword(const QString &key)
+QMultiMap<QString, QUrl> HelpManager::linksForKeyword(const QString &key)
 {
-    QMap<QString, QUrl> links;
+    QMultiMap<QString, QUrl> links;
     QTC_ASSERT(!d->m_needsSetup, return links);
 
     const QLatin1String sqlite("QSQLITE");
@@ -327,7 +327,7 @@ QMap<QString, QUrl> HelpManager::linksForKeyword(const QString &key)
                     QString title = query.value(0).toString();
                     if (title.isEmpty()) // generate a title + corresponding path
                         title = key + QLatin1String(" : ") + query.value(3).toString();
-                    links.insertMulti(title, buildQUrl(query.value(1).toString(),
+                    links.insert(title, buildQUrl(query.value(1).toString(),
                         query.value(2).toString(), query.value(3).toString(),
                         query.value(4).toString()));
                 }

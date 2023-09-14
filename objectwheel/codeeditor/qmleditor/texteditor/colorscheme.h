@@ -1,31 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "texteditor_global.h"
+
 #include "texteditorconstants.h"
 
 #include <QMap>
@@ -33,22 +11,18 @@
 #include <QColor>
 #include <QTextCharFormat>
 
-QT_BEGIN_NAMESPACE
 class QWidget;
-QT_END_NAMESPACE
+
+namespace Utils { class FilePath; }
 
 namespace TextEditor {
 
 /*! Format for a particular piece of text (text/comment, etc). */
-class TEXTEDITOR_EXPORT Format
+class Format
 {
 public:
     Format() = default;
     Format(const QColor &foreground, const QColor &background);
-
-    static Format createMixinFormat() {
-        return Format(QColor(), QColor());
-    }
 
     QColor foreground() const { return m_foreground; }
     void setForeground(const QColor &foreground);
@@ -85,9 +59,12 @@ public:
     QString toString() const;
     bool fromString(const QString &str);
 
+    friend bool operator==(const Format &f1, const Format &f2) { return f1.equals(f2); }
+    friend bool operator!=(const Format &f1, const Format &f2) { return !f1.equals(f2); }
+
 private:
-    QColor m_foreground = Qt::black;
-    QColor m_background = Qt::white;
+    QColor m_foreground;
+    QColor m_background;
     QColor m_underlineColor;
     double m_relativeForegroundSaturation = 0.0;
     double m_relativeForegroundLightness = 0.0;
@@ -98,24 +75,16 @@ private:
     bool m_italic = false;
 };
 
-inline bool operator==(const Format &f1, const Format &f2) { return f1.equals(f2); }
-inline bool operator!=(const Format &f1, const Format &f2) { return !f1.equals(f2); }
-
-
 /*! A color scheme combines a set of formats for different highlighting
     categories. It also provides saving and loading of the scheme to a file.
  */
 class ColorScheme
 {
 public:
-    void setDisplayName(const QString &name)
-    { m_displayName = name; }
+    void setDisplayName(const QString &name) { m_displayName = name; }
+    QString displayName() const { return m_displayName; }
 
-    QString displayName() const
-    { return m_displayName; }
-
-    inline bool isEmpty() const
-    { return m_formats.isEmpty(); }
+    bool isEmpty() const { return m_formats.isEmpty(); }
 
     bool contains(TextStyle category) const;
 
@@ -126,41 +95,22 @@ public:
 
     void clear();
 
-    bool save(const QString &fileName, QWidget *parent) const;
-    bool load(const QString &fileName);
+    bool save(const Utils::FilePath &filePath, QWidget *parent) const;
+    bool load(const Utils::FilePath &filePath);
 
-    inline bool equals(const ColorScheme &cs) const
+    bool equals(const ColorScheme &cs) const
     {
-        return m_formats == cs.m_formats
-                && m_displayName == cs.m_displayName;
+        return m_formats == cs.m_formats && m_displayName == cs.m_displayName;
     }
 
-    static QString readNameOfScheme(const QString &fileName);
+    static QString readNameOfScheme(const Utils::FilePath &filePath);
 
-    static bool loadColorSchemeInto(ColorScheme& scheme, const QString& fileName);
-
-    static QString createColorSchemeFileName(const QString& pattern);
+    friend bool operator==(const ColorScheme &cs1, const ColorScheme &cs2) { return cs1.equals(cs2); }
+    friend bool operator!=(const ColorScheme &cs1, const ColorScheme &cs2) { return !cs1.equals(cs2); }
 
 private:
     QMap<TextStyle, Format> m_formats;
     QString m_displayName;
 };
-
-struct ColorSchemeEntry
-{
-    ColorSchemeEntry(const QString& fileName, bool readOnly):
-        fileName(fileName),
-        name(TextEditor::ColorScheme::readNameOfScheme(fileName)),
-        readOnly(readOnly)
-    { }
-
-    QString fileName;
-    QString name;
-    QString id;
-    bool readOnly;
-};
-
-inline bool operator==(const ColorScheme &cs1, const ColorScheme &cs2) { return cs1.equals(cs2); }
-inline bool operator!=(const ColorScheme &cs1, const ColorScheme &cs2) { return !cs1.equals(cs2); }
 
 } // namespace TextEditor

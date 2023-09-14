@@ -1,30 +1,8 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "tabsettings.h"
-//#include "texteditorplugin.h"
+#include "texteditorplugin.h"
 
 #include <utils/settingsutils.h>
 
@@ -60,32 +38,32 @@ void TabSettings::toSettings(const QString &category, QSettings *s) const
     Utils::toSettings(QLatin1String(groupPostfix), category, s, this);
 }
 
-void TabSettings::fromSettings(const QString &category, const QSettings *s)
+void TabSettings::fromSettings(const QString &category, QSettings *s)
 {
     *this = TabSettings(); // Assign defaults
     Utils::fromSettings(QLatin1String(groupPostfix), category, s, this);
 }
 
-void TabSettings::toMap(const QString &prefix, QVariantMap *map) const
+QVariantMap TabSettings::toMap() const
 {
-    map->insert(prefix + QLatin1String(spacesForTabsKey), m_tabPolicy != TabsOnlyTabPolicy);
-    map->insert(prefix + QLatin1String(autoSpacesForTabsKey), m_tabPolicy == MixedTabPolicy);
-    map->insert(prefix + QLatin1String(tabSizeKey), m_tabSize);
-    map->insert(prefix + QLatin1String(indentSizeKey), m_indentSize);
-    map->insert(prefix + QLatin1String(paddingModeKey), m_continuationAlignBehavior);
+    return {
+        {spacesForTabsKey, m_tabPolicy != TabsOnlyTabPolicy},
+        {autoSpacesForTabsKey, m_tabPolicy == MixedTabPolicy},
+        {tabSizeKey, m_tabSize},
+        {indentSizeKey, m_indentSize},
+        {paddingModeKey, m_continuationAlignBehavior}
+    };
 }
 
-void TabSettings::fromMap(const QString &prefix, const QVariantMap &map)
+void TabSettings::fromMap(const QVariantMap &map)
 {
-    const bool spacesForTabs =
-        map.value(prefix + QLatin1String(spacesForTabsKey), true).toBool();
-    const bool autoSpacesForTabs =
-        map.value(prefix + QLatin1String(autoSpacesForTabsKey), false).toBool();
+    const bool spacesForTabs = map.value(spacesForTabsKey, true).toBool();
+    const bool autoSpacesForTabs = map.value(autoSpacesForTabsKey, false).toBool();
     m_tabPolicy = spacesForTabs ? (autoSpacesForTabs ? MixedTabPolicy : SpacesOnlyTabPolicy) : TabsOnlyTabPolicy;
-    m_tabSize = map.value(prefix + QLatin1String(tabSizeKey), m_tabSize).toInt();
-    m_indentSize = map.value(prefix + QLatin1String(indentSizeKey), m_indentSize).toInt();
+    m_tabSize = map.value(tabSizeKey, m_tabSize).toInt();
+    m_indentSize = map.value(indentSizeKey, m_indentSize).toInt();
     m_continuationAlignBehavior = (ContinuationAlignBehavior)
-        map.value(prefix + QLatin1String(paddingModeKey), m_continuationAlignBehavior).toInt();
+        map.value(paddingModeKey, m_continuationAlignBehavior).toInt();
 }
 
 bool TabSettings::cursorIsAtBeginningOfLine(const QTextCursor &cursor)
@@ -204,6 +182,11 @@ int TabSettings::columnAt(const QString &text, int position) const
     return column;
 }
 
+int TabSettings::columnAtCursorPosition(const QTextCursor &cursor) const
+{
+    return columnAt(cursor.block().text(), cursor.positionInBlock());
+}
+
 int TabSettings::positionAtColumn(const QString &text, int column, int *offset, bool allowOverstep) const
 {
     int col = 0;
@@ -224,8 +207,8 @@ int TabSettings::positionAtColumn(const QString &text, int column, int *offset, 
 int TabSettings::columnCountForText(const QString &text, int startColumn) const
 {
     int column = startColumn;
-    for (int i = 0; i < text.size(); ++i) {
-        if (text.at(i) == QLatin1Char('\t'))
+    for (auto c : text) {
+        if (c == QLatin1Char('\t'))
             column = column - (column % m_tabSize) + m_tabSize;
         else
             ++column;
@@ -268,7 +251,7 @@ bool TabSettings::guessSpacesForTabs(const QTextBlock &_block) const
             if (currentBlocks.at(1).isValid())
                 currentBlocks[1] = currentBlocks.at(1).next();
             bool done = true;
-            foreach (const QTextBlock &block, currentBlocks) {
+            for (const QTextBlock &block : std::as_const(currentBlocks)) {
                 if (block.isValid())
                     done = false;
                 if (!block.isValid() || block.length() == 0)

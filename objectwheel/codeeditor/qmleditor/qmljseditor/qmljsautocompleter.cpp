@@ -1,40 +1,15 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsautocompleter.h"
 
 #include <qmljs/qmljsscanner.h>
 
-#include <QChar>
-#include <QLatin1Char>
 #include <QTextDocument>
 #include <QTextCursor>
 #include <QTextBlock>
 
 using namespace QmlJSEditor;
-using namespace Internal;
 using namespace QmlJS;
 
 static int blockStartState(const QTextBlock &block)
@@ -120,7 +95,7 @@ static bool shouldInsertNewline(const QTextCursor &tc)
     return false;
 }
 
-static bool isCompleteStringLiteral(const QStringRef &text)
+static bool isCompleteStringLiteral(QStringView text)
 {
     if (text.length() < 2)
         return false;
@@ -133,11 +108,9 @@ static bool isCompleteStringLiteral(const QStringRef &text)
     return false;
 }
 
-AutoCompleter::AutoCompleter()
-{}
+AutoCompleter::AutoCompleter() = default;
 
-AutoCompleter::~AutoCompleter()
-{}
+AutoCompleter::~AutoCompleter() = default;
 
 bool AutoCompleter::contextAllowsAutoBrackets(const QTextCursor &cursor,
                                               const QString &textToInsert) const
@@ -176,7 +149,7 @@ bool AutoCompleter::contextAllowsAutoBrackets(const QTextCursor &cursor,
 
     case Token::String: {
         const QString blockText = cursor.block().text();
-        const QStringRef tokenText = blockText.midRef(token.offset, token.length);
+        const QStringView tokenText = QStringView(blockText).mid(token.offset, token.length);
         QChar quote = tokenText.at(0);
         // if a string literal doesn't start with a quote, it must be multiline
         if (quote != QLatin1Char('"') && quote != QLatin1Char('\'')) {
@@ -220,7 +193,7 @@ bool AutoCompleter::contextAllowsAutoQuotes(const QTextCursor &cursor,
 
     case Token::String: {
         const QString blockText = cursor.block().text();
-        const QStringRef tokenText = blockText.midRef(token.offset, token.length);
+        const QStringView tokenText = QStringView(blockText).mid(token.offset, token.length);
         QChar quote = tokenText.at(0);
         // if a string literal doesn't start with a quote, it must be multiline
         if (quote != QLatin1Char('"') && quote != QLatin1Char('\'')) {
@@ -232,7 +205,7 @@ bool AutoCompleter::contextAllowsAutoQuotes(const QTextCursor &cursor,
         }
 
         // never insert ' into string literals, it adds spurious ' when writing contractions
-        if (textToInsert.at(0) == QLatin1Char('\''))
+        if (textToInsert.at(0) == QLatin1Char('\'') && quote != '\'')
             return false;
 
         if (textToInsert.at(0) != quote || isCompleteStringLiteral(tokenText))

@@ -526,7 +526,7 @@ void ThemeChooserWidget::charge()
     if (!ProjectManager::isStarted())
         return;
 
-    const auto& object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
+    const auto& object = QJsonDocument::fromJson(SaveUtils::projectTheme(ProjectManager::dir())).object();
 
     if (m_version == V1) {
         const auto& style = object.value("stylev1").toString();
@@ -596,8 +596,8 @@ void ThemeChooserWidget::save()
 {
     disable();
 
-    auto object = QJsonDocument::fromBinaryData(SaveUtils::projectTheme(ProjectManager::dir())).object();
-    auto newObject = QJsonDocument::fromBinaryData(toJson()).object();
+    auto object = QJsonDocument::fromJson(SaveUtils::projectTheme(ProjectManager::dir())).object();
+    auto newObject = QJsonDocument::fromJson(toJson()).object();
 
     for (const auto& key : newObject.keys())
         object[key] = newObject[key];

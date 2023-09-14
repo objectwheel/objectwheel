@@ -52,7 +52,7 @@ void ControlPropertyManager::setX(Control* control, qreal x, ControlPropertyMana
     if (!control)
         return;
 
-    bool isInt = control->itemProperty("x").type() == QVariant::Int;
+    bool isInt = control->itemProperty("x").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setX(isInt ? int(x) : x);
@@ -94,7 +94,7 @@ void ControlPropertyManager::setY(Control* control, qreal y, ControlPropertyMana
     if (!control)
         return;
 
-    bool isInt = control->itemProperty("y").type() == QVariant::Int;
+    bool isInt = control->itemProperty("y").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setY(isInt ? int(y) : y);
@@ -165,7 +165,7 @@ void ControlPropertyManager::setWidth(Control* control, qreal width, Options opt
     if (!control)
         return;
 
-    bool isInt = control->itemProperty("width").type() == QVariant::Int;
+    bool isInt = control->itemProperty("width").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setSize(isInt ? int(width) : width, control->height());
@@ -207,7 +207,7 @@ void ControlPropertyManager::setHeight(Control* control, qreal height, Options o
     if (!control)
         return;
 
-    bool isInt = control->itemProperty("height").type() == QVariant::Int;
+    bool isInt = control->itemProperty("height").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setSize(control->width(), isInt ? int(height) : height);
@@ -251,7 +251,7 @@ void ControlPropertyManager::setPos(Control* control, const QPointF& pos,
     if (!control)
         return;
 
-    bool isInt = control->itemProperty("x").type() == QVariant::Int;
+    bool isInt = control->itemProperty("x").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setPos(isInt ? pos.toPoint() : pos);
@@ -304,7 +304,7 @@ void ControlPropertyManager::setSize(Control* control, const QSizeF& size,
     if (!size.isValid())
         return;
 
-    bool isInt = control->itemProperty("width").type() == QVariant::Int;
+    bool isInt = control->itemProperty("width").type() == QMetaType::Int;
 
     if (!(options & DontApplyDesigner))
         control->setSize(isInt ? size.toSize() : size);

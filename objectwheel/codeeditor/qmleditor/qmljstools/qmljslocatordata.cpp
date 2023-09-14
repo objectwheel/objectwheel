@@ -1,35 +1,17 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljslocatordata.h"
+
+#include <projectexplorer/project.h>
+#include <projectexplorer/projectmanager.h>
 
 #include <qmljs/qmljsmodelmanagerinterface.h>
 #include <qmljs/qmljsutils.h>
 //#include <qmljs/qmljsinterpreter.h>
 #include <qmljs/parser/qmljsast_p.h>
 
+#include <QDebug>
 #include <QMutexLocker>
 
 using namespace QmlJSTools::Internal;
@@ -39,15 +21,34 @@ using namespace QmlJS::AST;
 LocatorData::LocatorData()
 {
     ModelManagerInterface *manager = ModelManagerInterface::instance();
+    Q_ASSERT(thread() == manager->thread()); // we do not protect accesses below
+
+    // Force the updating of source file when updating a project (they could be cached, in such
+    // case LocatorData::onDocumentUpdated will not be called.
+    connect(manager,
+            &ModelManagerInterface::projectInfoUpdated,
+            [manager](const ModelManagerInterface::ProjectInfo &info) {
+                Utils::FilePaths files;
+                for (const Utils::FilePath &f :
+                     info.project->files(ProjectExplorer::Project::SourceFiles))
+                    files << f;
+                manager->updateSourceFiles(files, true);
+            });
 
     connect(manager, &ModelManagerInterface::documentUpdated,
             this, &LocatorData::onDocumentUpdated);
     connect(manager, &ModelManagerInterface::aboutToRemoveFiles,
             this, &LocatorData::onAboutToRemoveFiles);
+
+    ProjectExplorer::ProjectManager *session = ProjectExplorer::ProjectManager::instance();
+    if (session)
+        connect(session,
+                &ProjectExplorer::ProjectManager::projectRemoved,
+                this,
+                [this](ProjectExplorer::Project *) { m_entries.clear(); });
 }
 
-LocatorData::~LocatorData()
-{}
+LocatorData::~LocatorData() = default;
 
 namespace {
 
@@ -59,16 +60,13 @@ class FunctionFinder : protected AST::Visitor
     QString m_documentContext;
 
 public:
-    FunctionFinder()
-    {}
-
     QList<LocatorData::Entry> run(const Document::Ptr &doc)
     {
         m_doc = doc;
         if (!doc->componentName().isEmpty())
             m_documentContext = doc->componentName();
         else
-            m_documentContext = Utils::FileName::fromString(doc->fileName()).fileName();
+            m_documentContext = doc->fileName().fileName();
         accept(doc->ast(), m_documentContext);
         return m_entries;
     }
@@ -98,12 +96,12 @@ protected:
         m_context = old;
     }
 
-    bool visit(FunctionDeclaration *ast)
+    bool visit(FunctionDeclaration *ast) override
     {
         return visit(static_cast<FunctionExpression *>(ast));
     }
 
-    bool visit(FunctionExpression *ast)
+    bool visit(FunctionExpression *ast) override
     {
         if (ast->name.isEmpty())
             return true;
@@ -116,8 +114,8 @@ protected:
         for (FormalParameterList *it = ast->formals; it; it = it->next) {
             if (it != ast->formals)
                 entry.displayName += QLatin1String(", ");
-            if (!it->name.isEmpty())
-                entry.displayName += it->name.toString();
+            if (!it->element->bindingIdentifier.isEmpty())
+                entry.displayName += it->element->bindingIdentifier.toString();
         }
         entry.displayName += QLatin1Char(')');
         entry.symbolName = entry.displayName;
@@ -128,7 +126,7 @@ protected:
         return false;
     }
 
-    bool visit(UiScriptBinding *ast)
+    bool visit(UiScriptBinding *ast) override
     {
         if (!ast->qualifiedId)
             return true;
@@ -145,7 +143,7 @@ protected:
         return false;
     }
 
-    bool visit(UiObjectBinding *ast)
+    bool visit(UiObjectBinding *ast) override
     {
         if (!ast->qualifiedTypeNameId)
             return true;
@@ -158,7 +156,7 @@ protected:
         return false;
     }
 
-    bool visit(UiObjectDefinition *ast)
+    bool visit(UiObjectDefinition *ast) override
     {
         if (!ast->qualifiedTypeNameId)
             return true;
@@ -171,7 +169,7 @@ protected:
         return false;
     }
 
-    bool visit(AST::BinaryExpression *ast)
+    bool visit(AST::BinaryExpression *ast) override
     {
         auto fieldExpr = AST::cast<AST::FieldMemberExpression *>(ast->left);
         auto funcExpr = AST::cast<AST::FunctionExpression *>(ast->right);
@@ -196,8 +194,8 @@ protected:
             for (FormalParameterList *it = funcExpr->formals; it; it = it->next) {
                 if (it != funcExpr->formals)
                     entry.displayName += QLatin1String(", ");
-                if (!it->name.isEmpty())
-                    entry.displayName += it->name.toString();
+                if (!it->element->bindingIdentifier.isEmpty())
+                    entry.displayName += it->element->bindingIdentifier.toString();
             }
             entry.displayName += QLatin1Char(')');
             entry.symbolName = entry.displayName;
@@ -210,10 +208,15 @@ protected:
 
         return true;
     }
+
+    void throwRecursionDepthError() override
+    {
+        qWarning("Warning: Hit maximum recursion limit visiting AST in FunctionFinder.");
+    }
 };
 } // anonymous namespace
 
-QHash<QString, QList<LocatorData::Entry> > LocatorData::entries() const
+QHash<Utils::FilePath, QList<LocatorData::Entry>> LocatorData::entries() const
 {
     QMutexLocker l(&m_mutex);
     return m_entries;
@@ -226,11 +229,10 @@ void LocatorData::onDocumentUpdated(const Document::Ptr &doc)
     m_entries.insert(doc->fileName(), entries);
 }
 
-void LocatorData::onAboutToRemoveFiles(const QStringList &files)
+void LocatorData::onAboutToRemoveFiles(const Utils::FilePaths &files)
 {
     QMutexLocker l(&m_mutex);
-    foreach (const QString &file, files) {
+    for (const Utils::FilePath &file : files) {
         m_entries.remove(file);
     }
 }
-

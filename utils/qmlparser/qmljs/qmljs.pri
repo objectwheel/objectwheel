@@ -1,6 +1,8 @@
 include(parser/parser.pri)
 
 HEADERS += \
+    $$PWD/qmljsicons.h \
+    $$PWD/qmljstr.h \
     $$PWD/qmljsbind.h \
     $$PWD/qmljsbundle.h \
     $$PWD/qmljsevaluate.h \
@@ -16,7 +18,6 @@ HEADERS += \
     $$PWD/qmljsicontextpane.h \
     $$PWD/qmljspropertyreader.h \
     $$PWD/qmljsrewriter.h \
-    $$PWD/qmljsplugindumper.h \
     $$PWD/qmljstypedescriptionreader.h \
     $$PWD/qmljsscopeastpath.h \
     $$PWD/qmljsvalueowner.h \
@@ -27,14 +28,12 @@ HEADERS += \
     $$PWD/jsoncheck.h \
     $$PWD/qmljssimplereader.h \
     $$PWD/persistenttrie.h \
-    $$PWD/qmljsqrcparser.h \
     $$PWD/qmljsconstants.h \
     $$PWD/qmljsimportdependencies.h \
-    $$PWD/qmljsviewercontext.h \
-    $$PWD/qmljsdescribevalue.h \
     $$PWD/qmljsdialect.h
 
 SOURCES += \
+    $$PWD/qmljsicons.cpp \
     $$PWD/qmljsbind.cpp \
     $$PWD/qmljsbundle.cpp \
     $$PWD/qmljsevaluate.cpp \
@@ -49,7 +48,6 @@ SOURCES += \
     $$PWD/qmljsmodelmanagerinterface.cpp \
     $$PWD/qmljspropertyreader.cpp \
     $$PWD/qmljsrewriter.cpp \
-    $$PWD/qmljsplugindumper.cpp \
     $$PWD/qmljstypedescriptionreader.cpp \
     $$PWD/qmljsscopeastpath.cpp \
     $$PWD/qmljsvalueowner.cpp \
@@ -60,10 +58,7 @@ SOURCES += \
     $$PWD/jsoncheck.cpp \
     $$PWD/qmljssimplereader.cpp \
     $$PWD/persistenttrie.cpp \
-    $$PWD/qmljsqrcparser.cpp \
     $$PWD/qmljsimportdependencies.cpp \
-    $$PWD/qmljsviewercontext.cpp \
-    $$PWD/qmljsdescribevalue.cpp \
     $$PWD/qmljsdialect.cpp
 
 contains(QT, gui) {

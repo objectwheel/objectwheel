@@ -6,6 +6,7 @@
 #include <QStyleFactory>
 #include <QApplication>
 #include <QPainter>
+#include <QPainterPath>
 #include <QStyleOption>
 #include <QComboBox>
 #include <QMenu>

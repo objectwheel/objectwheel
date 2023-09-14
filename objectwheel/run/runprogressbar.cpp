@@ -6,6 +6,7 @@
 #include <QTextDocument>
 #include <QTextBlock>
 #include <QStyleOption>
+#include <QPainterPath>
 
 RunProgressBar::RunProgressBar(QWidget* parent) : QWidget(parent)
   , m_progress(0)

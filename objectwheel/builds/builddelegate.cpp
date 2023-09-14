@@ -8,6 +8,7 @@
 #include <QApplication>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QPainterPath>
 
 enum { PADDING = 7 };
 

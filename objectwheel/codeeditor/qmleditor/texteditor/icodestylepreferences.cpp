@@ -1,30 +1,8 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "icodestylepreferences.h"
-//#include "codestylepool.h"
+#include "codestylepool.h"
 #include "tabsettings.h"
 #include <utils/settingsutils.h>
 
@@ -40,21 +18,17 @@ namespace Internal {
 class ICodeStylePreferencesPrivate
 {
 public:
-    ICodeStylePreferencesPrivate()
-//        : m_pool(0),
-          : m_currentDelegate(0),
-          m_readOnly(false)
-    {}
-
-//    CodeStylePool *m_pool;
-    ICodeStylePreferences *m_currentDelegate;
+    CodeStylePool *m_pool = nullptr;
+    ICodeStylePreferences *m_currentDelegate = nullptr;
     TabSettings m_tabSettings;
     QByteArray m_id;
     QString m_displayName;
-    bool m_readOnly;
+    bool m_readOnly = false;
+    bool m_temporarilyReadOnly = false;
+    bool m_isAdditionalTabDisabled = false;
+    QString m_settingsSuffix;
 };
 
-}
 }
 
 ICodeStylePreferences::ICodeStylePreferences(QObject *parent) :
@@ -99,6 +73,26 @@ void ICodeStylePreferences::setReadOnly(bool on)
     d->m_readOnly = on;
 }
 
+void ICodeStylePreferences::setTemporarilyReadOnly(bool on)
+{
+    d->m_temporarilyReadOnly = on;
+}
+
+bool ICodeStylePreferences::isTemporarilyReadOnly() const
+{
+    return d->m_temporarilyReadOnly;
+}
+
+bool ICodeStylePreferences::isAdditionalTabDisabled() const
+{
+    return d->m_isAdditionalTabDisabled;
+}
+
+void ICodeStylePreferences::setIsAdditionalTabDisabled(bool on)
+{
+    d->m_isAdditionalTabDisabled = on;
+}
+
 void ICodeStylePreferences::setTabSettings(const TabSettings &settings)
 {
     if (d->m_tabSettings == settings)
@@ -128,33 +122,33 @@ QVariant ICodeStylePreferences::currentValue() const
 
 ICodeStylePreferences *ICodeStylePreferences::currentPreferences() const
 {
-    ICodeStylePreferences *prefs = (ICodeStylePreferences *)this;
+    auto prefs = (ICodeStylePreferences *)this;
     while (prefs->currentDelegate())
         prefs = prefs->currentDelegate();
     return prefs;
 }
 
-//CodeStylePool *ICodeStylePreferences::delegatingPool() const
-//{
-//    return d->m_pool;
-//}
+CodeStylePool *ICodeStylePreferences::delegatingPool() const
+{
+    return d->m_pool;
+}
 
-//void ICodeStylePreferences::setDelegatingPool(CodeStylePool *pool)
-//{
-//    if (pool == d->m_pool)
-//        return;
+void ICodeStylePreferences::setDelegatingPool(CodeStylePool *pool)
+{
+    if (pool == d->m_pool)
+        return;
 
-//    setCurrentDelegate(0);
-//    if (d->m_pool) {
-//        disconnect(d->m_pool, &CodeStylePool::codeStyleRemoved,
-//                   this, &ICodeStylePreferences::codeStyleRemoved);
-//    }
-//    d->m_pool = pool;
-//    if (d->m_pool) {
-//        connect(d->m_pool, &CodeStylePool::codeStyleRemoved,
-//                this, &ICodeStylePreferences::codeStyleRemoved);
-//    }
-//}
+    setCurrentDelegate(nullptr);
+    if (d->m_pool) {
+        disconnect(d->m_pool, &CodeStylePool::codeStyleRemoved,
+                   this, &ICodeStylePreferences::codeStyleRemoved);
+    }
+    d->m_pool = pool;
+    if (d->m_pool) {
+        connect(d->m_pool, &CodeStylePool::codeStyleRemoved,
+                this, &ICodeStylePreferences::codeStyleRemoved);
+    }
+}
 
 ICodeStylePreferences *ICodeStylePreferences::currentDelegate() const
 {
@@ -163,7 +157,7 @@ ICodeStylePreferences *ICodeStylePreferences::currentDelegate() const
 
 void ICodeStylePreferences::setCurrentDelegate(ICodeStylePreferences *delegate)
 {
-    if (delegate /*&& d->m_pool && !d->m_pool->codeStyles().contains(delegate)*/) {
+    if (delegate && d->m_pool && !d->m_pool->codeStyles().contains(delegate)) {
         // warning
         return;
     }
@@ -206,48 +200,52 @@ QByteArray ICodeStylePreferences::currentDelegateId() const
     return id(); // or 0?
 }
 
-void ICodeStylePreferences::setCurrentDelegate(const QByteArray &/*id*/)
+void ICodeStylePreferences::setCurrentDelegate(const QByteArray &id)
 {
-//    if (d->m_pool)
-//        setCurrentDelegate(d->m_pool->codeStyle(id)); // BUG ??
+    if (d->m_pool)
+        setCurrentDelegate(d->m_pool->codeStyle(id));
+}
+
+void ICodeStylePreferences::setSettingsSuffix(const QString &suffix)
+{
+    d->m_settingsSuffix = suffix;
 }
 
 void ICodeStylePreferences::toSettings(const QString &category, QSettings *s) const
 {
-    Utils::toSettings(settingsSuffix(), category, s, this);
+    Utils::toSettings(d->m_settingsSuffix, category, s, this);
 }
 
-void ICodeStylePreferences::fromSettings(const QString &category, const QSettings *s)
+void ICodeStylePreferences::fromSettings(const QString &category, QSettings *s)
 {
-    Utils::fromSettings(settingsSuffix(), category, s, this);
+    Utils::fromSettings(d->m_settingsSuffix, category, s, this);
 }
 
-void ICodeStylePreferences::toMap(const QString &prefix, QVariantMap *map) const
+QVariantMap ICodeStylePreferences::toMap() const
 {
     if (!currentDelegate())
-        d->m_tabSettings.toMap(prefix, map);
-    else
-        map->insert(prefix + QLatin1String(currentPreferencesKey), currentDelegateId());
+        return d->m_tabSettings.toMap();
+    return {{currentPreferencesKey, currentDelegateId()}};
 }
 
-void ICodeStylePreferences::fromMap(const QString &prefix, const QVariantMap &map)
+void ICodeStylePreferences::fromMap(const QVariantMap &map)
 {
-    d->m_tabSettings.fromMap(prefix, map);
-    const QByteArray delegateId = map.value(prefix + QLatin1String(currentPreferencesKey)).toByteArray();
-//    if (delegatingPool()) { BUG ??
-//        ICodeStylePreferences *delegate = delegatingPool()->codeStyle(delegateId);
-//        if (!delegateId.isEmpty() && delegate)
-//            setCurrentDelegate(delegate);
-//    }
+    d->m_tabSettings.fromMap(map);
+    const QByteArray delegateId = map.value(currentPreferencesKey).toByteArray();
+    if (delegatingPool()) {
+        ICodeStylePreferences *delegate = delegatingPool()->codeStyle(delegateId);
+        if (!delegateId.isEmpty() && delegate)
+            setCurrentDelegate(delegate);
+    }
 }
 
 void ICodeStylePreferences::codeStyleRemoved(ICodeStylePreferences *preferences)
 {
     if (currentDelegate() == preferences) {
-//        CodeStylePool *pool = delegatingPool();
-        QList<ICodeStylePreferences *> codeStyles/* = pool->codeStyles()*/;
+        CodeStylePool *pool = delegatingPool();
+        QList<ICodeStylePreferences *> codeStyles = pool->codeStyles();
         const int idx = codeStyles.indexOf(preferences);
-        ICodeStylePreferences *newCurrentPreferences = 0;
+        ICodeStylePreferences *newCurrentPreferences = nullptr;
         int i = idx + 1;
         // go forward
         while (i < codeStyles.count()) {
@@ -274,3 +272,4 @@ void ICodeStylePreferences::codeStyleRemoved(ICodeStylePreferences *preferences)
     }
 }
 
+} // TextEditor

@@ -2,6 +2,7 @@
 #include <QAbstractButton>
 #include <QPainter>
 #include <QtMath>
+#include <QPainterPath>
 
 ButtonFlasher::ButtonFlasher(QAbstractButton* parent) : ApplicationStyle()
   , m_button(parent)

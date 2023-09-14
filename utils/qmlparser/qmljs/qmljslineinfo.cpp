@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 /*
     This file is a self-contained interactive indenter for Qt Script.
@@ -78,7 +56,7 @@ const int LineInfo::SmallRoof = 40;
 const int LineInfo::BigRoof = 400;
 
 LineInfo::LineInfo()
-    : braceX(QRegExp(QLatin1String("^\\s*\\}\\s*(?:else|catch)\\b")))
+    : braceX(QRegularExpression("^\\s*\\}\\s*(?:else|catch)\\b"))
 {
     /*
         The "linizer" is a group of functions and variables to iterate
@@ -89,9 +67,9 @@ LineInfo::LineInfo()
     */
 
     // shorthands
-    yyLine = 0;
-    yyBraceDepth = 0;
-    yyLeftBraceFollows = 0;
+    yyLine = nullptr;
+    yyBraceDepth = nullptr;
+    yyLeftBraceFollows = nullptr;
 }
 
 LineInfo::~LineInfo()
@@ -127,8 +105,8 @@ QString LineInfo::trimmedCodeLine(const QString &t)
     yyLinizerState.tokens = scanner(t, startState);
     QString trimmed;
     int previousTokenEnd = 0;
-    foreach (const Token &token, yyLinizerState.tokens) {
-        trimmed.append(t.midRef(previousTokenEnd, token.begin() - previousTokenEnd));
+    for (const Token &token : std::as_const(yyLinizerState.tokens)) {
+        trimmed.append(t.mid(previousTokenEnd, token.begin() - previousTokenEnd));
 
         if (token.is(Token::String)) {
             for (int i = 0; i < token.length; ++i)
@@ -139,7 +117,7 @@ QString LineInfo::trimmedCodeLine(const QString &t)
                 trimmed.append(QLatin1Char(' '));
 
         } else {
-            trimmed.append(tokenText(token));
+            trimmed.append(tokenText(token).toString());
         }
 
         previousTokenEnd = token.end();
@@ -153,7 +131,7 @@ QString LineInfo::trimmedCodeLine(const QString &t)
     }
 
     bool isBinding = false;
-    foreach (const Token &token, yyLinizerState.tokens) {
+    for (const Token &token : std::as_const(yyLinizerState.tokens)) {
         if (token.is(Token::Colon)) {
             isBinding = true;
             break;
@@ -191,7 +169,7 @@ QString LineInfo::trimmedCodeLine(const QString &t)
             // "a = Somevar\n{" in a JS context
             // What's done here does not cover all cases, but goes as far as possible
             // with the limited information that's available.
-            const QStringRef text = tokenText(last);
+            const QStringView text = tokenText(last);
             if (yyLinizerState.leftBraceFollows && !text.isEmpty() && text.at(0).isUpper()) {
                 int i = index;
 
@@ -277,9 +255,9 @@ Token LineInfo::lastToken() const
     return Token();
 }
 
-QStringRef LineInfo::tokenText(const Token &token) const
+QStringView LineInfo::tokenText(const Token &token) const
 {
-    return yyLinizerState.line.midRef(token.offset, token.length);
+    return QStringView(yyLinizerState.line).mid(token.offset, token.length);
 }
 
 /*
@@ -457,7 +435,7 @@ bool LineInfo::matchBracelessControlStatement()
                     const Token &tk = yyLinizerState.tokens.at(tokenIndex - 1);
 
                     if (tk.is(Token::Keyword)) {
-                        const QStringRef text = tokenText(tk);
+                        const QStringView text = tokenText(tk);
 
                         /*
                             We have

@@ -1,52 +1,27 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "tooltip.h"
 #include "tips.h"
 #include "effects.h"
-#include "reuse.h"
 
 #include <utils/faketooltip.h>
 #include <utils/hostosinfo.h>
 #include <utils/qtcassert.h>
 
-#include <QString>
+#include <QApplication>
 #include <QColor>
-#include <QGuiApplication>
+#include <QHBoxLayout>
 #include <QKeyEvent>
-#include <QMouseEvent>
-#include <QWidget>
 #include <QMenu>
-#include <QWindow>
-
-#include <QDebug>
+#include <QMouseEvent>
+#include <QScreen>
+#include <QWidget>
 
 using namespace Utils;
 using namespace Internal;
 
-ToolTip::ToolTip() : m_tip(0), m_widget(0)
+ToolTip::ToolTip() : m_tip(nullptr), m_widget(nullptr)
 {
     connect(&m_showTimer, &QTimer::timeout, this, &ToolTip::hideTipImmediately);
     connect(&m_hideDelayTimer, &QTimer::timeout, this, &ToolTip::hideTipImmediately);
@@ -54,7 +29,7 @@ ToolTip::ToolTip() : m_tip(0), m_widget(0)
 
 ToolTip::~ToolTip()
 {
-    m_tip = 0;
+    m_tip = nullptr;
 }
 
 ToolTip *ToolTip::instance()
@@ -63,45 +38,125 @@ ToolTip *ToolTip::instance()
     return &tooltip;
 }
 
-void ToolTip::show(const QPoint &pos, const QString &content, QWidget *w, const QString &helpId, const QRect &rect)
+static QWidget *createF1Icon()
 {
-    if (content.isEmpty())
-        instance()->hideTipWithDelay();
-    else
-        instance()->showInternal(pos, QVariant(content), TextContent, w, helpId, rect);
+    auto label = new QLabel;
+    label->setPixmap({":/utils/tooltip/images/f1.png"});
+    label->setAlignment(Qt::AlignTop);
+    return label;
 }
 
-void ToolTip::show(const QPoint &pos, const QColor &color, QWidget *w, const QString &helpId, const QRect &rect)
+/*!
+    Shows a tool tip with the text \a content. If \a contextHelp is given, a context help icon
+    is shown as well.
+    \a contextHelp of the current shown tool tip can be retrieved via ToolTip::contextHelp().
+*/
+void ToolTip::show(const QPoint &pos, const QString &content, QWidget *w, const QVariant &contextHelp, const QRect &rect)
+{
+    show(pos, content, Qt::AutoText, w, contextHelp, rect);
+}
+
+/*!
+    Shows a tool tip with the text \a content with a specific text \a format.
+    If \a contextHelp is given, a context help icon is shown as well.
+    \a contextHelp of the current shown tool tip can be retrieved via ToolTip::contextHelp().
+*/
+void ToolTip::show(const QPoint &pos,
+                   const QString &content,
+                   Qt::TextFormat format,
+                   QWidget *w,
+                   const QVariant &contextHelp,
+                   const QRect &rect)
+{
+    if (content.isEmpty()) {
+        instance()->hideTipWithDelay();
+    } else {
+        if (contextHelp.isNull()) {
+            instance()->showInternal(pos,
+                                     QVariant::fromValue(TextItem(content, format)),
+                                     TextContent,
+                                     w,
+                                     contextHelp,
+                                     rect);
+        } else {
+            auto tooltipWidget = new FakeToolTip;
+            auto layout = new QHBoxLayout;
+            layout->setContentsMargins(0, 0, 0, 0);
+            tooltipWidget->setLayout(layout);
+            auto label = new QLabel;
+            label->setObjectName("qcWidgetTipTopLabel");
+            label->setTextFormat(format);
+            label->setText(content);
+            layout->addWidget(label);
+            layout->addWidget(createF1Icon());
+            instance()->showInternal(pos,
+                                     QVariant::fromValue(tooltipWidget),
+                                     WidgetContent,
+                                     w,
+                                     contextHelp,
+                                     rect);
+        }
+    }
+}
+
+/*!
+    Shows a tool tip with a small rectangle in the given \a color.
+    \a contextHelp of the current shown tool tip can be retrieved via ToolTip::contextHelp().
+*/
+void ToolTip::show(const QPoint &pos, const QColor &color, QWidget *w, const QVariant &contextHelp, const QRect &rect)
 {
     if (!color.isValid())
         instance()->hideTipWithDelay();
     else
-        instance()->showInternal(pos, QVariant(color), ColorContent, w, helpId, rect);
+        instance()->showInternal(pos, QVariant(color), ColorContent, w, contextHelp, rect);
 }
 
-void ToolTip::show(const QPoint &pos, QWidget *content, QWidget *w, const QString &helpId, const QRect &rect)
+/*!
+    Shows the widget \a content as a tool tip. The tool tip takes ownership of the widget.
+    \a contextHelp of the current shown tool tip can be retrieved via ToolTip::contextHelp().
+*/
+void ToolTip::show(const QPoint &pos, QWidget *content, QWidget *w, const QVariant &contextHelp, const QRect &rect)
 {
     if (!content)
         instance()->hideTipWithDelay();
     else
-        instance()->showInternal(pos, QVariant::fromValue(content), WidgetContent, w, helpId, rect);
+        instance()->showInternal(pos, QVariant::fromValue(content), WidgetContent, w, contextHelp, rect);
 }
 
-void ToolTip::show(const QPoint &pos, QLayout *content, QWidget *w, const QString &helpId, const QRect &rect)
+/*!
+    Shows the layout \a content as a tool tip. The tool tip takes ownership of the layout.
+    If \a contextHelp is given, a context help icon is shown as well.
+    \a contextHelp of the current shown tool tip can be retrieved via ToolTip::contextHelp().
+*/
+void ToolTip::show(
+    const QPoint &pos, QLayout *content, QWidget *w, const QVariant &contextHelp, const QRect &rect)
 {
     if (content && content->count()) {
         auto tooltipWidget = new FakeToolTip;
-        tooltipWidget->setLayout(content);
-        instance()->showInternal(pos, QVariant::fromValue(tooltipWidget), WidgetContent, w, helpId, rect);
+        // limit the size of the widget to 90% of the screen size to have some context around it
+        QScreen *qscreen = QGuiApplication::screenAt(pos);
+        if (!qscreen)
+            qscreen = QGuiApplication::primaryScreen();
+        tooltipWidget->setMaximumSize(qscreen->availableSize() * 0.9);
+        if (contextHelp.isNull()) {
+            tooltipWidget->setLayout(content);
+        } else {
+            auto layout = new QHBoxLayout;
+            layout->setContentsMargins(0, 0, 0, 0);
+            tooltipWidget->setLayout(layout);
+            layout->addLayout(content);
+            layout->addWidget(createF1Icon());
+        }
+        instance()->showInternal(pos, QVariant::fromValue(tooltipWidget), WidgetContent, w, contextHelp, rect);
     } else {
         instance()->hideTipWithDelay();
     }
 }
 
-void ToolTip::move(const QPoint &pos, QWidget *w)
+void ToolTip::move(const QPoint &pos)
 {
     if (isVisible())
-        instance()->placeTip(pos, w);
+        instance()->placeTip(pos);
 }
 
 bool ToolTip::pinToolTip(QWidget *w, QWidget *parent)
@@ -110,7 +165,7 @@ bool ToolTip::pinToolTip(QWidget *w, QWidget *parent)
     // Find the parent WidgetTip, tell it to pin/release the
     // widget and close.
     for (QWidget *p = w->parentWidget(); p ; p = p->parentWidget()) {
-        if (WidgetTip *wt = qobject_cast<WidgetTip *>(p)) {
+        if (auto wt = qobject_cast<WidgetTip *>(p)) {
             wt->pinToolTipWidget(parent);
             ToolTip::hide();
             return true;
@@ -119,15 +174,15 @@ bool ToolTip::pinToolTip(QWidget *w, QWidget *parent)
     return false;
 }
 
-QString ToolTip::contextHelpId()
+QVariant ToolTip::contextHelp()
 {
-    return instance()->m_tip ? instance()->m_tip->helpId() : QString();
+    return instance()->m_tip ? instance()->m_tip->contextHelp() : QVariant();
 }
 
 bool ToolTip::acceptShow(const QVariant &content,
                          int typeId,
                          const QPoint &pos,
-                         QWidget *w, const QString &helpId,
+                         QWidget *w, const QVariant &contextHelp,
                          const QRect &rect)
 {
     if (isVisible()) {
@@ -136,16 +191,16 @@ bool ToolTip::acceptShow(const QVariant &content,
             QPoint localPos = pos;
             if (w)
                 localPos = w->mapFromGlobal(pos);
-            if (tipChanged(localPos, content, typeId, w, helpId)) {
+            if (tipChanged(localPos, content, typeId, w, contextHelp)) {
                 m_tip->setContent(content);
-                m_tip->setHelpId(helpId);
+                m_tip->setContextHelp(contextHelp);
                 setUp(pos, w, rect);
             }
             return false;
         }
         hideTipImmediately();
     }
-#if !defined(QT_NO_EFFECTS) && !defined(Q_OS_MACOS)
+#if !defined(QT_NO_EFFECTS) && !defined(Q_OS_MAC)
     // While the effect takes places it might be that although the widget is actually on
     // screen the isVisible function doesn't return true.
     else if (m_tip
@@ -159,9 +214,9 @@ bool ToolTip::acceptShow(const QVariant &content,
 
 void ToolTip::setUp(const QPoint &pos, QWidget *w, const QRect &rect)
 {
-    m_tip->configure(pos, w);
+    m_tip->configure(pos);
 
-    placeTip(pos, w);
+    placeTip(pos);
     setTipRect(w, rect);
 
     if (m_hideDelayTimer.isActive())
@@ -170,9 +225,9 @@ void ToolTip::setUp(const QPoint &pos, QWidget *w, const QRect &rect)
 }
 
 bool ToolTip::tipChanged(const QPoint &pos, const QVariant &content, int typeId, QWidget *w,
-                         const QString &helpId) const
+                         const QVariant &contextHelp) const
 {
-    if (!m_tip->equals(typeId, content, helpId) || m_widget != w)
+    if (!m_tip->equals(typeId, content, contextHelp) || m_widget != w)
         return true;
     if (!m_rect.isNull())
         return !m_rect.contains(pos);
@@ -202,7 +257,7 @@ QPoint ToolTip::offsetFromPosition()
 
 void ToolTip::showTip()
 {
-#if !defined(QT_NO_EFFECTS) && !defined(Q_OS_MACOS)
+#if !defined(QT_NO_EFFECTS) && !defined(Q_OS_MAC)
     if (QApplication::isEffectEnabled(Qt::UI_FadeTooltip))
         qFadeEffect(m_tip);
     else if (QApplication::isEffectEnabled(Qt::UI_AnimateTooltip))
@@ -235,7 +290,7 @@ void ToolTip::hideTipImmediately()
     if (m_tip) {
         m_tip->close();
         m_tip->deleteLater();
-        m_tip = 0;
+        m_tip = nullptr;
     }
     m_showTimer.stop();
     m_hideDelayTimer.stop();
@@ -244,30 +299,23 @@ void ToolTip::hideTipImmediately()
 }
 
 void ToolTip::showInternal(const QPoint &pos, const QVariant &content,
-                           int typeId, QWidget *w, const QString &helpId, const QRect &rect)
+                           int typeId, QWidget *w, const QVariant &contextHelp, const QRect &rect)
 {
-    if (acceptShow(content, typeId, pos, w, helpId, rect)) {
-        QScreen *target = 0;
-        if (HostOsInfo::isWindowsHost())
-            target = Internal::screen(pos, w);
-        else
-            target = QApplication::primaryScreen();
-
+    if (acceptShow(content, typeId, pos, w, contextHelp, rect)) {
         switch (typeId) {
             case ColorContent:
-                m_tip = new ColorTip;
+                m_tip = new ColorTip(w);
                 break;
             case TextContent:
-                m_tip = new TextTip;
+                m_tip = new TextTip(w);
                 break;
             case WidgetContent:
-                m_tip = new WidgetTip;
+                m_tip = new WidgetTip(w);
                 break;
         }
-        if (m_tip->windowHandle())
-            m_tip->windowHandle()->setScreen(target);
+        m_tip->setObjectName("qcToolTip");
         m_tip->setContent(content);
-        m_tip->setHelpId(helpId);
+        m_tip->setContextHelp(contextHelp);
         setUp(pos, w, rect);
         qApp->installEventFilter(this);
         showTip();
@@ -275,9 +323,12 @@ void ToolTip::showInternal(const QPoint &pos, const QVariant &content,
     emit shown();
 }
 
-void ToolTip::placeTip(const QPoint &pos, QWidget *w)
+void ToolTip::placeTip(const QPoint &pos)
 {
-    QRect screen = Internal::screenGeometry(pos, w);
+    QScreen *qscreen = QGuiApplication::screenAt(pos);
+    if (!qscreen)
+        qscreen = QGuiApplication::primaryScreen();
+    const QRect screen = qscreen->availableGeometry();
     QPoint p = pos;
     p += offsetFromPosition();
     if (p.x() + m_tip->width() > screen.x() + screen.width())
@@ -358,6 +409,7 @@ bool ToolTip::eventFilter(QObject *o, QEvent *event)
             !m_rect.contains(static_cast<QMouseEvent*>(event)->pos())) {
             hideTipWithDelay();
         }
+        break;
     default:
         break;
     }

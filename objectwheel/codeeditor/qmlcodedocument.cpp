@@ -49,7 +49,7 @@ struct Declaration
 class FindIdDeclarations: protected Visitor
 {
 public:
-    typedef QHash<QString, QList<AST::SourceLocation> > Result;
+    typedef QHash<QString, QList<SourceLocation> > Result;
 
     Result operator()(Document::Ptr doc)
     {
@@ -90,7 +90,7 @@ protected:
                 if (AST::IdentifierExpression *idExpr = AST::cast<AST::IdentifierExpression *>(stmt->expression)) {
                     if (!idExpr->name.isEmpty()) {
                         const QString &id = idExpr->name.toString();
-                        QList<AST::SourceLocation> *locs = &_ids[id];
+                        QList<SourceLocation> *locs = &_ids[id];
                         locs->append(idExpr->firstSourceLocation());
                         locs->append(_maybeIds.value(id));
                         _maybeIds.remove(id);
@@ -409,7 +409,7 @@ protected:
         return createRange(ast, block->lbraceToken, block->rbraceToken);
     }
 
-    Range createRange(AST::Node *ast, AST::SourceLocation start, AST::SourceLocation end)
+    Range createRange(AST::Node *ast, SourceLocation start, SourceLocation end)
     {
         Range range;
 

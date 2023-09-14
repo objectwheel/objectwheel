@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljshighlighter.h"
 
@@ -45,9 +23,7 @@ QmlJSHighlighter::QmlJSHighlighter(QTextDocument *parent)
     setDefaultTextFormatCategories();
 }
 
-QmlJSHighlighter::~QmlJSHighlighter()
-{
-}
+QmlJSHighlighter::~QmlJSHighlighter() = default;
 
 bool QmlJSHighlighter::isQmlEnabled() const
 {
@@ -77,7 +53,8 @@ void QmlJSHighlighter::highlightBlock(const QString &text)
                 break;
 
             case Token::Comment:
-                if (m_inMultilineComment && text.midRef(token.end() - 2, 2) == QLatin1String("*/")) {
+                if (m_inMultilineComment
+                    && QStringView(text).mid(token.end() - 2, 2) == QLatin1String("*/")) {
                     onClosingParenthesis(QLatin1Char('-'), token.end() - 1, index == tokens.size()-1);
                     m_inMultilineComment = false;
                 } else if (!m_inMultilineComment
@@ -121,7 +98,7 @@ void QmlJSHighlighter::highlightBlock(const QString &text)
                 if (!m_qmlEnabled)
                     break;
 
-                const QStringRef spell = text.midRef(token.offset, token.length);
+                const QStringView spell = QStringView(text).mid(token.offset, token.length);
 
                 if (maybeQmlKeyword(spell)) {
                     // check the previous token
@@ -131,11 +108,26 @@ void QmlJSHighlighter::highlightBlock(const QString &text)
                             break;
                         }
                     }
+                    if (QStringView(text).mid(token.offset, token.length) == QLatin1String("enum")) {
+                        setFormat(token.offset, token.length, formatForCategory(C_KEYWORD));
+                        break;
+                    }
                 } else if (index > 0 && maybeQmlBuiltinType(spell)) {
                     const Token &previousToken = tokens.at(index - 1);
-                    if (previousToken.is(Token::Identifier) && text.at(previousToken.offset) == QLatin1Char('p')
-                        && text.midRef(previousToken.offset, previousToken.length) == QLatin1String("property")) {
+                    if (previousToken.is(Token::Identifier)
+                        && text.at(previousToken.offset) == QLatin1Char('p')
+                        && QStringView(text).mid(previousToken.offset, previousToken.length)
+                               == QLatin1String("property")) {
                         setFormat(token.offset, token.length, formatForCategory(C_KEYWORD));
+                        break;
+                    }
+                } else if (index == 1) {
+                    const Token &previousToken = tokens.at(0);
+                    if (previousToken.is(Token::Identifier)
+                        && text.at(previousToken.offset) == QLatin1Char('e')
+                        && QStringView(text).mid(previousToken.offset, previousToken.length)
+                               == QLatin1String("enum")) {
+                        setFormat(token.offset, token.length, formatForCategory(C_ENUMERATION));
                         break;
                     }
                 }
@@ -152,8 +144,7 @@ void QmlJSHighlighter::highlightBlock(const QString &text)
     }
 
     int previousTokenEnd = 0;
-    for (int index = 0; index < tokens.size(); ++index) {
-        const Token &token = tokens.at(index);
+    for (const auto &token : tokens) {
         setFormat(previousTokenEnd, token.begin() - previousTokenEnd, formatForCategory(C_VISUAL_WHITESPACE));
 
         switch (token.kind) {
@@ -188,7 +179,7 @@ void QmlJSHighlighter::highlightBlock(const QString &text)
     onBlockEnd(m_scanner.state());
 }
 
-bool QmlJSHighlighter::maybeQmlKeyword(const QStringRef &text) const
+bool QmlJSHighlighter::maybeQmlKeyword(QStringView text) const
 {
     if (text.isEmpty())
         return false;
@@ -198,19 +189,23 @@ bool QmlJSHighlighter::maybeQmlKeyword(const QStringRef &text) const
         return true;
     else if (ch == QLatin1Char('a') && text == QLatin1String("alias"))
         return true;
+    else if (ch == QLatin1Char('c') && text == QLatin1String("component"))
+        return true;
     else if (ch == QLatin1Char('s') && text == QLatin1String("signal"))
         return true;
-    else if (ch == QLatin1Char('r') && text == QLatin1String("readonly"))
+    else if (ch == QLatin1Char('r') && (text == QLatin1String("readonly") || text == QLatin1String("required")))
         return true;
     else if (ch == QLatin1Char('i') && text == QLatin1String("import"))
         return true;
     else if (ch == QLatin1Char('o') && text == QLatin1String("on"))
         return true;
+    else if (ch == QLatin1Char('e') && text == QLatin1String("enum"))
+        return true;
     else
         return false;
 }
 
-bool QmlJSHighlighter::maybeQmlBuiltinType(const QStringRef &text) const
+bool QmlJSHighlighter::maybeQmlBuiltinType(QStringView text) const
 {
     if (text.isEmpty())
         return false;
@@ -273,11 +268,11 @@ int QmlJSHighlighter::onBlockStart()
     m_braceDepth = 0;
     m_foldingIndent = 0;
     m_inMultilineComment = false;
-//    if (BlockData *userData = QmlCodeDocument::testUserData(currentBlock())) { // BUG
-//        userData->setFoldingIndent(0);
-//        userData->setFoldingStartIncluded(false);
-//        userData->setFoldingEndIncluded(false);
-//    }
+    if (TextBlockUserData *userData = TextDocumentLayout::textUserData(currentBlock())) {
+        userData->setFoldingIndent(0);
+        userData->setFoldingStartIncluded(false);
+        userData->setFoldingEndIncluded(false);
+    }
 
     int state = 0;
     int previousState = previousBlockState();
@@ -294,29 +289,29 @@ int QmlJSHighlighter::onBlockStart()
 void QmlJSHighlighter::onBlockEnd(int state)
 {
     setCurrentBlockState((m_braceDepth << 8) | state);
-    QmlCodeDocument::setParentheses(currentBlock(), m_currentBlockParentheses);
-//    QmlCodeDocument::setFoldingIndent(currentBlock(), m_foldingIndent); // BUG
+    TextDocumentLayout::setParentheses(currentBlock(), m_currentBlockParentheses);
+    TextDocumentLayout::setFoldingIndent(currentBlock(), m_foldingIndent);
 }
 
-void QmlJSHighlighter::onOpeningParenthesis(QChar parenthesis, int pos, bool /*atStart*/)
+void QmlJSHighlighter::onOpeningParenthesis(QChar parenthesis, int pos, bool atStart)
 {
     if (parenthesis == QLatin1Char('{') || parenthesis == QLatin1Char('[') || parenthesis == QLatin1Char('+')) {
         ++m_braceDepth;
         // if a folding block opens at the beginning of a line, treat the entire line
         // as if it were inside the folding block
-//        if (atStart)
-//            QmlCodeDocument::userData(currentBlock())->setFoldingStartIncluded(true); // BUG
+        if (atStart)
+            TextDocumentLayout::userData(currentBlock())->setFoldingStartIncluded(true);
     }
     m_currentBlockParentheses.push_back(Parenthesis(Parenthesis::Opened, parenthesis, pos));
 }
 
-void QmlJSHighlighter::onClosingParenthesis(QChar parenthesis, int pos, bool /*atEnd*/)
+void QmlJSHighlighter::onClosingParenthesis(QChar parenthesis, int pos, bool atEnd)
 {
     if (parenthesis == QLatin1Char('}') || parenthesis == QLatin1Char(']') || parenthesis == QLatin1Char('-')) {
         --m_braceDepth;
-//        if (atEnd)
-//            QmlCodeDocument::userData(currentBlock())->setFoldingEndIncluded(true); // BUG
-//        else
+        if (atEnd)
+            TextDocumentLayout::userData(currentBlock())->setFoldingEndIncluded(true);
+        else
             m_foldingIndent = qMin(m_braceDepth, m_foldingIndent); // folding indent is the minimum brace depth of a block
     }
     m_currentBlockParentheses.push_back(Parenthesis(Parenthesis::Closed, parenthesis, pos));

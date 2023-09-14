@@ -449,7 +449,7 @@ QWidget* PropertiesDelegate::createWidget(PropertiesDelegate::Type type) const
         comboBox->setFocusPolicy(Qt::StrongFocus);
         comboBox->setSizePolicy(QSizePolicy::Ignored, comboBox->sizePolicy().verticalPolicy());
         comboBox->setMinimumWidth(1);
-        comboBox->addItems(QFontDatabase().families());
+        comboBox->addItems(QFontDatabase::families());
         TransparentStyle::attach(comboBox);
         return comboBox;
     }

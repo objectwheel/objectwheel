@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "changeset.h"
 
@@ -30,12 +8,12 @@
 namespace Utils {
 
 ChangeSet::ChangeSet()
-    : m_string(0), m_cursor(0), m_error(false)
+    : m_string(nullptr), m_cursor(nullptr), m_error(false)
 {
 }
 
 ChangeSet::ChangeSet(const QList<EditOp> &operations)
-    : m_string(0), m_cursor(0), m_operationList(operations), m_error(false)
+    : m_string(nullptr), m_cursor(nullptr), m_operationList(operations), m_error(false)
 {
 }
 
@@ -53,11 +31,9 @@ static bool overlaps(int posA, int lengthA, int posB, int lengthB) {
     }
 }
 
-bool ChangeSet::hasOverlap(int pos, int length)
+bool ChangeSet::hasOverlap(int pos, int length) const
 {
-    QListIterator<EditOp> i(m_operationList);
-    while (i.hasNext()) {
-        const EditOp &cmd = i.next();
+    for (const EditOp &cmd : m_operationList) {
 
         switch (cmd.type) {
         case EditOp::Replace:
@@ -116,8 +92,8 @@ QList<ChangeSet::EditOp> ChangeSet::operationList() const
 
 void ChangeSet::clear()
 {
-    m_string = 0;
-    m_cursor = 0;
+    m_string = nullptr;
+    m_cursor = nullptr;
     m_operationList.clear();
     m_error = false;
 }
@@ -140,8 +116,9 @@ bool ChangeSet::move_helper(int pos, int length, int to)
 {
     if (hasOverlap(pos, length)
         || hasOverlap(to, 0)
-        || overlaps(pos, length, to, 0))
+        || overlaps(pos, length, to, 0)) {
         m_error = true;
+    }
 
     EditOp cmd(EditOp::Move);
     cmd.pos1 = pos;
@@ -214,8 +191,9 @@ bool ChangeSet::flip_helper(int pos1, int length1, int pos2, int length2)
 {
     if (hasOverlap(pos1, length1)
         || hasOverlap(pos2, length2)
-        || overlaps(pos1, length1, pos2, length2))
+        || overlaps(pos1, length1, pos2, length2)) {
         m_error = true;
+    }
 
     EditOp cmd(EditOp::Flip);
     cmd.pos1 = pos1;
@@ -231,8 +209,9 @@ bool ChangeSet::copy_helper(int pos, int length, int to)
 {
     if (hasOverlap(pos, length)
         || hasOverlap(to, 0)
-        || overlaps(pos, length, to, 0))
+        || overlaps(pos, length, to, 0)) {
         m_error = true;
+    }
 
     EditOp cmd(EditOp::Copy);
     cmd.pos1 = pos;
@@ -243,27 +222,25 @@ bool ChangeSet::copy_helper(int pos, int length, int to)
     return !m_error;
 }
 
-void ChangeSet::doReplace(const EditOp &replace_helper, QList<EditOp> *replaceList)
+void ChangeSet::doReplace(const EditOp &op, QList<EditOp> *replaceList)
 {
-    Q_ASSERT(replace_helper.type == EditOp::Replace);
+    Q_ASSERT(op.type == EditOp::Replace);
 
     {
-        QMutableListIterator<EditOp> i(*replaceList);
-        while (i.hasNext()) {
-            EditOp &c = i.next();
-            if (replace_helper.pos1 <= c.pos1)
-                c.pos1 += replace_helper.text.size();
-            if (replace_helper.pos1 < c.pos1)
-                c.pos1 -= replace_helper.length1;
+        for (EditOp &c : *replaceList) {
+            if (op.pos1 <= c.pos1)
+                c.pos1 += op.text.size();
+            if (op.pos1 < c.pos1)
+                c.pos1 -= op.length1;
         }
     }
 
     if (m_string) {
-        m_string->replace(replace_helper.pos1, replace_helper.length1, replace_helper.text);
+        m_string->replace(op.pos1, op.length1, op.text);
     } else if (m_cursor) {
-        m_cursor->setPosition(replace_helper.pos1);
-        m_cursor->setPosition(replace_helper.pos1 + replace_helper.length1, QTextCursor::KeepAnchor);
-        m_cursor->insertText(replace_helper.text);
+        m_cursor->setPosition(op.pos1);
+        m_cursor->setPosition(op.pos1 + op.length1, QTextCursor::KeepAnchor);
+        m_cursor->insertText(op.text);
     }
 }
 
@@ -322,7 +299,7 @@ void ChangeSet::convertToReplace(const EditOp &op, QList<EditOp> *replaceList)
     }
 }
 
-bool ChangeSet::hadErrors()
+bool ChangeSet::hadErrors() const
 {
     return m_error;
 }
@@ -331,14 +308,14 @@ void ChangeSet::apply(QString *s)
 {
     m_string = s;
     apply_helper();
-    m_string = 0;
+    m_string = nullptr;
 }
 
 void ChangeSet::apply(QTextCursor *textCursor)
 {
     m_cursor = textCursor;
     apply_helper();
-    m_cursor = 0;
+    m_cursor = nullptr;
 }
 
 QString ChangeSet::textAt(int pos, int length)
@@ -358,22 +335,16 @@ void ChangeSet::apply_helper()
     // convert all ops to replace
     QList<EditOp> replaceList;
     {
-        while (!m_operationList.isEmpty()) {
-            const EditOp cmd(m_operationList.first());
-            m_operationList.removeFirst();
-            convertToReplace(cmd, &replaceList);
-        }
+        while (!m_operationList.isEmpty())
+            convertToReplace(m_operationList.takeFirst(), &replaceList);
     }
 
     // execute replaces
     if (m_cursor)
         m_cursor->beginEditBlock();
 
-    while (!replaceList.isEmpty()) {
-        const EditOp cmd(replaceList.first());
-        replaceList.removeFirst();
-        doReplace(cmd, &replaceList);
-    }
+    while (!replaceList.isEmpty())
+        doReplace(replaceList.takeFirst(), &replaceList);
 
     if (m_cursor)
         m_cursor->endEditBlock();

@@ -698,8 +698,8 @@ void PropertiesController::onSceneSelectionChange()
             const QList<QString>& propertyKeys = propertyMap.keys();
             for (const QString& propertyName : propertyKeys) {
                 const QVariant& propertyValue = propertyMap.value(propertyName);
-                switch (propertyValue.type()) {
-                case QVariant::Font: {
+                switch (propertyValue.typeId()) {
+                case QMetaType::QFont: {
                     const QFont& font = propertyValue.value<QFont>();
                     const bool isPx = font.pixelSize() > 0 ? true : false;
                     const QString& family = QFontInfo(font).family();
@@ -853,7 +853,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::Color: {
+                case QMetaType::QColor: {
                     auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onColorPropertyEdit,
                                                                      this, item, nullptr, propertyName);
@@ -867,7 +867,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::Bool: {
+                case QMetaType::Bool: {
                     auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onBoolPropertyEdit,
                                                                      this, item, nullptr, propertyName);
@@ -883,7 +883,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::String: {
+                case QMetaType::QString: {
                     auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onStringPropertyEdit,
                                                                      this, item, nullptr, propertyName);
@@ -897,7 +897,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::Url: {
+                case QMetaType::QUrl: {
                     auto item = tree->delegate()->createItem();
                     auto callback = PropertiesDelegate::makeCallback(&PropertiesController::onUrlPropertyEdit,
                                                                      this, item, nullptr, propertyName);
@@ -911,7 +911,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::Double: {
+                case QMetaType::Double: {
                     if (isGeometryProperty(propertyName)) {
                         if (isGeometryHandled)
                             break;
@@ -1005,7 +1005,7 @@ void PropertiesController::onSceneSelectionChange()
                     break;
                 }
 
-                case QVariant::Int: {
+                case QMetaType::Int: {
                     if (isGeometryProperty(propertyName)) {
                         if (isGeometryHandled)
                             break;
@@ -1299,10 +1299,10 @@ void PropertiesController::onFontSizePropertyEdit(QTreeWidgetItem* item, QTreeWi
 
         QString fontText = classItem->text(1);
         if (isPx) {
-            fontText.replace(QRegExp(QStringLiteral(",.*")), QStringLiteral(", ") +
+            fontText.replace(QRegularExpression(QStringLiteral(",.*")), QStringLiteral(", ") +
                              QString::number(font.pixelSize()) + QStringLiteral("px]"));
         } else {
-            fontText.replace(QRegExp(QStringLiteral(",.*")), QStringLiteral(", ") +
+            fontText.replace(QRegularExpression(QStringLiteral(",.*")), QStringLiteral(", ") +
                              QString::number(font.pointSize()) + QStringLiteral("pt]"));
         }
         classItem->setText(1, fontText);

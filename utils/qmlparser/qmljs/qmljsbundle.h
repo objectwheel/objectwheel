@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -51,7 +29,6 @@ class UTILS_EXPORT QmlBundle
 {
     typedef PersistentTrie::Trie Trie;
 public:
-    QmlBundle(const QmlBundle &o);
     QmlBundle();
     QmlBundle(const QString &name,
               const Trie &searchPaths,
@@ -76,14 +53,15 @@ public:
     bool writeTo(const QString &path) const;
     bool writeTo(QTextStream &stream, const QString &indent = QString()) const;
     QString toString(const QString &indent = QString());
-    bool readFrom(QString path, QStringList *errors);
+    bool readFrom(QString path, bool stripVersions, QStringList *errors);
     bool operator==(const QmlBundle &o) const;
     bool operator!=(const QmlBundle &o) const;
 private:
     static void printEscaped(QTextStream &s, const QString &str);
     static void writeTrie(QTextStream &stream, const Trie &t, const QString &indent);
     QStringList maybeReadTrie(Trie &trie, Utils::JsonObjectValue *config, const QString &path,
-                          const QString &propertyName, bool required = false);
+                              const QString &propertyName, bool required = false,
+                              bool stripVersions = false);
 
     QString m_name;
     Trie m_searchPaths;
@@ -97,7 +75,7 @@ class UTILS_EXPORT QmlLanguageBundles
 public:
     QmlBundle bundleForLanguage(Dialect l) const;
     void mergeBundleForLanguage(Dialect l, const QmlBundle &bundle);
-    QList<Dialect> languages() const;
+    const QList<Dialect> languages() const;
     void mergeLanguageBundles(const QmlLanguageBundles &);
 private:
     QHash<Dialect,QmlBundle> m_bundles;

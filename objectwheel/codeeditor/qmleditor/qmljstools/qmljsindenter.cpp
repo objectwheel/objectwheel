@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsindenter.h"
 
@@ -35,11 +13,11 @@
 using namespace QmlJSEditor;
 using namespace Internal;
 
-Indenter::Indenter()
+Indenter::Indenter(QTextDocument *doc)
+    : TextEditor::TextIndenter(doc)
 {}
 
-Indenter::~Indenter()
-{}
+Indenter::~Indenter() = default;
 
 bool Indenter::isElectricCharacter(const QChar &ch) const
 {
@@ -51,13 +29,11 @@ bool Indenter::isElectricCharacter(const QChar &ch) const
     return false;
 }
 
-void Indenter::indentBlock(QTextDocument *doc,
-                           const QTextBlock &block,
+void Indenter::indentBlock(const QTextBlock &block,
                            const QChar &typedChar,
-                           const TextEditor::TabSettings &tabSettings)
+                           const TextEditor::TabSettings &tabSettings,
+                           int /*cursorPositionInEditor*/)
 {
-    Q_UNUSED(doc)
-
     const int depth = indentFor(block, tabSettings);
     if (depth == -1)
         return;
@@ -76,33 +52,37 @@ void Indenter::indentBlock(QTextDocument *doc,
     tabSettings.indentLine(block, depth);
 }
 
-void Indenter::invalidateCache(QTextDocument *doc)
+void Indenter::invalidateCache()
 {
     QmlJSTools::CreatorCodeFormatter codeFormatter;
-    codeFormatter.invalidateCache(doc);
+    codeFormatter.invalidateCache(m_doc);
 }
 
-
 int Indenter::indentFor(const QTextBlock &block,
-                        const TextEditor::TabSettings &tabSettings)
+                        const TextEditor::TabSettings &tabSettings,
+                        int /*cursorPositionInEditor*/)
 {
     QmlJSTools::CreatorCodeFormatter codeFormatter(tabSettings);
     codeFormatter.updateStateUntil(block);
     return codeFormatter.indentFor(block);
 }
 
+int Indenter::visualIndentFor(const QTextBlock &block, const TextEditor::TabSettings &tabSettings)
+{
+    return indentFor(block, tabSettings);
+}
 
-TextEditor::IndentationForBlock
-Indenter::indentationForBlocks(const QVector<QTextBlock> &blocks,
-                               const TextEditor::TabSettings &tabSettings)
+TextEditor::IndentationForBlock Indenter::indentationForBlocks(
+    const QVector<QTextBlock> &blocks,
+    const TextEditor::TabSettings &tabSettings,
+    int /*cursorPositionInEditor*/)
 {
     QmlJSTools::CreatorCodeFormatter codeFormatter(tabSettings);
-
 
     codeFormatter.updateStateUntil(blocks.last());
 
     TextEditor::IndentationForBlock ret;
-    foreach (QTextBlock block, blocks)
+    for (QTextBlock block : blocks)
         ret.insert(block.blockNumber(), codeFormatter.indentFor(block));
     return ret;
 }

@@ -1,39 +1,21 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
-#include "osspecificaspects.h"
-#include <QString>
+#include "utils_global.h"
 
-#ifdef Q_OS_WINDOWS
+#include "osspecificaspects.h"
+
+#include <optional>
+
+class QString;
+
+#ifdef Q_OS_WIN
 #define QTC_HOST_EXE_SUFFIX QTC_WIN_EXE_SUFFIX
 #else
 #define QTC_HOST_EXE_SUFFIX ""
-#endif // Q_OS_WINDOWS
+#endif // Q_OS_WIN
 
 namespace Utils {
 
@@ -42,11 +24,11 @@ class UTILS_EXPORT HostOsInfo
 public:
     static constexpr OsType hostOs()
     {
-#if defined(Q_OS_WINDOWS)
+#if defined(Q_OS_WIN)
         return OsTypeWindows;
 #elif defined(Q_OS_LINUX)
         return OsTypeLinux;
-#elif defined(Q_OS_MACOS)
+#elif defined(Q_OS_MAC)
         return OsTypeMac;
 #elif defined(Q_OS_UNIX)
         return OsTypeOtherUnix;
@@ -56,7 +38,7 @@ public:
     }
 
     enum HostArchitecture { HostArchitectureX86, HostArchitectureAMD64, HostArchitectureItanium,
-                            HostArchitectureArm, HostArchitectureUnknown };
+                            HostArchitectureArm, HostArchitectureArm64, HostArchitectureUnknown };
     static HostArchitecture hostArchitecture();
 
     static constexpr bool isWindowsHost() { return hostOs() == OsTypeWindows; }
@@ -70,6 +52,8 @@ public:
         return false;
 #endif
     }
+
+    static bool isRunningUnderRosetta();
 
     static QString withExecutableSuffix(const QString &executable)
     {
@@ -86,17 +70,19 @@ public:
                 : OsSpecificAspects::fileNameCaseSensitivity(hostOs());
     }
 
-    static QChar pathListSeparator()
+    static constexpr QChar pathListSeparator()
     {
         return OsSpecificAspects::pathListSeparator(hostOs());
     }
 
-    static Qt::KeyboardModifier controlModifier()
+    static constexpr Qt::KeyboardModifier controlModifier()
     {
         return OsSpecificAspects::controlModifier(hostOs());
     }
 
     static bool canCreateOpenGLContext(QString *errorMessage);
+
+    static std::optional<quint64> totalMemoryInstalledInBytes();
 
 private:
     static Qt::CaseSensitivity m_overrideFileNameCaseSensitivity;

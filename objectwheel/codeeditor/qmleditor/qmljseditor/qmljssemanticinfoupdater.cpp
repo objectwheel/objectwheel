@@ -1,30 +1,8 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljssemanticinfoupdater.h"
-//#include "qmljseditorplugin.h"
+#include "qmljseditorplugin.h"
 
 #include <qmljs/qmljsmodelmanagerinterface.h>
 #include <qmljs/qmljsdocument.h>
@@ -34,18 +12,16 @@
 #include <qmljs/qmljslink.h>
 #include <qmljstools/qmljsmodelmanager.h>
 
-//#include <coreplugin/icore.h>
+#include <coreplugin/icore.h>
 
 #include <utils/json.h>
 
 namespace QmlJSEditor {
 namespace Internal {
 
-SemanticInfoUpdater::SemanticInfoUpdater(QObject *parent)
-        : QThread(parent)
-        , m_wasCancelled(false)
-{
-}
+SemanticInfoUpdater::SemanticInfoUpdater() = default;
+
+SemanticInfoUpdater::~SemanticInfoUpdater() = default;
 
 void SemanticInfoUpdater::abort()
 {
@@ -117,17 +93,18 @@ QmlJSTools::SemanticInfo SemanticInfoUpdater::makeNewSemanticInfo(const QmlJS::D
     Link link(semanticInfo.snapshot, modelManager->defaultVContext(doc->language(), doc), modelManager->builtins(doc));
     semanticInfo.context = link(doc, &semanticInfo.semanticMessages);
 
-    ScopeChain *scopeChain = new ScopeChain(doc, semanticInfo.context);
+    auto scopeChain = new ScopeChain(doc, semanticInfo.context);
     semanticInfo.setRootScopeChain(QSharedPointer<const ScopeChain>(scopeChain));
 
-    if (doc->language() == Dialect::Json) { // BUG
-//        Utils::JsonSchema *schema = QmlJSEditorPlugin::jsonManager()->schemaForFile(doc->fileName());
-//        if (schema) {
-//            JsonCheck jsonChecker(doc);
-//            semanticInfo.staticAnalysisMessages = jsonChecker(schema);
-//        }
+    if (doc->language() == Dialect::Json) {
+        Utils::JsonSchema *schema = QmlJSEditorPlugin::jsonManager()->schemaForFile(
+            doc->fileName().toString());
+        if (schema) {
+            JsonCheck jsonChecker(doc);
+            semanticInfo.staticAnalysisMessages = jsonChecker(schema);
+        }
     } else {
-        Check checker(doc, semanticInfo.context);
+        Check checker(doc, semanticInfo.context, Core::ICore::settings());
         semanticInfo.staticAnalysisMessages = checker();
     }
 

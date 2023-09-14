@@ -1,32 +1,10 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
 #include <QString>
+
 #include <algorithm>
 
 #define QTC_WIN_EXE_SUFFIX ".exe"
@@ -36,38 +14,80 @@ namespace Utils {
 // Add more as needed.
 enum OsType { OsTypeWindows, OsTypeLinux, OsTypeMac, OsTypeOtherUnix, OsTypeOther };
 
+inline QString osTypeToString(OsType osType)
+{
+    switch (osType) {
+    case OsTypeWindows:
+        return "Windows";
+    case OsTypeLinux:
+        return "Linux";
+    case OsTypeMac:
+        return "Mac";
+    case OsTypeOtherUnix:
+        return "Other Unix";
+    case OsTypeOther:
+    default:
+        return "Other";
+    }
+}
+
+inline OsType osTypeFromString(const QString &string)
+{
+    if (string == "Windows")
+        return OsTypeWindows;
+    if (string == "Linux")
+        return OsTypeLinux;
+    if (string == "Mac")
+        return OsTypeMac;
+    if (string == "Other Unix")
+        return OsTypeOtherUnix;
+    return OsTypeOther;
+}
+
 namespace OsSpecificAspects {
 
-UTILS_EXPORT inline QString withExecutableSuffix(OsType osType, const QString &executable)
+inline QString withExecutableSuffix(OsType osType, const QString &executable)
 {
     QString finalName = executable;
-    if (osType == OsTypeWindows)
+    if (osType == OsTypeWindows && !finalName.endsWith(QTC_WIN_EXE_SUFFIX))
         finalName += QLatin1String(QTC_WIN_EXE_SUFFIX);
     return finalName;
 }
 
-UTILS_EXPORT inline Qt::CaseSensitivity fileNameCaseSensitivity(OsType osType)
+constexpr Qt::CaseSensitivity fileNameCaseSensitivity(OsType osType)
 {
     return osType == OsTypeWindows || osType == OsTypeMac ? Qt::CaseInsensitive : Qt::CaseSensitive;
 }
 
-UTILS_EXPORT inline QChar pathListSeparator(OsType osType)
+constexpr Qt::CaseSensitivity envVarCaseSensitivity(OsType osType)
+{
+    return fileNameCaseSensitivity(osType);
+}
+
+constexpr QChar pathListSeparator(OsType osType)
 {
     return QLatin1Char(osType == OsTypeWindows ? ';' : ':');
 }
 
-UTILS_EXPORT inline Qt::KeyboardModifier controlModifier(OsType osType)
+constexpr Qt::KeyboardModifier controlModifier(OsType osType)
 {
     return osType == OsTypeMac ? Qt::MetaModifier : Qt::ControlModifier;
 }
 
-UTILS_EXPORT inline QString pathWithNativeSeparators(OsType osType, const QString &pathName)
+inline QString pathWithNativeSeparators(OsType osType, const QString &pathName)
 {
     if (osType == OsTypeWindows) {
         const int pos = pathName.indexOf('/');
         if (pos >= 0) {
             QString n = pathName;
             std::replace(std::begin(n) + pos, std::end(n), '/', '\\');
+            return n;
+        }
+    } else {
+        const int pos = pathName.indexOf('\\');
+        if (pos >= 0) {
+            QString n = pathName;
+            std::replace(std::begin(n) + pos, std::end(n), '\\', '/');
             return n;
         }
     }

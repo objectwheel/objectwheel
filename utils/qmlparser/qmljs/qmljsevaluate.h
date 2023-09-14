@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -41,7 +19,7 @@ class FunctionValue;
 class UTILS_EXPORT Evaluate: protected AST::Visitor
 {
 public:
-    Evaluate(const ScopeChain *scopeChain, ReferenceContext *referenceContext = 0);
+    Evaluate(const ScopeChain *scopeChain, ReferenceContext *referenceContext = nullptr);
     ~Evaluate();
 
     // same as value()
@@ -61,7 +39,6 @@ protected:
     // Ui
     bool visit(AST::UiProgram *ast) override;
     bool visit(AST::UiHeaderItemList *ast) override;
-    bool visit(AST::UiQualifiedPragmaId *ast) override;
     bool visit(AST::UiPragma *ast) override;
     bool visit(AST::UiImport *ast) override;
     bool visit(AST::UiPublicMember *ast) override;
@@ -76,6 +53,7 @@ protected:
     bool visit(AST::UiQualifiedId *ast) override;
 
     // QmlJS
+    bool visit(AST::TemplateLiteral *ast) override;
     bool visit(AST::ThisExpression *ast) override;
     bool visit(AST::IdentifierExpression *ast) override;
     bool visit(AST::NullExpression *ast) override;
@@ -84,13 +62,12 @@ protected:
     bool visit(AST::StringLiteral *ast) override;
     bool visit(AST::NumericLiteral *ast) override;
     bool visit(AST::RegExpLiteral *ast) override;
-    bool visit(AST::ArrayLiteral *ast) override;
-    bool visit(AST::ObjectLiteral *ast) override;
-    bool visit(AST::ElementList *ast) override;
+    bool visit(AST::ArrayPattern *ast) override;
+    bool visit(AST::ObjectPattern *ast) override;
     bool visit(AST::Elision *ast) override;
-    bool visit(AST::PropertyAssignmentList *ast) override;
-    bool visit(AST::PropertyGetterSetter *ast) override;
-    bool visit(AST::PropertyNameAndValue *ast) override;
+    bool visit(AST::PatternElementList *ast) override;
+    bool visit(AST::PatternPropertyList *ast) override;
+    bool visit(AST::PatternProperty *ast) override;
     bool visit(AST::NestedExpression *ast) override;
     bool visit(AST::IdentifierPropertyName *ast) override;
     bool visit(AST::StringLiteralPropertyName *ast) override;
@@ -116,19 +93,16 @@ protected:
     bool visit(AST::ConditionalExpression *ast) override;
     bool visit(AST::Expression *ast) override;
     bool visit(AST::Block *ast) override;
-    bool visit(AST::StatementList *ast) override;
     bool visit(AST::VariableStatement *ast) override;
     bool visit(AST::VariableDeclarationList *ast) override;
-    bool visit(AST::VariableDeclaration *ast) override;
+    bool visit(AST::PatternElement *ast) override;
     bool visit(AST::EmptyStatement *ast) override;
     bool visit(AST::ExpressionStatement *ast) override;
     bool visit(AST::IfStatement *ast) override;
     bool visit(AST::DoWhileStatement *ast) override;
     bool visit(AST::WhileStatement *ast) override;
     bool visit(AST::ForStatement *ast) override;
-    bool visit(AST::LocalForStatement *ast) override;
     bool visit(AST::ForEachStatement *ast) override;
-    bool visit(AST::LocalForEachStatement *ast) override;
     bool visit(AST::ContinueStatement *ast) override;
     bool visit(AST::BreakStatement *ast) override;
     bool visit(AST::ReturnStatement *ast) override;
@@ -146,12 +120,11 @@ protected:
     bool visit(AST::FunctionDeclaration *ast) override;
     bool visit(AST::FunctionExpression *ast) override;
     bool visit(AST::FormalParameterList *ast) override;
-    bool visit(AST::FunctionBody *ast) override;
     bool visit(AST::Program *ast) override;
-    bool visit(AST::SourceElements *ast) override;
-    bool visit(AST::FunctionSourceElement *ast) override;
-    bool visit(AST::StatementSourceElement *ast) override;
+    bool visit(AST::StatementList *ast) override;
     bool visit(AST::DebuggerStatement *ast) override;
+
+    void throwRecursionDepthError() override;
 
 private:
     QmlJS::Document::Ptr _doc;

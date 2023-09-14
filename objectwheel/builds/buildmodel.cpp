@@ -144,7 +144,7 @@ QVariant BuildModel::data(const QModelIndex& index, int role) const
 
     case AbisRole: {
         QStringList abis;
-        foreach (const QCborValue& abi, buildInfo->request().value(QLatin1String("abis")).toArray())
+        for (const QCborValue& abi : buildInfo->request().value(QLatin1String("abis")).toArray())
             abis.append(abi.toString());
         return abis.join(QLatin1String(", "));
     }

@@ -1,49 +1,24 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmleditorwidgets_global.h"
 #include <QFrame>
 
-QT_BEGIN_NAMESPACE
 class QDoubleSpinBox;
-QT_END_NAMESPACE
 
 namespace QmlEditorWidgets {
 
 class ColorBox;
 class HueControl;
 
-class QMLEDITORWIDGETS_EXPORT CustomColorDialog : public QFrame {
+class CustomColorDialog : public QFrame {
 
     Q_OBJECT
     Q_PROPERTY(QColor color READ color WRITE setColor NOTIFY colorChanged)
 
 public:
-    CustomColorDialog(QWidget *parent = 0);
+    CustomColorDialog(QWidget *parent = nullptr);
     QColor color() const { return m_color; }
     void setupColor(const QColor &color);
     void setColor(const QColor &color)
@@ -82,8 +57,8 @@ signals:
 
 protected:
     void setupWidgets();
-    void leaveEvent(QEvent *);
-    void enterEvent(QEvent *);
+    void leaveEvent(QEvent *) override;
+    void enterEvent(QEnterEvent *) override;
 
 private:
     QFrame *m_beforeColorWidget;

@@ -1,10 +1,10 @@
 ### App Settings
-CONFIG  += c++14 strict_c strict_c++ utf8_source hide_symbols
+CONFIG  += c++17 strict_c strict_c++ utf8_source hide_symbols
 TARGET   = Objectwheel
 gcc:QMAKE_CXXFLAGS += -pedantic-errors
 msvc:QMAKE_CXXFLAGS += -permissive-
 windows:LIBS += -lWs2_32 -luser32 # PayloadManager uses setsockopt()
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000
+DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x060502
 #DEFINES += RENDERER_DEBUG
 #DEFINES += PAYLOADMANAGER_DEBUG
 

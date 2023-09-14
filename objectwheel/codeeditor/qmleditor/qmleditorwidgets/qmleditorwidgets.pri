@@ -1,4 +1,7 @@
 HEADERS += \
+    $$PWD/easingpane/easinggraph.h \
+    $$PWD/easingpane/easingcontextpane.h \
+    \
     $$PWD/fontsizespinbox.h \
     $$PWD/filewidget.h \
     $$PWD/contextpanewidgetrectangle.h \
@@ -9,10 +12,12 @@ HEADERS += \
     $$PWD/colorbox.h \
     $$PWD/customcolordialog.h \
     $$PWD/gradientline.h \
-    $$PWD/huecontrol.h \
-    $$PWD/qmleditorwidgets_global.h
+    $$PWD/huecontrol.h
 
 SOURCES += \
+    $$PWD/easingpane/easinggraph.cpp \
+    $$PWD/easingpane/easingcontextpane.cpp \
+    \
     $$PWD/fontsizespinbox.cpp \
     $$PWD/filewidget.cpp \
     $$PWD/contextpanewidgetrectangle.cpp \
@@ -25,10 +30,3 @@ SOURCES += \
     $$PWD/gradientline.cpp \
     $$PWD/colorbutton.cpp
 
-FORMS += \
-    $$PWD/contextpanewidgetrectangle.ui \
-    $$PWD/contextpanewidgetimage.ui \
-    $$PWD/contextpanewidgetborderimage.ui \
-    $$PWD/contextpanetext.ui
-
-include($$PWD/easingpane/easingpane.pri)

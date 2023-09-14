@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljssemanticinfo.h"
 
@@ -29,6 +7,8 @@
 #include <qmljs/qmljsscopebuilder.h>
 #include <qmljs/qmljsscopechain.h>
 #include <qmljs/parser/qmljsengine_p.h>
+
+#include <QDebug>
 
 using namespace QmlJS;
 using namespace QmlJS::AST;
@@ -63,13 +43,13 @@ protected:
             node->accept(this);
     }
 
-    bool containsOffset(AST::SourceLocation start, AST::SourceLocation end)
+    bool containsOffset(SourceLocation start, SourceLocation end)
     {
         return _offset >= start.begin() && _offset <= end.end();
     }
 
     bool handle(AST::Node *ast,
-                AST::SourceLocation start, AST::SourceLocation end,
+                SourceLocation start, SourceLocation end,
                 bool addToPath = true)
     {
         if (containsOffset(start, end)) {
@@ -86,7 +66,7 @@ protected:
         return handle(ast, ast->firstSourceLocation(), ast->lastSourceLocation(), addToPath);
     }
 
-    virtual bool preVisit(AST::Node *node)
+    bool preVisit(AST::Node *node) override
     {
         if (Statement *stmt = node->statementCast())
             return handleLocationAst(stmt);
@@ -97,10 +77,10 @@ protected:
         return true;
     }
 
-    virtual bool visit(AST::UiQualifiedId *ast)
+    bool visit(AST::UiQualifiedId *ast) override
     {
-        AST::SourceLocation first = ast->identifierToken;
-        AST::SourceLocation last;
+        SourceLocation first = ast->identifierToken;
+        SourceLocation last;
         for (AST::UiQualifiedId *it = ast; it; it = it->next)
             last = it->identifierToken;
         if (containsOffset(first, last))
@@ -108,30 +88,40 @@ protected:
         return false;
     }
 
-    virtual bool visit(AST::UiProgram *ast)
+    bool visit(AST::UiProgram *ast) override
     {
         _path.append(ast);
         return true;
     }
 
-    virtual bool visit(AST::Program *ast)
+    bool visit(AST::Program *ast) override
     {
         _path.append(ast);
         return true;
     }
 
-    virtual bool visit(AST::UiImport *ast)
+    bool visit(AST::UiImport *ast) override
     {
         return handleLocationAst(ast);
     }
 
+    bool visit(AST::TemplateLiteral *ast) override
+    {
+        AST::Node::accept(ast->expression, this);
+        return true;
+    }
+
+    void throwRecursionDepthError() override
+    {
+        qWarning("Warning: Hit maximum recursion depth when visiting the AST in AstPath");
+    }
 };
 
 } // anonmymous
 
 AST::Node *SemanticInfo::rangeAt(int cursorPosition) const
 {
-    AST::Node *declaringMember = 0;
+    AST::Node *declaringMember = nullptr;
 
     for (int i = ranges.size() - 1; i != -1; --i) {
         const Range &range = ranges.at(i);
@@ -152,8 +142,8 @@ Node *SemanticInfo::declaringMemberNoProperties(int cursorPosition) const
 {
     AST::Node *node = rangeAt(cursorPosition);
 
-    if (UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(node)) {
-        const QStringRef name = objectDefinition->qualifiedTypeNameId->name;
+    if (auto objectDefinition = cast<const UiObjectDefinition*>(node)) {
+        const QStringView name = objectDefinition->qualifiedTypeNameId->name;
         if (!name.isEmpty() && name.at(0).isLower()) {
             QList<AST::Node *> path = rangePath(cursorPosition);
             if (path.size() > 1)
@@ -163,8 +153,8 @@ Node *SemanticInfo::declaringMemberNoProperties(int cursorPosition) const
             if (path.size() > 2)
                 return path.at(path.size() - 3);
         }
-    } else if (UiObjectBinding *objectBinding = cast<UiObjectBinding*>(node)) {
-        const QStringRef name = objectBinding->qualifiedTypeNameId->name;
+    } else if (auto objectBinding = cast<const UiObjectBinding*>(node)) {
+        const QStringView name = objectBinding->qualifiedTypeNameId->name;
         if (name.contains(QLatin1String("Gradient"))) {
             QList<AST::Node *> path = rangePath(cursorPosition);
             if (path.size() > 1)
@@ -179,7 +169,7 @@ QList<AST::Node *> SemanticInfo::rangePath(int cursorPosition) const
 {
     QList<AST::Node *> path;
 
-    foreach (const Range &range, ranges) {
+    for (const Range &range : std::as_const(ranges)) {
         if (range.begin.isNull() || range.end.isNull())
             continue;
         else if (cursorPosition >= range.begin.position() && cursorPosition <= range.end.position())
@@ -222,7 +212,7 @@ AST::Node *SemanticInfo::astNodeAt(int pos) const
 {
     const QList<AST::Node *> path = astPath(pos);
     if (path.isEmpty())
-        return 0;
+        return nullptr;
     return path.last();
 }
 

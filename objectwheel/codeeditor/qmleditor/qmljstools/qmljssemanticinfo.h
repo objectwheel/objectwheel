@@ -1,31 +1,7 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
-
-#include "qmljstools_global.h"
 
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/qmljscontext.h>
@@ -41,22 +17,20 @@ namespace AST { class Node; }
 
 namespace QmlJSTools {
 
-class QMLJSTOOLS_EXPORT Range
+class Range
 {
 public:
-    Range(): ast(0) {}
-
-public: // attributes
-    QmlJS::AST::Node *ast;
+    // attributes
+    QmlJS::AST::Node *ast = nullptr;
     QTextCursor begin;
     QTextCursor end;
 };
 
-class QMLJSTOOLS_EXPORT SemanticInfo
+class SemanticInfo
 {
 public:
-    SemanticInfo() {}
-    SemanticInfo(QmlJS::ScopeChain *rootScopeChain);
+    SemanticInfo() = default;
+    explicit SemanticInfo(QmlJS::ScopeChain *rootScopeChain);
 
     bool isValid() const;
     int revision() const;
@@ -87,7 +61,7 @@ public: // attributes
     QmlJS::Snapshot snapshot;
     QmlJS::ContextPtr context;
     QList<Range> ranges;
-    QHash<QString, QList<QmlJS::AST::SourceLocation> > idLocations;
+    QHash<QString, QList<QmlJS::SourceLocation> > idLocations;
 
     // these are in addition to the parser messages in the document
     QList<QmlJS::DiagnosticMessage> semanticMessages;

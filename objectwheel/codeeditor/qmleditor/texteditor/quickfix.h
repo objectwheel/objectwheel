@@ -1,32 +1,11 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "texteditor_global.h"
 
+
+#include <QList>
 #include <QString>
 #include <QMetaType>
 #include <QSharedPointer>
@@ -44,20 +23,19 @@ class AssistInterface;
     Subclasses should make sure that they copy parts of, or the whole QuickFixState ,
     which are needed to perform the quick-fix operation.
  */
-class TEXTEDITOR_EXPORT QuickFixOperation
+class QuickFixOperation
 {
     Q_DISABLE_COPY(QuickFixOperation)
 
 public:
-    typedef QSharedPointer<QuickFixOperation> Ptr;
+    using Ptr = QSharedPointer<QuickFixOperation>;
 
 public:
     QuickFixOperation(int priority = -1);
     virtual ~QuickFixOperation();
 
     /*!
-        \returns The priority for this quick-fix. See the QuickFixCollector for more
-                 information.
+        Returns The priority for this quick-fix. See the QuickFixCollector for more information.
      */
     virtual int priority() const;
 
@@ -65,8 +43,7 @@ public:
     void setPriority(int priority);
 
     /*!
-        \returns The description for this quick-fix. This description is shown to the
-                 user.
+        Returns The description for this quick-fix. This description is shown to the user.
      */
     virtual QString description() const;
 
@@ -85,7 +62,7 @@ private:
     QString _description;
 };
 
-typedef QList<QuickFixOperation::Ptr> QuickFixOperations;
+using QuickFixOperations = QList<QuickFixOperation::Ptr>;
 
 inline QuickFixOperations &operator<<(QuickFixOperations &list, QuickFixOperation *op)
 {
@@ -93,7 +70,7 @@ inline QuickFixOperations &operator<<(QuickFixOperations &list, QuickFixOperatio
     return list;
 }
 
-typedef QSharedPointer<const AssistInterface> QuickFixInterface;
+using QuickFixInterface = QSharedPointer<const AssistInterface>;
 
 } // namespace TextEditor
 

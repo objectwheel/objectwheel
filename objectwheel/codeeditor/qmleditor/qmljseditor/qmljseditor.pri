@@ -19,7 +19,6 @@ HEADERS += \
         $$PWD/qmljshoverhandler.h \
         $$PWD/qmljshighlighter.h \
         $$PWD/qmljseditorconstants.h \
-        $$PWD/qmljseditor_global.h \
         $$PWD/qmljscompletionassist.h \
         $$PWD/qmlexpressionundercursor.h \
         $$PWD/qmljsautocompleter.h

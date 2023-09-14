@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -34,7 +12,6 @@
 #include <utility>
 
 QT_FORWARD_DECLARE_CLASS(QString)
-QT_FORWARD_DECLARE_CLASS(QStringList)
 QT_FORWARD_DECLARE_CLASS(QDebug)
 
 namespace QmlJS {
@@ -79,7 +56,6 @@ class UTILS_EXPORT Trie
 public:
     Trie();
     Trie(const TrieNode::Ptr &t);
-    Trie(const Trie &o);
 
     QStringList complete(const QString &root, const QString &base = QString(),
         LookupFlags flags = LookupFlags(CaseInsensitive|Partial)) const;
@@ -100,8 +76,8 @@ public:
     bool operator==(const Trie &o);
     bool operator!=(const Trie &o);
 
-    friend UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
-    friend UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
+    friend UTILS_EXPORT QDebug operator<<(QDebug dbg, const TrieNode::Ptr &trie);
+    friend UTILS_EXPORT QDebug operator<<(QDebug dbg, const Trie &trie);
 
     TrieNode::Ptr trie;
 };
@@ -112,7 +88,7 @@ template <typename T> void enumerateTrieNode(const TrieNode::Ptr &trie, T &t,
     if (trie.isNull())
         return;
     base.append(trie->prefix);
-    foreach (const TrieNode::Ptr subT, trie->postfixes) {
+    for (const TrieNode::Ptr &subT : std::as_const(trie->postfixes)) {
         enumerateTrieNode(subT,t,base);
     }
     if (trie->postfixes.isEmpty())
@@ -122,8 +98,8 @@ template <typename T> void enumerateTrieNode(const TrieNode::Ptr &trie, T &t,
 UTILS_EXPORT int matchStrength(const QString &searchStr, const QString &str);
 UTILS_EXPORT QStringList matchStrengthSort(const QString &searchString, QStringList &res);
 
-UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const TrieNode::Ptr &trie);
-UTILS_EXPORT QDebug &operator<<(QDebug &dbg, const Trie &trie);
+UTILS_EXPORT QDebug operator<<(QDebug dbg, const TrieNode::Ptr &trie);
+UTILS_EXPORT QDebug operator<<(QDebug dbg, const Trie &trie);
 
 } // end namespace PersistentTrie
 } // end namespace QmlJS

@@ -1,29 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "quicktoolbar.h"
+#include "qmljseditingsettingspage.h"
+
 #include <utils/changeset.h>
 #include <qmleditorwidgets/contextpanewidget.h>
 #include <qmleditorwidgets/customcolordialog.h>
@@ -37,10 +17,10 @@
 #include <qmljs/qmljsscopebuilder.h>
 #include <qmljs/qmljsevaluate.h>
 #include <qmljs/qmljsutils.h>
-#include <qmlcodeeditor.h>
-#include <qmlcodedocument.h>
+#include <texteditor/texteditor.h>
+#include <texteditor/textdocument.h>
 #include <texteditor/tabsettings.h>
-#include <qmljseditor/qmljseditingsettings.h>
+#include <coreplugin/icore.h>
 
 #include <QDebug>
 
@@ -55,7 +35,7 @@ static inline const ObjectValue * getPropertyChangesTarget(Node *node, const Sco
     UiObjectInitializer *initializer = initializerOfObject(node);
     if (initializer) {
         for (UiObjectMemberList *members = initializer->members; members; members = members->next) {
-            if (UiScriptBinding *scriptBinding = cast<UiScriptBinding *>(members->member)) {
+            if (auto scriptBinding = cast<const UiScriptBinding *>(members->member)) {
                 if (scriptBinding->qualifiedId
                         && scriptBinding->qualifiedId->name == QLatin1String("target")
                         && ! scriptBinding->qualifiedId->next) {
@@ -64,12 +44,12 @@ static inline const ObjectValue * getPropertyChangesTarget(Node *node, const Sco
                     if (const ObjectValue *targetObject = value_cast<ObjectValue>(targetValue))
                         return targetObject;
                     else
-                        return 0;
+                        return nullptr;
                 }
             }
         }
     }
-    return 0;
+    return nullptr;
 }
 
 QuickToolBar::QuickToolBar()
@@ -103,10 +83,10 @@ QuickToolBar::QuickToolBar()
 QuickToolBar::~QuickToolBar()
 {
     delete m_widget.data();
-    m_widget = 0;
+    m_widget = nullptr;
 }
 
-void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, const ScopeChain *scopeChain, Node *node, bool update, bool force)
+void QuickToolBar::apply(TextEditor::TextEditorWidget *editorWidget, Document::Ptr document, const ScopeChain *scopeChain, Node *node, bool update, bool force)
 {
     if (!QmlJsEditingSettings::get().enableContextPane() && !force && !update) {
         contextWidget()->hide();
@@ -127,37 +107,37 @@ void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, co
 
     if (scopeChain && scopeObject) {
         m_prototypes.clear();
-        foreach (const ObjectValue *object,
-                 PrototypeIterator(scopeObject, scopeChain->context()).all()) {
+        const QList<const ObjectValue *> objects
+            = PrototypeIterator(scopeObject, scopeChain->context()).all();
+        for (const ObjectValue *object : objects)
             m_prototypes.append(object->className());
-        }
 
         if (m_prototypes.contains(QLatin1String("PropertyChanges"))) {
             isPropertyChanges = true;
             const ObjectValue *targetObject = getPropertyChangesTarget(node, *scopeChain);
             m_prototypes.clear();
             if (targetObject) {
-                foreach (const ObjectValue *object,
-                         PrototypeIterator(targetObject, scopeChain->context()).all()) {
+                const QList<const ObjectValue *> objects
+                    = PrototypeIterator(targetObject, scopeChain->context()).all();
+                for (const ObjectValue *object : objects)
                     m_prototypes.append(object->className());
-                }
             }
         }
     }
 
     setEnabled(document->isParsedCorrectly());
     m_editorWidget = editorWidget;
-    contextWidget()->setParent(editorWidget->parentWidget()->parentWidget());
-    contextWidget()->colorDialog()->setParent(editorWidget->parentWidget()->parentWidget());
+    contextWidget()->setParent(editorWidget->parentWidget());
+    contextWidget()->colorDialog()->setParent(editorWidget->parentWidget());
 
     if (cast<UiObjectDefinition*>(node) || cast<UiObjectBinding*>(node)) {
-        UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(node);
-        UiObjectBinding *objectBinding = cast<UiObjectBinding*>(node);
+        auto objectDefinition = cast<const UiObjectDefinition*>(node);
+        auto objectBinding = cast<const UiObjectBinding*>(node);
 
         QString name;
         quint32 offset = 0;
         quint32 end = 0;
-        UiObjectInitializer *initializer = 0;
+        UiObjectInitializer *initializer = nullptr;
         if (objectDefinition) {
             name = objectDefinition->qualifiedTypeNameId->name.toString();
             initializer = objectDefinition->initializer;
@@ -197,7 +177,7 @@ void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, co
         reg = reg.intersected(rect);
 
         if (contextWidget()->acceptsType(m_prototypes)) {
-            m_node = 0;
+            m_node = nullptr;
             PropertyReader propertyReader(document, initializer);
             QTextCursor tc = m_editorWidget->textCursor();
             tc.setPosition(offset);
@@ -217,17 +197,17 @@ void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, co
             else
                 contextWidget()->rePosition(p3 , p1, p2, QmlJsEditingSettings::get().pinContextPane());
             contextWidget()->setOptions(QmlJsEditingSettings::get().enableContextPane(), QmlJsEditingSettings::get().pinContextPane());
-            contextWidget()->setPath(document->path());
+            contextWidget()->setPath(document->path().toString());
             contextWidget()->setProperties(&propertyReader);
             m_doc = document;
             m_node = node;
         } else {
-            contextWidget()->setParent(0);
+            contextWidget()->setParent(nullptr);
             contextWidget()->hide();
             contextWidget()->colorDialog()->hide();
         }
     } else {
-        contextWidget()->setParent(0);
+        contextWidget()->setParent(nullptr);
         contextWidget()->hide();
         contextWidget()->colorDialog()->hide();
     }
@@ -236,7 +216,7 @@ void QuickToolBar::apply(QmlCodeEditor *editorWidget, Document::Ptr document, co
 
 }
 
-bool QuickToolBar::isAvailable(QmlCodeEditor *, Document::Ptr document, Node *node)
+bool QuickToolBar::isAvailable(TextEditor::TextEditorWidget *, Document::Ptr document, Node *node)
 {
     if (document.isNull())
         return false;
@@ -246,8 +226,8 @@ bool QuickToolBar::isAvailable(QmlCodeEditor *, Document::Ptr document, Node *no
 
     QString name;
 
-    UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(node);
-    UiObjectBinding *objectBinding = cast<UiObjectBinding*>(node);
+    auto objectDefinition = cast<const UiObjectDefinition*>(node);
+    auto objectBinding = cast<const UiObjectBinding*>(node);
     if (objectDefinition)
         name = objectDefinition->qualifiedTypeNameId->name.toString();
 
@@ -275,14 +255,14 @@ void QuickToolBar::setProperty(const QString &propertyName, const QVariant &valu
 {
 
     QString stringValue = value.toString();
-    if (value.type() == QVariant::Color)
+    if (value.typeId() == QVariant::Color)
         stringValue = QLatin1Char('\"') + value.toString() + QLatin1Char('\"');
 
     if (cast<UiObjectDefinition*>(m_node) || cast<UiObjectBinding*>(m_node)) {
-        UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(m_node);
-        UiObjectBinding *objectBinding = cast<UiObjectBinding*>(m_node);
+        auto objectDefinition = cast<const UiObjectDefinition*>(m_node);
+        auto objectBinding = cast<const UiObjectBinding*>(m_node);
 
-        UiObjectInitializer *initializer = 0;
+        UiObjectInitializer *initializer = nullptr;
         if (objectDefinition)
             initializer = objectDefinition->initializer;
         else if (objectBinding)
@@ -307,8 +287,8 @@ void QuickToolBar::setProperty(const QString &propertyName, const QVariant &valu
 
         int column;
 
-        int changeSetPos = changeSet.operationList().last().pos1;
-        int changeSetLength = changeSet.operationList().last().text.length();
+        int changeSetPos = changeSet.operationList().constLast().pos1;
+        int changeSetLength = changeSet.operationList().constLast().text.length();
         QTextCursor tc = m_editorWidget->textCursor();
         tc.beginEditBlock();
         changeSet.apply(&tc);
@@ -324,10 +304,10 @@ void QuickToolBar::setProperty(const QString &propertyName, const QVariant &valu
 void QuickToolBar::removeProperty(const QString &propertyName)
 {
     if (cast<UiObjectDefinition*>(m_node) || cast<UiObjectBinding*>(m_node)) {
-        UiObjectDefinition *objectDefinition = cast<UiObjectDefinition*>(m_node);
-        UiObjectBinding *objectBinding = cast<UiObjectBinding*>(m_node);
+        auto objectDefinition = cast<const UiObjectDefinition*>(m_node);
+        auto objectBinding = cast<const UiObjectBinding*>(m_node);
 
-        UiObjectInitializer *initializer = 0;
+        UiObjectInitializer *initializer = nullptr;
         if (objectDefinition)
             initializer = objectDefinition->initializer;
         else if (objectBinding)
@@ -414,13 +394,13 @@ void QuickToolBar::onEnabledChanged(bool b)
 void QuickToolBar::indentLines(int startLine, int endLine)
 {
     if (startLine > 0) {
-        TextEditor::TabSettings tabSettings = m_editorWidget->codeDocument()->tabSettings();
+        TextEditor::TabSettings tabSettings = m_editorWidget->textDocument()->tabSettings();
         for (int i = startLine; i <= endLine; i++) {
             QTextBlock start = m_editorWidget->document()->findBlockByNumber(i);
 
             if (start.isValid()) {
-                QmlJSEditor::Internal::Indenter indenterMy;
-                indenterMy.indentBlock(m_editorWidget->document(), start, QChar::Null, tabSettings);
+                QmlJSEditor::Internal::Indenter indenterMy(m_editorWidget->document());
+                indenterMy.indentBlock(start, QChar::Null, tabSettings);
             }
         }
     }

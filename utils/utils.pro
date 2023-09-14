@@ -5,7 +5,8 @@ TARGET   = Utils
 QT      += core-private widgets-private widgets qml quick websockets multimedia quickcontrols2
 gcc:QMAKE_CXXFLAGS += -pedantic-errors
 msvc:QMAKE_CXXFLAGS += -permissive-
-DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000 \
+msvc:LIBS += -lShell32
+DEFINES += QT_DISABLE_DEPRECATED_UP_TO=0x060502 \
            UTILS_LIBRARY \
            ASYNC_LIBRARY \
            ZIPASYNC_LIBRARY \

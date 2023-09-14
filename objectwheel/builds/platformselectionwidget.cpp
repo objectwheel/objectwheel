@@ -12,6 +12,7 @@
 #include <QApplication>
 #include <QPainter>
 #include <QPushButton>
+#include <QPainterPath>
 
 enum Availability {
     InFuture,
@@ -121,7 +122,7 @@ PlatformSelectionWidget::PlatformSelectionWidget(QWidget* parent) : QWidget(pare
         p.setColor(QPalette::Highlight, QStringLiteral("#16000000"));
         m_platformList->setPalette(p);
     };
-    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
+//    connect(qApp, &QApplication::paletteChanged, this, updatePalette);
     updatePalette();
 
     auto androidItem = new QListWidgetItem;

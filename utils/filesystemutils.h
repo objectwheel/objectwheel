@@ -4,8 +4,6 @@
 #include <utils_global.h>
 #include <QtGlobal>
 
-class QStringList;
-
 namespace FileSystemUtils {
 
 UTILS_EXPORT bool copy(const QString& fromPath, const QString& toDir, bool content = false,

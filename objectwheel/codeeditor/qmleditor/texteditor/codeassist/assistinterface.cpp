@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "assistinterface.h"
 
@@ -101,14 +79,15 @@ using namespace TextEditor;
 
 namespace TextEditor {
 
-AssistInterface::AssistInterface(QTextDocument *textDocument,
-                                               int position,
-                                               const QString &fileName,
-                                               AssistReason reason)
-    : m_textDocument(textDocument)
+AssistInterface::AssistInterface(const QTextCursor &cursor,
+                                 const Utils::FilePath &filePath,
+                                 AssistReason reason)
+    : m_textDocument(cursor.document())
+    , m_cursor(cursor)
     , m_isAsync(false)
-    , m_position(position)
-    , m_fileName(fileName)
+    , m_position(cursor.position())
+    , m_anchor(cursor.anchor())
+    , m_filePath(filePath)
     , m_reason(reason)
 {}
 
@@ -134,13 +113,16 @@ void AssistInterface::prepareForAsyncUse()
     m_userStates.reserve(m_textDocument->blockCount());
     for (QTextBlock block = m_textDocument->firstBlock(); block.isValid(); block = block.next())
         m_userStates.append(block.userState());
-    m_textDocument = 0;
+    m_textDocument = nullptr;
     m_isAsync = true;
 }
 
 void AssistInterface::recreateTextDocument()
 {
     m_textDocument = new QTextDocument(m_text);
+    m_cursor = QTextCursor(m_textDocument);
+    m_cursor.setPosition(m_anchor);
+    m_cursor.setPosition(m_position, QTextCursor::KeepAnchor);
     m_text.clear();
 
     QTC_CHECK(m_textDocument->blockCount() == m_userStates.count());

@@ -1,55 +1,36 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
+
+#include "filesearch.h"
 
 #include "algorithm.h"
-#include "filesearch.h"
-#include "fileutils.h"
+#include "filepath.h"
 #include "mapreduce.h"
+#include "qtcassert.h"
+#include "searchresultitem.h"
+#include "stringutils.h"
+#include "utilstr.h"
 
-#include <QCoreApplication>
+#include <QLoggingCategory>
 #include <QMutex>
-#include <QRegExp>
 #include <QRegularExpression>
-#include <QTextCodec>
 
 #include <cctype>
+
+Q_LOGGING_CATEGORY(searchLog, "qtc.utils.filesearch", QtWarningMsg)
 
 using namespace Utils;
 
 static inline QString msgCanceled(const QString &searchTerm, int numMatches, int numFilesSearched)
 {
-    return QCoreApplication::translate("Utils::FileSearch",
-                                       "%1: canceled. %n occurrences found in %2 files.",
-                                       0, numMatches).arg(searchTerm).arg(numFilesSearched);
+    return Tr::tr("%1: canceled. %n occurrences found in %2 files.",
+                  nullptr, numMatches).arg(searchTerm).arg(numFilesSearched);
 }
 
 static inline QString msgFound(const QString &searchTerm, int numMatches, int numFilesSearched)
 {
-    return QCoreApplication::translate("Utils::FileSearch",
-                                       "%1: %n occurrences found in %2 files.",
-                                       0, numMatches).arg(searchTerm).arg(numFilesSearched);
+    return Tr::tr("%1: %n occurrences found in %2 files.",
+                  nullptr, numMatches).arg(searchTerm).arg(numFilesSearched);
 }
 
 namespace {
@@ -64,19 +45,17 @@ QString clippedText(const QString &text, int maxLength)
 }
 
 // returns success
-bool openStream(const QString &filePath, QTextCodec *encoding, QTextStream *stream, QFile *file,
-                QString *tempString,
-                const QMap<QString, QString> &fileToContentsMap)
+static bool getFileContent(const FilePath &filePath,
+                           QString *tempString,
+                           const QMap<FilePath, QString> &fileToContentsMap)
 {
     if (fileToContentsMap.contains(filePath)) {
         *tempString = fileToContentsMap.value(filePath);
-        stream->setString(tempString);
     } else {
-        file->setFileName(filePath);
-        if (!file->open(QIODevice::ReadOnly))
+        const expected_str<QByteArray> content = filePath.fileContents();
+        if (!content)
             return false;
-        stream->setDevice(file);
-        stream->setCodec(encoding);
+        *tempString = *content;
     }
     return true;
 }
@@ -84,13 +63,14 @@ bool openStream(const QString &filePath, QTextCodec *encoding, QTextStream *stre
 class FileSearch
 {
 public:
-    FileSearch(const QString &searchTerm, QTextDocument::FindFlags flags,
-               const QMap<QString, QString> &fileToContentsMap);
-    void operator()(QFutureInterface<FileSearchResultList> &futureInterface,
+    FileSearch(const QString &searchTerm,
+               QTextDocument::FindFlags flags,
+               const QMap<FilePath, QString> &fileToContentsMap);
+    void operator()(QFutureInterface<SearchResultItems> &futureInterface,
                     const FileIterator::Item &item) const;
 
 private:
-    QMap<QString, QString> fileToContentsMap;
+    QMap<FilePath, QString> fileToContentsMap;
     QString searchTermLower;
     QString searchTermUpper;
     int termMaxIndex;
@@ -104,22 +84,24 @@ private:
 class FileSearchRegExp
 {
 public:
-    FileSearchRegExp(const QString &searchTerm, QTextDocument::FindFlags flags,
-                     const QMap<QString, QString> &fileToContentsMap);
+    FileSearchRegExp(const QString &searchTerm,
+                     QTextDocument::FindFlags flags,
+                     const QMap<FilePath, QString> &fileToContentsMap);
     FileSearchRegExp(const FileSearchRegExp &other);
-    void operator()(QFutureInterface<FileSearchResultList> &futureInterface,
+    void operator()(QFutureInterface<SearchResultItems> &futureInterface,
                     const FileIterator::Item &item) const;
 
 private:
     QRegularExpressionMatch doGuardedMatch(const QString &line, int offset) const;
 
-    QMap<QString, QString> fileToContentsMap;
+    QMap<FilePath, QString> fileToContentsMap;
     QRegularExpression expression;
     mutable QMutex mutex;
 };
 
-FileSearch::FileSearch(const QString &searchTerm, QTextDocument::FindFlags flags,
-                       const QMap<QString, QString> &fileToContentsMap)
+FileSearch::FileSearch(const QString &searchTerm,
+                       QTextDocument::FindFlags flags,
+                       const QMap<FilePath, QString> &fileToContentsMap)
 {
     this->fileToContentsMap = fileToContentsMap;
     caseSensitive = (flags & QTextDocument::FindCaseSensitively);
@@ -132,28 +114,28 @@ FileSearch::FileSearch(const QString &searchTerm, QTextDocument::FindFlags flags
     termDataUpper = searchTermUpper.constData();
 }
 
-void FileSearch::operator()(QFutureInterface<FileSearchResultList> &futureInterface,
+void FileSearch::operator()(QFutureInterface<SearchResultItems> &futureInterface,
                             const FileIterator::Item &item) const
 {
     if (futureInterface.isCanceled())
         return;
+    qCDebug(searchLog) << "Searching in" << item.filePath;
     futureInterface.setProgressRange(0, 1);
     futureInterface.setProgressValue(0);
-    FileSearchResultList results;
-    QFile file;
-    QTextStream stream;
+    SearchResultItems results;
     QString tempString;
-    if (!openStream(item.filePath, item.encoding, &stream, &file, &tempString, fileToContentsMap)) {
+    if (!getFileContent(item.filePath, &tempString, fileToContentsMap)) {
+        qCDebug(searchLog) << "- failed to get content for" << item.filePath;
         futureInterface.cancel(); // failure
         return;
     }
+    QTextStream stream(&tempString);
     int lineNr = 0;
 
     while (!stream.atEnd()) {
         ++lineNr;
         const QString chunk = stream.readLine();
-        const QString resultItemText = clippedText(chunk, MAX_LINE_SIZE);
-        int chunkLength = chunk.length();
+        const int chunkLength = chunk.length();
         const QChar *chunkPtr = chunk.constData();
         const QChar *chunkEnd = chunkPtr + chunkLength - 1;
         for (const QChar *regionPtr = chunkPtr; regionPtr + termMaxIndex <= chunkEnd; ++regionPtr) {
@@ -200,32 +182,37 @@ void FileSearch::operator()(QFutureInterface<FileSearchResultList> &futureInterf
                                && *regionCursor != termDataUpper[regionIndex])
                               ) {
                             equal = false;
+                            break;
                         }
                     }
                 }
                 if (equal) {
-                    results << FileSearchResult(item.filePath, lineNr, resultItemText,
-                                                regionPtr - chunkPtr, termMaxIndex + 1,
-                                                QStringList());
+                    SearchResultItem result;
+                    result.setFilePath(item.filePath);
+                    result.setMainRange(lineNr, regionPtr - chunkPtr, termMaxIndex + 1);
+                    result.setDisplayText(clippedText(chunk, MAX_LINE_SIZE));
+                    result.setUserData(QStringList());
+                    result.setUseTextEditorFont(true);
+                    results << result;
                     regionPtr += termMaxIndex; // another +1 done by for-loop
                 }
             }
         }
-        if (futureInterface.isPaused())
+        if (futureInterface.isSuspended())
             futureInterface.waitForResume();
         if (futureInterface.isCanceled())
             break;
     }
-    if (file.isOpen())
-        file.close();
     if (!futureInterface.isCanceled()) {
         futureInterface.reportResult(results);
         futureInterface.setProgressValue(1);
     }
+    qCDebug(searchLog) << "- finished searching in" << item.filePath;
 }
 
-FileSearchRegExp::FileSearchRegExp(const QString &searchTerm, QTextDocument::FindFlags flags,
-                                   const QMap<QString, QString> &fileToContentsMap)
+FileSearchRegExp::FileSearchRegExp(const QString &searchTerm,
+                                   QTextDocument::FindFlags flags,
+                                   const QMap<FilePath, QString> &fileToContentsMap)
 {
     this->fileToContentsMap = fileToContentsMap;
     QString term = searchTerm;
@@ -248,21 +235,26 @@ QRegularExpressionMatch FileSearchRegExp::doGuardedMatch(const QString &line, in
     return expression.match(line, offset);
 }
 
-void FileSearchRegExp::operator()(QFutureInterface<FileSearchResultList> &futureInterface,
+void FileSearchRegExp::operator()(QFutureInterface<SearchResultItems> &futureInterface,
                                   const FileIterator::Item &item) const
 {
+    if (!expression.isValid()) {
+        futureInterface.cancel();
+        return;
+    }
     if (futureInterface.isCanceled())
         return;
+    qCDebug(searchLog) << "Searching in" << item.filePath;
     futureInterface.setProgressRange(0, 1);
     futureInterface.setProgressValue(0);
-    FileSearchResultList results;
-    QFile file;
-    QTextStream stream;
+    SearchResultItems results;
     QString tempString;
-    if (!openStream(item.filePath, item.encoding, &stream, &file, &tempString, fileToContentsMap)) {
+    if (!getFileContent(item.filePath, &tempString, fileToContentsMap)) {
+        qCDebug(searchLog) << "- failed to get content for" << item.filePath;
         futureInterface.cancel(); // failure
         return;
     }
+    QTextStream stream(&tempString);
     int lineNr = 0;
 
     QString line;
@@ -275,39 +267,42 @@ void FileSearchRegExp::operator()(QFutureInterface<FileSearchResultList> &future
         int pos = 0;
         while ((match = doGuardedMatch(line, pos)).hasMatch()) {
             pos = match.capturedStart();
-            results << FileSearchResult(item.filePath, lineNr, resultItemText,
-                                          pos, match.capturedLength(),
-                                          match.capturedTexts());
+            SearchResultItem result;
+            result.setFilePath(item.filePath);
+            result.setMainRange(lineNr, pos, match.capturedLength());
+            result.setDisplayText(resultItemText);
+            result.setUserData(match.capturedTexts());
+            result.setUseTextEditorFont(true);
+            results << result;
             if (match.capturedLength() == 0)
                 break;
             pos += match.capturedLength();
             if (pos >= lengthOfLine)
                 break;
         }
-        if (futureInterface.isPaused())
+        if (futureInterface.isSuspended())
             futureInterface.waitForResume();
         if (futureInterface.isCanceled())
             break;
     }
-    if (file.isOpen())
-        file.close();
     if (!futureInterface.isCanceled()) {
         futureInterface.reportResult(results);
         futureInterface.setProgressValue(1);
     }
+    qCDebug(searchLog) << "- finished searching in" << item.filePath;
 }
 
 struct SearchState
 {
     SearchState(const QString &term, FileIterator *iterator) : searchTerm(term), files(iterator) {}
     QString searchTerm;
-    FileIterator *files = 0;
-    FileSearchResultList cachedResults;
+    FileIterator *files = nullptr;
+    SearchResultItems cachedResults;
     int numFilesSearched = 0;
     int numMatches = 0;
 };
 
-SearchState initFileSearch(QFutureInterface<FileSearchResultList> &futureInterface,
+SearchState initFileSearch(QFutureInterface<SearchResultItems> &futureInterface,
                            const QString &searchTerm, FileIterator *files)
 {
     futureInterface.setProgressRange(0, files->maxProgress());
@@ -315,9 +310,9 @@ SearchState initFileSearch(QFutureInterface<FileSearchResultList> &futureInterfa
     return SearchState(searchTerm, files);
 }
 
-void collectSearchResults(QFutureInterface<FileSearchResultList> &futureInterface,
+void collectSearchResults(QFutureInterface<SearchResultItems> &futureInterface,
                           SearchState &state,
-                          const FileSearchResultList &results)
+                          const SearchResultItems &results)
 {
     state.numMatches += results.size();
     state.cachedResults << results;
@@ -336,7 +331,7 @@ void collectSearchResults(QFutureInterface<FileSearchResultList> &futureInterfac
     }
 }
 
-void cleanUpFileSearch(QFutureInterface<FileSearchResultList> &futureInterface,
+void cleanUpFileSearch(QFutureInterface<SearchResultItems> &futureInterface,
                        SearchState &state)
 {
     if (!state.cachedResults.isEmpty()) {
@@ -359,11 +354,13 @@ void cleanUpFileSearch(QFutureInterface<FileSearchResultList> &futureInterface,
 
 } // namespace
 
-QFuture<FileSearchResultList> Utils::findInFiles(const QString &searchTerm, FileIterator *files,
-    QTextDocument::FindFlags flags, const QMap<QString, QString> &fileToContentsMap)
+QFuture<SearchResultItems> Utils::findInFiles(const QString &searchTerm,
+                                              FileIterator *files,
+                                              QTextDocument::FindFlags flags,
+                                              const QMap<FilePath, QString> &fileToContentsMap)
 {
     return mapReduce(files->begin(), files->end(),
-                     [searchTerm, files](QFutureInterface<FileSearchResultList> &futureInterface) {
+                     [searchTerm, files](QFutureInterface<SearchResultItems> &futureInterface) {
                          return initFileSearch(futureInterface, searchTerm, files);
                      },
                      FileSearch(searchTerm, flags, fileToContentsMap),
@@ -371,11 +368,14 @@ QFuture<FileSearchResultList> Utils::findInFiles(const QString &searchTerm, File
                      &cleanUpFileSearch);
 }
 
-QFuture<FileSearchResultList> Utils::findInFilesRegExp(const QString &searchTerm, FileIterator *files,
-    QTextDocument::FindFlags flags, const QMap<QString, QString> &fileToContentsMap)
+QFuture<SearchResultItems> Utils::findInFilesRegExp(
+    const QString &searchTerm,
+    FileIterator *files,
+    QTextDocument::FindFlags flags,
+    const QMap<FilePath, QString> &fileToContentsMap)
 {
     return mapReduce(files->begin(), files->end(),
-                     [searchTerm, files](QFutureInterface<FileSearchResultList> &futureInterface) {
+                     [searchTerm, files](QFutureInterface<SearchResultItems> &futureInterface) {
                          return initFileSearch(futureInterface, searchTerm, files);
                      },
                      FileSearchRegExp(searchTerm, flags, fileToContentsMap),
@@ -471,45 +471,37 @@ QString matchCaseReplacement(const QString &originalText, const QString &replace
 }
 } // namespace
 
-static QList<QRegExp> filtersToRegExps(const QStringList &filters)
+static QList<QRegularExpression> filtersToRegExps(const QStringList &filters)
 {
     return Utils::transform(filters, [](const QString &filter) {
-        return QRegExp(filter, Qt::CaseInsensitive, QRegExp::Wildcard);
+        return QRegularExpression(Utils::wildcardToRegularExpression(filter),
+                                  QRegularExpression::CaseInsensitiveOption);
     });
 }
 
-static bool matches(const QList<QRegExp> &exprList, const QString &filePath)
+static bool matches(const QList<QRegularExpression> &exprList, const FilePath &filePath)
 {
-    return Utils::anyOf(exprList, [&filePath](QRegExp reg) {
-        return (reg.exactMatch(filePath)
-                || reg.exactMatch(Utils::FileName::fromString(filePath).fileName()));
+    return Utils::anyOf(exprList, [&filePath](const QRegularExpression &reg) {
+        return (reg.match(filePath.toString()).hasMatch()
+                || reg.match(filePath.fileName()).hasMatch());
     });
 }
 
-static bool isFileIncluded(const QList<QRegExp> &filterRegs, const QList<QRegExp> &exclusionRegs,
-                           const QString &filePath)
+static bool isFileIncluded(const QList<QRegularExpression> &filterRegs,
+                           const QList<QRegularExpression> &exclusionRegs,
+                           const FilePath &filePath)
 {
     const bool isIncluded = filterRegs.isEmpty() || matches(filterRegs, filePath);
     return isIncluded && (exclusionRegs.isEmpty() || !matches(exclusionRegs, filePath));
 }
 
-std::function<bool(const QString &)>
-filterFileFunction(const QStringList &filters, const QStringList &exclusionFilters)
+std::function<FilePaths(const FilePaths &)> filterFilesFunction(const QStringList &filters,
+                                                                const QStringList &exclusionFilters)
 {
-    const QList<QRegExp> filterRegs = filtersToRegExps(filters);
-    const QList<QRegExp> exclusionRegs = filtersToRegExps(exclusionFilters);
-    return [filterRegs, exclusionRegs](const QString &filePath) {
-        return isFileIncluded(filterRegs, exclusionRegs, filePath);
-    };
-}
-
-std::function<QStringList(const QStringList &)>
-filterFilesFunction(const QStringList &filters, const QStringList &exclusionFilters)
-{
-    const QList<QRegExp> filterRegs = filtersToRegExps(filters);
-    const QList<QRegExp> exclusionRegs = filtersToRegExps(exclusionFilters);
-    return [filterRegs, exclusionRegs](const QStringList &filePaths) {
-        return Utils::filtered(filePaths, [&filterRegs, &exclusionRegs](const QString &filePath) {
+    const QList<QRegularExpression> filterRegs = filtersToRegExps(filters);
+    const QList<QRegularExpression> exclusionRegs = filtersToRegExps(exclusionFilters);
+    return [filterRegs, exclusionRegs](const FilePaths &filePaths) {
+        return Utils::filtered(filePaths, [&filterRegs, &exclusionRegs](const FilePath &filePath) {
             return isFileIncluded(filterRegs, exclusionRegs, filePath);
         });
     };
@@ -527,19 +519,20 @@ QStringList splitFilterUiText(const QString &text)
 
 QString msgFilePatternLabel()
 {
-    return QCoreApplication::translate("Utils::FileSearch", "Fi&le pattern:");
+    return Tr::tr("Fi&le pattern:");
 }
 
 QString msgExclusionPatternLabel()
 {
-    return QCoreApplication::translate("Utils::FileSearch", "Excl&usion pattern:");
+    return Tr::tr("Excl&usion pattern:");
 }
 
-QString msgFilePatternToolTip()
+QString msgFilePatternToolTip(InclusionType inclusionType)
 {
-    return QCoreApplication::translate("Utils::FileSearch",
-                                       "List of comma separated wildcard filters. "
-                                       "Files with file name or full file path matching any filter are included.");
+    return Tr::tr("List of comma separated wildcard filters. ")
+        + (inclusionType == InclusionType::Included
+            ? Tr::tr("Files with file name or full file path matching any filter are included.")
+            : Tr::tr("Files with file name or full file path matching any filter are excluded."));
 }
 
 QString matchCaseReplacement(const QString &originalText, const QString &replaceText)
@@ -596,20 +589,18 @@ FileIterator::const_iterator FileIterator::end() const
 
 // #pragma mark -- FileListIterator
 
-QTextCodec *encodingAt(const QList<QTextCodec *> &encodings, int index)
+QList<FileIterator::Item> constructItems(const FilePaths &fileList)
 {
-    if (index >= 0 && index < encodings.size())
-        return encodings.at(index);
-    return QTextCodec::codecForLocale();
+    QList<FileIterator::Item> items;
+    items.reserve(fileList.size());
+    for (int i = 0; i < fileList.size(); ++i)
+        items.append(FileIterator::Item(fileList.at(i)));
+    return items;
 }
 
-FileListIterator::FileListIterator(const QStringList &fileList,
-                                   const QList<QTextCodec *> encodings)
-    : m_maxIndex(-1)
+FileListIterator::FileListIterator(const FilePaths &fileList)
+    : m_items(constructItems(fileList))
 {
-    m_items.reserve(fileList.size());
-    for (int i = 0; i < fileList.size(); ++i)
-        m_items.append(Item(fileList.at(i), encodingAt(encodings, i)));
 }
 
 void FileListIterator::update(int requestedIndex)
@@ -644,18 +635,22 @@ namespace {
     const int MAX_PROGRESS = 1000;
 }
 
-SubDirFileIterator::SubDirFileIterator(const QStringList &directories, const QStringList &filters,
-                                       const QStringList &exclusionFilters, QTextCodec *encoding)
-    : m_filterFiles(filterFilesFunction(filters, exclusionFilters)),
-      m_progress(0)
+SubDirFileIterator::SubDirFileIterator(const FilePaths &directories,
+                                       const QStringList &filters,
+                                       const QStringList &exclusionFilters)
+    : m_filterFiles(filterFilesFunction(filters, exclusionFilters))
+    , m_progress(0)
 {
-    m_encoding = (encoding == 0 ? QTextCodec::codecForLocale() : encoding);
     qreal maxPer = qreal(MAX_PROGRESS) / directories.count();
-    foreach (const QString &directoryEntry, directories) {
+    for (const FilePath &directoryEntry : directories) {
         if (!directoryEntry.isEmpty()) {
-            m_dirs.push(QDir(directoryEntry));
-            m_progressValues.push(maxPer);
-            m_processedValues.push(false);
+            const FilePath canonicalPath = directoryEntry.canonicalPath();
+            if (!canonicalPath.isEmpty() && directoryEntry.exists()) {
+                m_dirs.push(directoryEntry);
+                m_knownDirs.insert(canonicalPath);
+                m_progressValues.push(maxPer);
+                m_processedValues.push(false);
+            }
         }
     }
 }
@@ -671,24 +666,27 @@ void SubDirFileIterator::update(int index)
         return;
     // collect files from the directories until we have enough for the given index
     while (!m_dirs.isEmpty() && index >= m_items.size()) {
-        QDir dir = m_dirs.pop();
+        FilePath dir = m_dirs.pop();
         const qreal dirProgressMax = m_progressValues.pop();
         const bool processed = m_processedValues.pop();
         if (dir.exists()) {
-            const QString dirPath = dir.path();
-            QStringList subDirs;
-            if (!processed)
-                subDirs = dir.entryList(QDir::Dirs|QDir::Hidden|QDir::NoDotAndDotDot);
-            if (subDirs.isEmpty()) {
-                const QStringList allFileEntries = dir.entryList(QDir::Files|QDir::Hidden);
-                const QStringList allFilePaths = Utils::transform(allFileEntries,
-                                                                  [&dirPath](const QString &entry) {
-                    return QString(dirPath + '/' + entry);
-                });
-                const QStringList filePaths = m_filterFiles(allFilePaths);
+            using Dir = FilePath;
+            using CanonicalDir = FilePath;
+            std::vector<std::pair<Dir, CanonicalDir>> subDirs;
+            if (!processed) {
+                for (const FilePath &entry :
+                     dir.dirEntries(QDir::Dirs | QDir::Hidden | QDir::NoDotAndDotDot)) {
+                    const FilePath canonicalDir = entry.canonicalPath();
+                    if (!m_knownDirs.contains(canonicalDir))
+                        subDirs.emplace_back(entry, canonicalDir);
+                }
+            }
+            if (subDirs.empty()) {
+                const FilePaths allFilePaths = dir.dirEntries(QDir::Files | QDir::Hidden);
+                const FilePaths filePaths = m_filterFiles(allFilePaths);
                 m_items.reserve(m_items.size() + filePaths.size());
-                Utils::reverseForeach(filePaths, [this](const QString &file) {
-                    m_items.append(new Item(file, m_encoding));
+                Utils::reverseForeach(filePaths, [this](const FilePath &file) {
+                    m_items.append(new Item(file));
                 });
                 m_progress += dirProgressMax;
             } else {
@@ -696,14 +694,13 @@ void SubDirFileIterator::update(int index)
                 m_dirs.push(dir);
                 m_progressValues.push(subProgress);
                 m_processedValues.push(true);
-                QStringListIterator it(subDirs);
-                it.toBack();
-                while (it.hasPrevious()) {
-                    const QString &directory = it.previous();
-                    m_dirs.push(QDir(dirPath + QLatin1Char('/') + directory));
-                    m_progressValues.push(subProgress);
-                    m_processedValues.push(false);
-                }
+                Utils::reverseForeach(subDirs,
+                                      [this, subProgress](const std::pair<Dir, CanonicalDir> &dir) {
+                                          m_dirs.push(dir.first);
+                                          m_knownDirs.insert(dir.second);
+                                          m_progressValues.push(subProgress);
+                                          m_processedValues.push(false);
+                                      });
             }
         } else {
             m_progress += dirProgressMax;

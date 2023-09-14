@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "genericproposalwidget.h"
 #include "genericproposalmodel.h"
@@ -31,11 +9,12 @@
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/completionsettings.h>
 #include <texteditor/texteditorconstants.h>
+#include <texteditor/codeassist/assistproposaliteminterface.h>
 
-#include <utils/tooltip/reuse.h>
+#include <utils/algorithm.h>
 #include <utils/faketooltip.h>
 #include <utils/hostosinfo.h>
-#include <utils/tooltip/reuse.h>
+#include <utils/utilsicons.h>
 
 #include <QRect>
 #include <QLatin1String>
@@ -47,10 +26,11 @@
 #include <QVBoxLayout>
 #include <QListView>
 #include <QAbstractItemView>
+#include <QScreen>
 #include <QScrollBar>
 #include <QKeyEvent>
-#include <QDesktopWidget>
 #include <QLabel>
+#include <QStyledItemDelegate>
 
 using namespace Utils;
 
@@ -66,9 +46,10 @@ class ModelAdapter : public QAbstractListModel
 public:
     ModelAdapter(GenericProposalModelPtr completionModel, QWidget *parent);
 
-    virtual int rowCount(const QModelIndex &) const;
-    virtual QVariant data(const QModelIndex &index, int role) const;
+    int rowCount(const QModelIndex &) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
 
+    enum UserRoles{ FixItRole = Qt::UserRole, DetailTextFormatRole };
 private:
     GenericProposalModelPtr m_completionModel;
 };
@@ -88,12 +69,21 @@ QVariant ModelAdapter::data(const QModelIndex &index, int role) const
     if (!index.isValid() || index.row() >= m_completionModel->size())
         return QVariant();
 
-    if (role == Qt::DisplayRole)
-        return m_completionModel->text(index.row());
-    else if (role == Qt::DecorationRole)
+    if (role == Qt::DisplayRole) {
+        const QString text = m_completionModel->text(index.row());
+        const int lineBreakPos = text.indexOf('\n');
+        if (lineBreakPos < 0)
+            return text;
+        return QString(text.left(lineBreakPos) + QLatin1String(" (...)"));
+    } else if (role == Qt::DecorationRole) {
         return m_completionModel->icon(index.row());
-    else if (role == Qt::WhatsThisRole)
+    } else if (role == Qt::WhatsThisRole) {
         return m_completionModel->detail(index.row());
+    } else if (role == DetailTextFormatRole) {
+        return m_completionModel->detailFormat(index.row());
+    } else if (role == FixItRole) {
+        return m_completionModel->proposalItem(index.row())->requiresFixIts();
+    }
 
     return QVariant();
 }
@@ -104,10 +94,10 @@ QVariant ModelAdapter::data(const QModelIndex &index, int role) const
 class GenericProposalInfoFrame : public FakeToolTip
 {
 public:
-    GenericProposalInfoFrame(QWidget *parent = 0)
+    GenericProposalInfoFrame(QWidget *parent = nullptr)
         : FakeToolTip(parent), m_label(new QLabel(this))
     {
-        QVBoxLayout *layout = new QVBoxLayout(this);
+        auto layout = new QVBoxLayout(this);
         layout->setContentsMargins(0, 0, 0, 0);
         layout->setSpacing(0);
         layout->addWidget(m_label);
@@ -115,7 +105,6 @@ public:
         // Limit horizontal width
         m_label->setSizePolicy(QSizePolicy::Fixed, m_label->sizePolicy().verticalPolicy());
 
-        m_label->setTextFormat(Qt::RichText);
         m_label->setForegroundRole(QPalette::ToolTipText);
         m_label->setBackgroundRole(QPalette::ToolTipBase);
     }
@@ -125,18 +114,21 @@ public:
         m_label->setText(text);
     }
 
+    void setTextFormat(Qt::TextFormat format)
+    {
+        m_label->setTextFormat(format);
+    }
+
     // Workaround QTCREATORBUG-11653
     void calculateMaximumWidth()
     {
-        const QDesktopWidget *desktopWidget = QApplication::desktop();
-        const int desktopWidth = QApplication::primaryScreen()->virtualSiblings().size() > 0
-                ? desktopWidget->width()
-                : QApplication::primaryScreen()->availableGeometry().width();
+        const QRect screenGeometry = screen()->availableGeometry();
+        const int xOnScreen = this->pos().x() - screenGeometry.x();
         const QMargins widgetMargins = contentsMargins();
         const QMargins layoutMargins = layout()->contentsMargins();
         const int margins = widgetMargins.left() + widgetMargins.right()
                 + layoutMargins.left() + layoutMargins.right();
-        m_label->setMaximumWidth(desktopWidth - this->pos().x() - margins);
+        m_label->setMaximumWidth(qMax(0, screenGeometry.width() - xOnScreen - margins));
     }
 
 private:
@@ -148,6 +140,7 @@ private:
 // -----------------------
 class GenericProposalListView : public QListView
 {
+    friend class ProposalItemDelegate;
 public:
     GenericProposalListView(QWidget *parent);
 
@@ -162,10 +155,53 @@ public:
     void selectLastRow() { selectRow(model()->rowCount() - 1); }
 };
 
+class ProposalItemDelegate : public QStyledItemDelegate
+{
+    Q_OBJECT
+public:
+    explicit ProposalItemDelegate(GenericProposalListView *parent = nullptr)
+        : QStyledItemDelegate(parent)
+        , m_parent(parent)
+    {
+    }
+
+    void paint(QPainter *painter,
+               const QStyleOptionViewItem &option,
+               const QModelIndex &index) const override
+    {
+        static const QIcon fixItIcon = ::Utils::Icons::CODEMODEL_FIXIT.icon();
+
+        QStyledItemDelegate::paint(painter, option, index);
+
+        if (m_parent->model()->data(index, ModelAdapter::FixItRole).toBool()) {
+            const QRect itemRect = m_parent->rectForIndex(index);
+            const QScrollBar *verticalScrollBar = m_parent->verticalScrollBar();
+
+            const int x = m_parent->width() - itemRect.height() - (verticalScrollBar->isVisible()
+                                                                   ? verticalScrollBar->width()
+                                                                   : 0);
+            const int iconSize = itemRect.height() - 5;
+            fixItIcon.paint(painter, QRect(x, itemRect.y() - m_parent->verticalOffset(),
+                                           iconSize, iconSize));
+        }
+    }
+
+    QSize sizeHint(const QStyleOptionViewItem &option, const QModelIndex &index) const override
+    {
+        QSize size(QStyledItemDelegate::sizeHint(option, index));
+        if (m_parent->model()->data(index, ModelAdapter::FixItRole).toBool())
+            size.setWidth(size.width() + m_parent->rectForIndex(index).height() - 5);
+        return size;
+    }
+private:
+    GenericProposalListView *m_parent;
+};
+
 GenericProposalListView::GenericProposalListView(QWidget *parent)
     : QListView(parent)
 {
     setVerticalScrollMode(QAbstractItemView::ScrollPerItem);
+    setItemDelegate(new ProposalItemDelegate(this));
 }
 
 QSize GenericProposalListView::calculateSize() const
@@ -176,10 +212,9 @@ QSize GenericProposalListView::calculateSize() const
     const int visibleItems = qMin(model()->rowCount(), maxVisibleItems);
     const int firstVisibleRow = verticalScrollBar()->value();
 
-    const QStyleOptionViewItem &option = viewOptions();
     QSize shint;
     for (int i = 0; i < visibleItems; ++i) {
-        QSize tmp = itemDelegate()->sizeHint(option, model()->index(i + firstVisibleRow, 0));
+        QSize tmp = sizeHintForIndex(model()->index(i + firstVisibleRow, 0));
         if (shint.width() < tmp.width())
             shint = tmp;
     }
@@ -214,7 +249,6 @@ public:
     QRect m_displayRect;
     bool m_isSynchronized = true;
     bool m_explicitlySelected = false;
-    AssistReason m_reason = IdleEditor;
     AssistKind m_kind = Completion;
     bool m_justInvoked = false;
     QPointer<GenericProposalInfoFrame> m_infoFrame;
@@ -229,6 +263,7 @@ public:
 GenericProposalWidgetPrivate::GenericProposalWidgetPrivate(QWidget *completionWidget)
     : m_completionListView(new GenericProposalListView(completionWidget))
 {
+    m_completionListView->setIconSize(QSize(16, 16));
     connect(m_completionListView, &QAbstractItemView::activated,
             this, &GenericProposalWidgetPrivate::handleActivation);
 
@@ -260,6 +295,8 @@ void GenericProposalWidgetPrivate::maybeShowInfoTip()
         m_infoFrame = new GenericProposalInfoFrame(m_completionListView);
 
     m_infoFrame->move(m_completionListView->infoFramePos());
+    m_infoFrame->setTextFormat(
+        current.data(ModelAdapter::DetailTextFormatRole).value<Qt::TextFormat>());
     m_infoFrame->setText(infoTip);
     m_infoFrame->calculateMaximumWidth();
     m_infoFrame->adjustSize();
@@ -285,6 +322,7 @@ GenericProposalWidget::GenericProposalWidget()
         setFrameStyle(d->m_completionListView->frameStyle());
     }
     d->m_completionListView->setFrameStyle(QFrame::NoFrame);
+    d->m_completionListView->setAttribute(Qt::WA_MacShowFocusRect, false);
     d->m_completionListView->setUniformItemSizes(true);
     d->m_completionListView->setSelectionBehavior(QAbstractItemView::SelectItems);
     d->m_completionListView->setSelectionMode(QAbstractItemView::SingleSelection);
@@ -297,7 +335,7 @@ GenericProposalWidget::GenericProposalWidget()
     connect(d->m_completionListView->verticalScrollBar(), &QAbstractSlider::sliderReleased,
             this, &GenericProposalWidget::turnOnAutoWidth);
 
-    QVBoxLayout *layout = new QVBoxLayout(this);
+    auto layout = new QVBoxLayout(this);
     layout->setContentsMargins(0, 0, 0, 0);
     layout->addWidget(d->m_completionListView);
 
@@ -319,9 +357,9 @@ void GenericProposalWidget::setAssistant(CodeAssistant *assistant)
 
 void GenericProposalWidget::setReason(AssistReason reason)
 {
-    d->m_reason = reason;
-    if (d->m_reason == ExplicitlyInvoked)
+    if (reason == ExplicitlyInvoked)
         d->m_justInvoked = true;
+    IAssistProposalWidget::setReason(reason);
 }
 
 void GenericProposalWidget::setKind(AssistKind kind)
@@ -341,7 +379,7 @@ void GenericProposalWidget::setModel(ProposalModelPtr model)
     d->m_completionListView->setModel(new ModelAdapter(d->m_model, d->m_completionListView));
 
     connect(d->m_completionListView->selectionModel(), &QItemSelectionModel::currentChanged,
-            &d->m_infoTimer, static_cast<void (QTimer::*)()>(&QTimer::start));
+            &d->m_infoTimer, QOverload<>::of(&QTimer::start));
 }
 
 void GenericProposalWidget::setDisplayRect(const QRect &rect)
@@ -352,6 +390,28 @@ void GenericProposalWidget::setDisplayRect(const QRect &rect)
 void GenericProposalWidget::setIsSynchronized(bool isSync)
 {
     d->m_isSynchronized = isSync;
+}
+
+void GenericProposalWidget::updateModel(GenericProposalModelPtr model, const QString &prefix)
+{
+    QString currentText;
+    if (d->m_explicitlySelected)
+        currentText = d->m_model->text(d->m_completionListView->currentIndex().row());
+    d->m_model = model;
+    if (d->m_model->containsDuplicates())
+        d->m_model->removeDuplicates();
+    d->m_completionListView->setModel(new ModelAdapter(d->m_model, d->m_completionListView));
+    connect(d->m_completionListView->selectionModel(), &QItemSelectionModel::currentChanged,
+            &d->m_infoTimer, QOverload<>::of(&QTimer::start));
+    if (!currentText.isEmpty()) {
+        const int currentRow = d->m_model->indexOf(
+            Utils::equal(&AssistProposalItemInterface::text, currentText));
+        if (currentRow < 0)
+            d->m_explicitlySelected = false;
+        else
+            d->m_completionListView->selectRow(currentRow);
+    }
+    updateAndCheck(prefix);
 }
 
 void GenericProposalWidget::showProposal(const QString &prefix)
@@ -365,7 +425,7 @@ void GenericProposalWidget::showProposal(const QString &prefix)
     d->m_completionListView->setFocus();
 }
 
-void GenericProposalWidget::updateProposal(const QString &prefix)
+void GenericProposalWidget::filterProposal(const QString &prefix)
 {
     if (!isVisible())
         return;
@@ -404,7 +464,7 @@ bool GenericProposalWidget::updateAndCheck(const QString &prefix)
         if (!prefix.isEmpty())
             d->m_model->filter(prefix);
     }
-    if (!d->m_model->hasItemsToPropose(prefix, d->m_reason)) {
+    if (!d->m_model->hasItemsToPropose(prefix, reason())) {
         d->m_completionListView->reset();
         abort();
         return false;
@@ -413,7 +473,7 @@ bool GenericProposalWidget::updateAndCheck(const QString &prefix)
         d->m_model->sort(prefix);
     d->m_completionListView->reset();
 
-    // Try to find the previosly explicit selection (if any). If we can find the item set it
+    // Try to find the previously explicit selection (if any). If we can find the item set it
     // as the current. Otherwise (it might have been filtered out) select the first row.
     if (d->m_explicitlySelected) {
         Q_ASSERT(preferredItemId != -1);
@@ -468,7 +528,7 @@ void GenericProposalWidget::updatePositionAndSize()
     const int height = shint.height() + fw * 2;
 
     // Determine the position, keeping the popup on the screen
-    const QRect screen = Internal::screenGeometry(d->m_underlyingWidget->pos(), d->m_underlyingWidget);
+    const QRect screen = d->m_underlyingWidget->screen()->availableGeometry();
 
     QPoint pos = d->m_displayRect.bottomLeft();
     pos.rx() -= 16 + fw;    // Space for the icons
@@ -498,17 +558,18 @@ bool GenericProposalWidget::eventFilter(QObject *o, QEvent *e)
             d->m_infoFrame->close();
         return true;
     } else if (e->type() == QEvent::ShortcutOverride) {
-        QKeyEvent *ke = static_cast<QKeyEvent *>(e);
+        auto ke = static_cast<QKeyEvent *>(e);
         switch (ke->key()) {
         case Qt::Key_N:
         case Qt::Key_P:
+        case Qt::Key_BracketLeft:
             if (ke->modifiers() == Qt::KeyboardModifiers(HostOsInfo::controlModifier())) {
                 e->accept();
                 return true;
             }
         }
     } else if (e->type() == QEvent::KeyPress) {
-        QKeyEvent *ke = static_cast<QKeyEvent *>(e);
+        auto ke = static_cast<QKeyEvent *>(e);
         switch (ke->key()) {
         case Qt::Key_Escape:
             abort();
@@ -516,11 +577,21 @@ bool GenericProposalWidget::eventFilter(QObject *o, QEvent *e)
             e->accept();
             return true;
 
+        case Qt::Key_BracketLeft:
+            // vim-style behavior
+            if (ke->modifiers() == Qt::KeyboardModifiers(HostOsInfo::controlModifier())) {
+                abort();
+                emit explicitlyAborted();
+                e->accept();
+                return true;
+            }
+            break;
+
         case Qt::Key_N:
         case Qt::Key_P:
             // select next/previous completion
-            d->m_explicitlySelected = true;
             if (ke->modifiers() == Qt::KeyboardModifiers(HostOsInfo::controlModifier())) {
+                d->m_explicitlySelected = true;
                 int change = (ke->key() == Qt::Key_N) ? 1 : -1;
                 int nrows = d->m_model->size();
                 int row = d->m_completionListView->currentIndex().row();
@@ -564,7 +635,10 @@ bool GenericProposalWidget::eventFilter(QObject *o, QEvent *e)
         case Qt::Key_End:
         case Qt::Key_Backspace:
             // We want these navigation keys to work in the editor.
-            break;
+            QApplication::sendEvent(const_cast<QWidget *>(d->m_underlyingWidget), e);
+            if (isVisible())
+                d->m_assistant->notifyChange();
+            return true;
 
         default:
             // Only forward keys that insert text and refine the completion.
@@ -580,7 +654,7 @@ bool GenericProposalWidget::eventFilter(QObject *o, QEvent *e)
             AssistProposalItemInterface *item =
                 d->m_model->proposalItem(d->m_completionListView->currentIndex().row());
             if (item->prematurelyApplies(typedChar)
-                    && (d->m_reason == ExplicitlyInvoked || item->text().endsWith(typedChar))) {
+                    && (reason() == ExplicitlyInvoked || item->text().endsWith(typedChar))) {
                 abort();
                 emit proposalItemActivated(item);
                 return true;
@@ -588,8 +662,6 @@ bool GenericProposalWidget::eventFilter(QObject *o, QEvent *e)
         }
 
         QApplication::sendEvent(const_cast<QWidget *>(d->m_underlyingWidget), e);
-        if (isVisible())
-            d->m_assistant->notifyChange();
 
         return true;
     }

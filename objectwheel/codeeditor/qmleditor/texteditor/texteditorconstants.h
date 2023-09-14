@@ -1,31 +1,13 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
+
+
 #include <QtGlobal>
+
+namespace TextEditor {
 
 // Text color and style categories
 enum TextStyle : quint8 {
@@ -35,6 +17,9 @@ enum TextStyle : quint8 {
     C_SELECTION,
     C_LINE_NUMBER,
     C_SEARCH_RESULT,
+    C_SEARCH_RESULT_ALT1,
+    C_SEARCH_RESULT_ALT2,
+    C_SEARCH_RESULT_CONTAINING_FUNCTION,
     C_SEARCH_SCOPE,
     C_PARENTHESES,
     C_PARENTHESES_MISMATCH,
@@ -48,7 +33,10 @@ enum TextStyle : quint8 {
     C_NUMBER,
     C_STRING,
     C_TYPE,
+    C_CONCEPT,
+    C_NAMESPACE,
     C_LOCAL,
+    C_PARAMETER,
     C_GLOBAL,
     C_FIELD,
     C_ENUMERATION,
@@ -57,7 +45,10 @@ enum TextStyle : quint8 {
     C_KEYWORD,
     C_PRIMITIVE_TYPE,
     C_OPERATOR,
+    C_OVERLOADED_OPERATOR,
+    C_PUNCTUATION,
     C_PREPROCESSOR,
+    C_MACRO,
     C_LABEL,
     C_COMMENT,
     C_DOXYGEN_COMMENT,
@@ -75,7 +66,6 @@ enum TextStyle : quint8 {
     C_QML_STATE_NAME,
     C_BINDING,
 
-
     C_DISABLED_CODE,
 
     C_ADDED_LINE,
@@ -91,6 +81,11 @@ enum TextStyle : quint8 {
     C_DIFF_DEST_CHAR,
 
     C_LOG_CHANGE_LINE,
+    C_LOG_AUTHOR_NAME,
+    C_LOG_COMMIT_DATE,
+    C_LOG_COMMIT_HASH,
+    C_LOG_COMMIT_SUBJECT,
+    C_LOG_DECORATION,
 
     C_WARNING,
     C_WARNING_CONTEXT,
@@ -100,11 +95,22 @@ enum TextStyle : quint8 {
     C_DECLARATION,
     C_FUNCTION_DEFINITION,
     C_OUTPUT_ARGUMENT,
+    C_STATIC_MEMBER,
+
+    C_COCO_CODE_ADDED,
+    C_COCO_PARTIALLY_COVERED,
+    C_COCO_NOT_COVERED,
+    C_COCO_FULLY_COVERED,
+    C_COCO_MANUALLY_VALIDATED,
+    C_COCO_DEAD_CODE,
+    C_COCO_EXECUTION_COUNT_TOO_LOW,
+    C_COCO_NOT_COVERED_INFO,
+    C_COCO_COVERED_INFO,
+    C_COCO_MANUALLY_VALIDATED_INFO,
 
     C_LAST_STYLE_SENTINEL
 };
 
-namespace TextEditor {
 namespace Constants {
 
 const char C_TEXTEDITOR[]          = "Text Editor";
@@ -114,6 +120,7 @@ const char G_COPYPASTE[]           = "TextEditor.CopyPasteGroup";
 const char G_SELECT[]              = "TextEditor.SelectGroup";
 const char G_BOM[]                 = "TextEditor.BomGroup";
 const char COMPLETE_THIS[]         = "TextEditor.CompleteThis";
+const char FUNCTION_HINT[]         = "TextEditor.FunctionHint";
 const char QUICKFIX_THIS[]         = "TextEditor.QuickFix";
 const char SHOWCONTEXTMENU[]       = "TextEditor.ShowContextMenu";
 const char CREATE_SCRATCH_BUFFER[] = "TextEditor.CreateScratchBuffer";
@@ -125,6 +132,7 @@ const char FOLD[]                  = "TextEditor.Fold";
 const char UNFOLD[]                = "TextEditor.Unfold";
 const char UNFOLD_ALL[]            = "TextEditor.UnFoldAll";
 const char AUTO_INDENT_SELECTION[] = "TextEditor.AutoIndentSelection";
+const char AUTO_FORMAT_SELECTION[] = "TextEditor.AutoFormatSelection";
 const char INCREASE_FONT_SIZE[]    = "TextEditor.IncreaseFontSize";
 const char DECREASE_FONT_SIZE[]    = "TextEditor.DecreaseFontSize";
 const char RESET_FONT_SIZE[]       = "TextEditor.ResetFontSize";
@@ -143,6 +151,7 @@ const char MOVE_LINE_UP[]          = "TextEditor.MoveLineUp";
 const char MOVE_LINE_DOWN[]        = "TextEditor.MoveLineDown";
 const char COPY_LINE_UP[]          = "TextEditor.CopyLineUp";
 const char COPY_LINE_DOWN[]        = "TextEditor.CopyLineDown";
+const char COPY_WITH_HTML[]        = "TextEditor.CopyWithHtml";
 const char JOIN_LINES[]            = "TextEditor.JoinLines";
 const char INSERT_LINE_ABOVE[]     = "TextEditor.InsertLineAboveCurrentLine";
 const char INSERT_LINE_BELOW[]     = "TextEditor.InsertLineBelowCurrentLine";
@@ -151,6 +160,8 @@ const char LOWERCASE_SELECTION[]   = "TextEditor.LowercaseSelection";
 const char SORT_SELECTED_LINES[]   = "TextEditor.SortSelectedLines";
 const char CUT_LINE[]              = "TextEditor.CutLine";
 const char COPY_LINE[]             = "TextEditor.CopyLine";
+const char ADD_SELECT_NEXT_FIND_MATCH[] = "TextEditor.AddSelectionNextFindMatch";
+const char ADD_CURSORS_TO_LINE_ENDS[] = "TextEditor.AddCursorsAtLineEnd";
 const char DUPLICATE_SELECTION[]   = "TextEditor.DuplicateSelection";
 const char DUPLICATE_SELECTION_AND_COMMENT[] = "TextEditor.DuplicateSelectionAndComment";
 const char DELETE_LINE[]           = "TextEditor.DeleteLine";
@@ -185,14 +196,20 @@ const char GOTO_NEXT_WORD_WITH_SELECTION[] = "TextEditor.GotoNextWordWithSelecti
 const char GOTO_PREVIOUS_WORD_CAMEL_CASE_WITH_SELECTION[] = "TextEditor.GotoPreviousWordCamelCaseWithSelection";
 const char GOTO_NEXT_WORD_CAMEL_CASE_WITH_SELECTION[] = "TextEditor.GotoNextWordCamelCaseWithSelection";
 const char C_TEXTEDITOR_MIMETYPE_TEXT[] = "text/plain";
-const char INFO_SYNTAX_DEFINITION[] = "TextEditor.InfoSyntaxDefinition";
+const char INFO_MISSING_SYNTAX_DEFINITION[] = "TextEditor.InfoSyntaxDefinition";
+const char INFO_MULTIPLE_SYNTAX_DEFINITIONS[] = "TextEditor.InfoMultipleSyntaxDefinitions";
 const char TASK_OPEN_FILE[]        = "TextEditor.Task.OpenFile";
 const char CIRCULAR_PASTE[]        = "TextEditor.CircularPaste";
+const char NO_FORMAT_PASTE[]       = "TextEditor.NoFormatPaste";
 const char SWITCH_UTF8BOM[]        = "TextEditor.SwitchUtf8bom";
 const char INDENT[]        = "TextEditor.Indent";
 const char UNINDENT[]        = "TextEditor.Unindent";
 const char FOLLOW_SYMBOL_UNDER_CURSOR[] = "TextEditor.FollowSymbolUnderCursor";
 const char FOLLOW_SYMBOL_UNDER_CURSOR_IN_NEXT_SPLIT[] = "TextEditor.FollowSymbolUnderCursorInNextSplit";
+const char FIND_USAGES[] = "TextEditor.FindUsages";
+// moved from CppEditor to TextEditor avoid breaking the setting by using the old key
+const char RENAME_SYMBOL[] = "CppEditor.RenameSymbolUnderCursor";
+const char OPEN_CALL_HIERARCHY[] = "TextEditor.OpenCallHierarchy";
 const char JUMP_TO_FILE_UNDER_CURSOR[] = "TextEditor.JumpToFileUnderCursor";
 const char JUMP_TO_FILE_UNDER_CURSOR_IN_NEXT_SPLIT[] = "TextEditor.JumpToFileUnderCursorInNextSplit";
 
@@ -202,6 +219,7 @@ const char SCROLL_BAR_CURRENT_LINE[] = "TextEditor.ScrollBarCurrentLine";
 const char *nameForStyle(TextStyle style);
 TextStyle styleFromName(const char *name);
 
+const char TEXT_EDITOR_SETTINGS_CATEGORY_ICON_PATH[] =  ":/texteditor/images/settingscategory_texteditor.png";
 const char TEXT_EDITOR_SETTINGS_CATEGORY[] = "C.TextEditor";
 const char TEXT_EDITOR_FONT_SETTINGS[] = "A.FontSettings";
 const char TEXT_EDITOR_BEHAVIOR_SETTINGS[] = "B.BehaviourSettings";
@@ -209,10 +227,13 @@ const char TEXT_EDITOR_DISPLAY_SETTINGS[] = "D.DisplaySettings";
 const char TEXT_EDITOR_HIGHLIGHTER_SETTINGS[] = "E.HighlighterSettings";
 const char TEXT_EDITOR_SNIPPETS_SETTINGS[] = "F.SnippetsSettings";
 
+const char HIGHLIGHTER_SETTINGS_CATEGORY[] = "HighlighterSettings";
+
 const char SNIPPET_EDITOR_ID[]     = "TextEditor.SnippetEditor";
 const char TEXT_SNIPPET_GROUP_ID[] = "Text";
 
 const char GLOBAL_SETTINGS_ID[]    = "Global";
+const char GENERIC_PROPOSAL_ID[] = "TextEditor.GenericProposalId";
 
 /**
  * Delay before tooltip will be shown near completion assistant proposal

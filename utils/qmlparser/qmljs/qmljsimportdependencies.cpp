@@ -1,41 +1,74 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsimportdependencies.h"
 #include "qmljsinterpreter.h"
-#include "qmljsqrcparser.h"
 #include "qmljsviewercontext.h"
 
+#include <utils/algorithm.h>
+//#include <utils/qrcparser.h>
 #include <utils/qtcassert.h>
 
 #include <QCryptographicHash>
+#include <QElapsedTimer>
 #include <QLoggingCategory>
 
 #include <algorithm>
 
+static Q_LOGGING_CATEGORY(importsLog, "qtc.qmljs.imports", QtWarningMsg)
+static Q_LOGGING_CATEGORY(importsBenchmark, "qtc.qmljs.imports.benchmark", QtWarningMsg)
+
+
+class ImportsBenchmarker
+{
+public:
+    ImportsBenchmarker(const QString &functionName)
+        : m_functionName(functionName)
+    {
+        m_timer.start();
+    }
+
+    ~ImportsBenchmarker()
+    {
+        if (importsBenchmark().isDebugEnabled()) {
+            qCDebug(importsBenchmark).noquote().nospace() << m_functionName << " executed nPossibleExports: " << nPossibleExports << " in " << m_timer.elapsed() << "ms";
+        }
+    }
+    int nPossibleExports = 0;
+
+    QElapsedTimer m_timer;
+    QString m_functionName;
+};
+
 namespace QmlJS {
+
+/*
+ which languages might be imported in this context
+ */
+static bool languageIsCompatible(Dialect contextLanguage, Dialect importLanguage)
+{
+    if (importLanguage == Dialect::AnyLanguage && contextLanguage != Dialect::NoLanguage)
+        return true;
+    switch (contextLanguage.dialect()) {
+    case Dialect::JavaScript:
+    case Dialect::Json:
+    case Dialect::QmlProject:
+    case Dialect::QmlQbs:
+    case Dialect::QmlTypeInfo:
+        return contextLanguage == importLanguage;
+    case Dialect::Qml:
+        return importLanguage == Dialect::Qml || importLanguage == Dialect::QmlQtQuick2 || importLanguage == Dialect::JavaScript;
+    case Dialect::QmlQtQuick2:
+    case Dialect::QmlQtQuick2Ui:
+        return importLanguage == Dialect::Qml || importLanguage == Dialect::QmlQtQuick2 || importLanguage == Dialect::QmlQtQuick2Ui
+            || importLanguage == Dialect::JavaScript;
+    case Dialect::AnyLanguage:
+        return true;
+    case Dialect::NoLanguage:
+        break;
+    }
+    return false;
+}
 
 ImportKind::Enum toImportKind(ImportType::Enum type)
 {
@@ -116,8 +149,7 @@ ImportKey::ImportKey(const ImportInfo &info)
     , majorVersion(info.version().majorVersion())
     , minorVersion(info.version().minorVersion())
 {
-    splitPath = QFileInfo(info.path()).canonicalFilePath().split(QLatin1Char('/'),
-                                                                 QString::KeepEmptyParts);
+    splitPath = QFileInfo(info.path()).canonicalFilePath().split('/');
 }
 
 ImportKey::ImportKey(ImportType::Enum type, const QString &path, int majorVersion, int minorVersion)
@@ -135,15 +167,15 @@ ImportKey::ImportKey(ImportType::Enum type, const QString &path, int majorVersio
         if (splitPath.length() > 1 && splitPath.last().isEmpty())
             splitPath.removeLast();
         break;
-    case ImportType::File:
-    case ImportType::QrcFile:
-        splitPath = QrcParser::normalizedQrcFilePath(path).split(QLatin1Char('/'));
-        break;
-    case ImportType::QrcDirectory:
-        splitPath = QrcParser::normalizedQrcDirectoryPath(path).split(QLatin1Char('/'));
-        if (splitPath.length() > 1 && splitPath.last().isEmpty())
-            splitPath.removeLast();
-        break;
+//    case ImportType::File:
+//    case ImportType::QrcFile:
+//        splitPath = Utils::QrcParser::normalizedQrcFilePath(path).split(QLatin1Char('/'));
+//        break;
+//    case ImportType::QrcDirectory:
+//        splitPath = Utils::QrcParser::normalizedQrcDirectoryPath(path).split(QLatin1Char('/'));
+//        if (splitPath.length() > 1 && splitPath.last().isEmpty())
+//            splitPath.removeLast();
+//        break;
     case ImportType::Invalid:
     case ImportType::UnknownFile:
         splitPath = path.split(QLatin1Char('/'));
@@ -153,14 +185,14 @@ ImportKey::ImportKey(ImportType::Enum type, const QString &path, int majorVersio
 
 void ImportKey::addToHash(QCryptographicHash &hash) const
 {
-    hash.addData(reinterpret_cast<const char *>(&type), sizeof(type));
-    hash.addData(reinterpret_cast<const char *>(&majorVersion), sizeof(majorVersion));
-    hash.addData(reinterpret_cast<const char *>(&minorVersion), sizeof(minorVersion));
-    foreach (const QString &s, splitPath) {
-        hash.addData("/", 1);
-        hash.addData(reinterpret_cast<const char *>(s.constData()), sizeof(QChar) * s.size());
+    hash.addData(QByteArrayView(reinterpret_cast<const char *>(&type), sizeof(type)));
+    hash.addData(QByteArrayView(reinterpret_cast<const char *>(&majorVersion), sizeof(majorVersion)));
+    hash.addData(QByteArrayView(reinterpret_cast<const char *>(&minorVersion), sizeof(minorVersion)));
+    for (const QString &s : splitPath) {
+        hash.addData(QByteArrayView("/", 1));
+        hash.addData(QByteArrayView(reinterpret_cast<const char *>(s.constData()), sizeof(QChar) * s.size()));
     }
-    hash.addData("/", 1);
+    hash.addData(QByteArrayView("/", 1));
 }
 
 ImportKey ImportKey::flatKey() const {
@@ -195,7 +227,7 @@ QString ImportKey::libraryQualifiedPath() const
 {
     QString res = splitPath.join(QLatin1Char('.'));
     if (res.isEmpty() && !splitPath.isEmpty())
-        return QString();
+        return QLatin1String("");
     return res;
 }
 
@@ -268,13 +300,13 @@ ImportMatchStrength ImportKey::matchImport(const ImportKey &o, const ViewerConte
     if (dirToFile)
         --lenPath1;
     int iSelector = 0;
-    int nSelectors = vContext.selectors.size();
+    const int nSelectors = vContext.selectors.size();
     while (iPath1 < lenPath1) {
         if (lenPath2 - iPath2 > lenPath1 - iPath1)
             return ImportMatchStrength();
-        QString p1 = splitPath.at(iPath1);
+        const QString p1 = splitPath.at(iPath1);
         if (iPath2 < lenPath2) {
-            QString p2 = splitPath.at(iPath2);
+            const QString p2 = o.splitPath.at(iPath2);
             if (p1 == p2) {
                 ++iPath1;
                 ++iPath2;
@@ -282,24 +314,24 @@ ImportMatchStrength ImportKey::matchImport(const ImportKey &o, const ViewerConte
             }
         }
         if (!p1.startsWith(QLatin1Char('+')))
-            return QList<int>();
-        QStringRef selectorAtt(&p1, 1, p1.size()-1);
+            return ImportMatchStrength();
+        const QStringView selectorAtt(p1.constData() + 1, p1.size() - 1);
         while (iSelector < nSelectors) {
             if (selectorAtt == vContext.selectors.at(iSelector))
                 break;
             ++iSelector;
         }
         if (iSelector == nSelectors)
-            return QList<int>();
+            return ImportMatchStrength();
         res << (nSelectors - iSelector);
         ++iSelector;
         ++iPath1;
     }
     if (iPath2 != lenPath2)
-        return QList<int>();
+        return ImportMatchStrength();
     if (res.isEmpty())
         res << 0;
-    return  ImportMatchStrength(res);
+    return ImportMatchStrength(res);
 }
 
 int ImportKey::compare(const ImportKey &other) const
@@ -448,11 +480,11 @@ QString ImportKey::toString() const
     return res;
 }
 
-uint qHash(const ImportKey &info)
+size_t qHash(const ImportKey &info)
 {
-    uint res = ::qHash(info.type) ^
+    size_t res = ::qHash(info.type) ^
             ::qHash(info.majorVersion) ^ ::qHash(info.minorVersion);
-    foreach (const QString &s, info.splitPath)
+    for (const QString &s : std::as_const(info.splitPath))
         res = res ^ ::qHash(s);
     return res;
 }
@@ -481,26 +513,19 @@ Export::Export()
     : intrinsic(false)
 { }
 
-Export::Export(ImportKey exportName, const QString &pathRequired, bool intrinsic, const QString &typeName)
-    : exportName(exportName), pathRequired(pathRequired), typeName(typeName), intrinsic(intrinsic)
+Export::Export(ImportKey exportName,
+               const Utils::FilePath &pathRequired,
+               bool intrinsic,
+               const QString &typeName)
+    : exportName(exportName)
+    , pathRequired(pathRequired)
+    , typeName(typeName)
+    , intrinsic(intrinsic)
 { }
 
 bool Export::visibleInVContext(const ViewerContext &vContext) const
 {
-    return pathRequired.isEmpty() || vContext.paths.contains(pathRequired);
-}
-
-bool operator ==(const Export &i1, const Export &i2)
-{
-    return i1.exportName == i2.exportName
-            && i1.pathRequired == i2.pathRequired
-            && i1.intrinsic == i2.intrinsic
-            && i1.typeName == i2.typeName;
-}
-
-bool operator !=(const Export &i1, const Export &i2)
-{
-    return !(i1 == i2);
+    return pathRequired.isEmpty() || vContext.paths.count(pathRequired);
 }
 
 CoreImport::CoreImport() : language(Dialect::Qml) { }
@@ -519,17 +544,17 @@ QByteArray DependencyInfo::calculateFingerprint(const ImportDependencies &deps)
 {
     QCryptographicHash hash(QCryptographicHash::Sha1);
     rootImport.addToHash(hash);
-    QStringList coreImports = allCoreImports.values();
+    QStringList coreImports = Utils::toList(allCoreImports);
     coreImports.sort();
-    foreach (const QString importId, coreImports) {
-        hash.addData(reinterpret_cast<const char*>(importId.constData()), importId.size() * sizeof(QChar));
+    for (const QString &importId : std::as_const(coreImports)) {
+        hash.addData(QByteArrayView(reinterpret_cast<const char*>(importId.constData()), importId.size() * sizeof(QChar)));
         QByteArray coreImportFingerprint = deps.coreImport(importId).fingerprint;
         hash.addData(coreImportFingerprint);
     }
-    hash.addData("/", 1);
-    QList<ImportKey> imports(allImports.values());
+    hash.addData(QByteArrayView("/", 1));
+    QList<ImportKey> imports = Utils::toList(allImports);
     std::sort(imports.begin(), imports.end());
-    foreach (const ImportKey &k, imports)
+    for (const ImportKey &k : std::as_const(imports))
         k.addToHash(hash);
     return hash.result();
 }
@@ -579,16 +604,16 @@ ImportDependencies::~ImportDependencies()
 
 void ImportDependencies::filter(const ViewerContext &vContext)
 {
+    ImportsBenchmarker benchMark("filter()");
     QMap<QString, CoreImport> newCoreImports;
     QMap<ImportKey, QStringList> newImportCache;
-    QMapIterator<QString, CoreImport> j(m_coreImports);
     bool hasChanges = false;
-    while (j.hasNext()) {
-        j.next();
+    for (auto j = m_coreImports.cbegin(), end = m_coreImports.cend(); j != end; ++j) {
         const CoreImport &cImport = j.value();
-        if (vContext.languageIsCompatible(cImport.language)) {
+        if (languageIsCompatible(vContext.language, cImport.language)) {
             QList<Export> newExports;
-            foreach (const Export &e, cImport.possibleExports) {
+            for (const Export &e : std::as_const(cImport.possibleExports)) {
+                ++benchMark.nPossibleExports;
                 if (e.visibleInVContext(vContext)) {
                     newExports.append(e);
                     QStringList &candidateImports = newImportCache[e.exportName];
@@ -626,6 +651,7 @@ void ImportDependencies::iterateOnCandidateImports(
         std::function<bool (const ImportMatchStrength &,const Export &,const CoreImport &)>
         const &iterF) const
 {
+    ImportsBenchmarker benchMark("iterateOnCandidateImports()");
     switch (key.type) {
     case ImportType::Directory:
     case ImportType::QrcDirectory:
@@ -634,10 +660,11 @@ void ImportDependencies::iterateOnCandidateImports(
     default:
     {
         const QStringList imp = m_importCache.value(key.flatKey());
-        foreach (const QString &cImportName, imp) {
+        for (const QString &cImportName : imp) {
             CoreImport cImport = coreImport(cImportName);
-            if (vContext.languageIsCompatible(cImport.language)) {
-                foreach (const Export e, cImport.possibleExports) {
+            if (languageIsCompatible(vContext.language, cImport.language)) {
+                for (const Export &e : std::as_const(cImport.possibleExports)) {
+                    ++benchMark.nPossibleExports;
                     if (e.visibleInVContext(vContext)) {
                         ImportMatchStrength m = e.exportName.matchImport(key, vContext);
                         if (m.hasMatch()) {
@@ -656,10 +683,11 @@ void ImportDependencies::iterateOnCandidateImports(
     while (lb != end) {
         ImportKey::DirCompareInfo c = key.compareDir(lb.key());
         if (c == ImportKey::SameDir) {
-            foreach (const QString &cImportName, lb.value()) {
+            for (const QString &cImportName : std::as_const(lb.value())) {
                 CoreImport cImport = coreImport(cImportName);
-                if (vContext.languageIsCompatible(cImport.language)) {
-                    foreach (const Export e, cImport.possibleExports) {
+                if (languageIsCompatible(vContext.language, cImport.language)) {
+                    for (const Export &e : std::as_const(cImport.possibleExports)) {
+                        ++benchMark.nPossibleExports;
                         if (e.visibleInVContext(vContext)) {
                             ImportMatchStrength m = e.exportName.matchImport(key, vContext);
                             if (m.hasMatch()) {
@@ -714,8 +742,8 @@ ImportDependencies::ImportElements ImportDependencies::candidateImports(
 QList<DependencyInfo::ConstPtr> ImportDependencies::createDependencyInfos(
         const ImportKey &mainDoc, const ViewerContext &vContext) const
 {
-    Q_UNUSED(mainDoc);
-    Q_UNUSED(vContext);
+    Q_UNUSED(mainDoc)
+    Q_UNUSED(vContext)
     QList<DependencyInfo::ConstPtr> res;
     QTC_CHECK(false);
     return res;
@@ -726,25 +754,34 @@ void ImportDependencies::addCoreImport(const CoreImport &import)
     CoreImport newImport = import;
     if (m_coreImports.contains(import.importId)) {
         CoreImport oldVal = m_coreImports.value(import.importId);
-        foreach (const Export &e, oldVal.possibleExports) {
+        for (const Export &e : std::as_const(oldVal.possibleExports)) {
             if (e.intrinsic)
                 removeImportCacheEntry(e.exportName, import.importId);
             else
                 newImport.possibleExports.append(e);
         }
     }
-    foreach (const Export &e, import.possibleExports)
+    for (const Export &e : std::as_const(import.possibleExports))
         m_importCache[e.exportName].append(import.importId);
     m_coreImports.insert(newImport.importId, newImport);
+    if (importsLog().isDebugEnabled()) {
+        QString msg = QString::fromLatin1("added import %1 for").arg(newImport.importId);
+        for (const Export &e : std::as_const(newImport.possibleExports))
+            msg += QString::fromLatin1("\n %1(%2)")
+                       .arg(e.exportName.toString(), e.pathRequired.toUserOutput());
+        qCDebug(importsLog) << msg;
+    }
 }
 
 void ImportDependencies::removeCoreImport(const QString &importId)
 {
-    if (!m_coreImports.contains(importId))
+    if (!m_coreImports.contains(importId)) {
+        qCWarning(importsLog) << "missing importId in removeCoreImport(" << importId << ")";
         return;
+    }
     CoreImport &cImport = m_coreImports[importId];
     QList<Export> newExports;
-    foreach (const Export &e, cImport.possibleExports)
+    for (const Export &e : std::as_const(cImport.possibleExports))
         if (e.intrinsic)
             removeImportCacheEntry(e.exportName, importId);
         else
@@ -753,43 +790,66 @@ void ImportDependencies::removeCoreImport(const QString &importId)
         cImport.possibleExports = newExports;
     else
         m_coreImports.remove(importId);
+
+    qCDebug(importsLog) << "removed import with id:"<< importId;
 }
 
 void ImportDependencies::removeImportCacheEntry(const ImportKey &importKey, const QString &importId)
 {
     QStringList &cImp = m_importCache[importKey];
-    cImp.removeOne(importId);
+    if (!cImp.removeOne(importId)) {
+        qCWarning(importsLog) << "missing possibleExport backpointer for " << importKey.toString() << " to "
+                              << importId;
+    }
     if (cImp.isEmpty())
         m_importCache.remove(importKey);
 }
 
-void ImportDependencies::addExport(const QString &importId, const ImportKey &importKey,
-                                   const QString &requiredPath, const QString &typeName)
+void ImportDependencies::addExport(const QString &importId,
+                                   const ImportKey &importKey,
+                                   const Utils::FilePath &requiredPath,
+                                   const QString &typeName)
 {
     if (!m_coreImports.contains(importId)) {
         CoreImport newImport(importId);
         newImport.language = Dialect::AnyLanguage;
-        newImport.possibleExports.append(Export(importKey, requiredPath, false, typeName));
+        newImport.addPossibleExport(Export(importKey, requiredPath, false, typeName));
         m_coreImports.insert(newImport.importId, newImport);
         m_importCache[importKey].append(importId);
         return;
     }
     CoreImport &importValue = m_coreImports[importId];
-    importValue.possibleExports.append(Export(importKey, requiredPath, false, typeName));
+    importValue.addPossibleExport(Export(importKey, requiredPath, false, typeName));
     m_importCache[importKey].append(importId);
+    qCDebug(importsLog) << "added export "<< importKey.toString() << " for id " <<importId
+                        << " (" << requiredPath << ")";
 }
 
-void ImportDependencies::removeExport(const QString &importId, const ImportKey &importKey,
-                                      const QString &requiredPath, const QString &typeName)
+void ImportDependencies::removeExport(const QString &importId,
+                                      const ImportKey &importKey,
+                                      const Utils::FilePath &requiredPath,
+                                      const QString &typeName)
 {
-    if (m_coreImports.contains(importId)) {
+    if (!m_coreImports.contains(importId)) {
+        qCWarning(importsLog) << "non existing core import for removeExport(" << importId << ", "
+                              << importKey.toString() << ")";
+    } else {
         CoreImport &importValue = m_coreImports[importId];
-        importValue.possibleExports.removeOne(Export(importKey, requiredPath, false, typeName));
+        if (!importValue.possibleExports.removeOne(Export(importKey, requiredPath, false, typeName))) {
+            qCWarning(importsLog) << "non existing export for removeExport(" << importId << ", "
+                                  << importKey.toString() << ")";
+        }
         if (importValue.possibleExports.isEmpty() && importValue.fingerprint.isEmpty())
             m_coreImports.remove(importId);
     }
-    if (m_importCache.contains(importKey))
+    if (!m_importCache.contains(importKey)) {
+        qCWarning(importsLog) << "missing possibleExport for " << importKey.toString()
+                            << " when removing export of " << importId;
+    } else {
         removeImportCacheEntry(importKey, importId);
+    }
+    qCDebug(importsLog) << "removed export "<< importKey.toString() << " for id " << importId
+                        << " (" << requiredPath << ")";
 }
 
 void ImportDependencies::iterateOnLibraryImports(
@@ -798,19 +858,25 @@ void ImportDependencies::iterateOnLibraryImports(
                             const Export &,
                             const CoreImport &)> const &iterF) const
 {
+    ImportsBenchmarker benchMark("iterateOnLibraryImports()");
+
     typedef QMap<ImportKey, QStringList>::const_iterator iter_t;
     ImportKey firstLib;
     firstLib.type = ImportType::Library;
     iter_t i = m_importCache.lowerBound(firstLib);
     iter_t end = m_importCache.constEnd();
     while (i != end && i.key().type == ImportType::Library) {
-        foreach (const QString &cImportName, i.value()) {
+        qCDebug(importsLog) << "libloop:" << i.key().toString() << i.value();
+        for (const QString &cImportName : i.value()) {
             CoreImport cImport = coreImport(cImportName);
-            if (vContext.languageIsCompatible(cImport.language)) {
-                foreach (const Export &e, cImport.possibleExports) {
+            if (languageIsCompatible(vContext.language, cImport.language)) {
+                for (const Export &e : std::as_const(cImport.possibleExports)) {
+                    ++benchMark.nPossibleExports;
                     if (e.visibleInVContext(vContext) && e.exportName.type == ImportType::Library) {
                         ImportMatchStrength m = e.exportName.matchImport(i.key(), vContext);
                         if (m.hasMatch()) {
+                            qCDebug(importsLog) << "import iterate:" << e.exportName.toString()
+                                                << " (" << e.pathRequired << "), id:" << cImport.importId;
                             if (!iterF(m, e, cImport))
                                 return;
                         }
@@ -829,6 +895,7 @@ void ImportDependencies::iterateOnSubImports(
                             const Export &,
                             const CoreImport &)> const &iterF) const
 {
+    ImportsBenchmarker benchMark("iterateOnSubImports()");
     typedef QMap<ImportKey, QStringList>::const_iterator iter_t;
     iter_t i = m_importCache.lowerBound(baseKey);
     iter_t end = m_importCache.constEnd();
@@ -836,10 +903,11 @@ void ImportDependencies::iterateOnSubImports(
         ImportKey::DirCompareInfo c = baseKey.compareDir(i.key());
         if (c != ImportKey::SameDir && c != ImportKey::SecondInFirst)
             break;
-        foreach (const QString &cImportName, i.value()) {
+        for (const QString &cImportName : i.value()) {
             CoreImport cImport = coreImport(cImportName);
-            if (vContext.languageIsCompatible(cImport.language)) {
-                foreach (const Export &e, cImport.possibleExports) {
+            if (languageIsCompatible(vContext.language, cImport.language)) {
+                for (const Export &e : std::as_const(cImport.possibleExports)) {
+                    ++benchMark.nPossibleExports;
                     if (e.visibleInVContext(vContext)) {
                         ImportMatchStrength m = e.exportName.matchImport(i.key(), vContext);
                         if (m.hasMatch()) {
@@ -864,8 +932,8 @@ public:
                     const Export &e,
                     const CoreImport &cI) const
     {
-        Q_UNUSED(m);
-        Q_UNUSED(cI);
+        Q_UNUSED(m)
+        Q_UNUSED(cI)
         imports.insert(e.exportName.flatKey());
         return true;
     }
@@ -890,15 +958,29 @@ QSet<ImportKey> ImportDependencies::subdirImports(
 
 void ImportDependencies::checkConsistency() const
 {
-    QMapIterator<ImportKey, QStringList> j(m_importCache);
-    while (j.hasNext()) {
-        j.next();
-        foreach (const QString &s, j.value()) {
+    for (auto j = m_importCache.cbegin(), end = m_importCache.cend(); j != end; ++j) {
+        for (const QString &s : j.value()) {
             bool found = false;
-            foreach (const Export &e, m_coreImports.value(s).possibleExports)
+            const QList<Export> exports = m_coreImports.value(s).possibleExports;
+            for (const Export &e : exports)
                 if (e.exportName == j.key())
                     found = true;
-            Q_ASSERT(found); Q_UNUSED(found);
+            Q_ASSERT(found); Q_UNUSED(found)
+        }
+    }
+    for (auto i = m_coreImports.cbegin(), end = m_coreImports.cend(); i != end; ++i) {
+        for (const Export &e : std::as_const(i.value().possibleExports)) {
+            if (!m_importCache.value(e.exportName).contains(i.key())) {
+                qCWarning(importsLog) << e.exportName.toString();
+                qCWarning(importsLog) << i.key();
+
+                for (auto j = m_importCache.cbegin(), end = m_importCache.cend(); j != end; ++j)
+                    qCWarning(importsLog) << j.key().toString() << j.value();
+
+                qCWarning(importsLog) << m_importCache.contains(e.exportName);
+                qCWarning(importsLog) << m_importCache.value(e.exportName);
+            }
+            Q_ASSERT(m_importCache.value(e.exportName).contains(i.key()));
         }
     }
 }

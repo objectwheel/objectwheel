@@ -1,40 +1,15 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmljseditor_global.h"
-#include <qmlcodeeditor.h>
-
 #include <qmljstools/qmljssemanticinfo.h>
-#include <texteditor/codeassist/assistproposalitem.h>
-#include <texteditor/codeassist/genericproposalmodel.h>
-#include <texteditor/codeassist/completionassistprovider.h>
-#include <texteditor/codeassist/iassistprocessor.h>
 #include <texteditor/codeassist/assistinterface.h>
-//#include <texteditor/snippets/snippetassistcollector.h>
+#include <texteditor/codeassist/assistproposalitem.h>
+#include <texteditor/codeassist/asyncprocessor.h>
+#include <texteditor/codeassist/completionassistprovider.h>
+#include <texteditor/codeassist/genericproposalmodel.h>
+#include <texteditor/codeassist/iassistprocessor.h>
 
 #include <QStringList>
 #include <QScopedPointer>
@@ -46,6 +21,7 @@ namespace QmlJS { class Value; }
 namespace QmlJSEditor {
 
 class QmlJSCompletionAssistInterface;
+class QmlJSCompletionAssistProvider;
 
 namespace Internal {
 
@@ -72,26 +48,13 @@ public:
 };
 
 
-class QmlJSCompletionAssistProvider : public TextEditor::CompletionAssistProvider
-{
-    Q_OBJECT
-
-public:
-    TextEditor::IAssistProcessor *createProcessor() const override;
-
-    int activationCharSequenceLength() const override;
-    bool isActivationCharSequence(const QString &sequence) const override;
-    bool isContinuationChar(const QChar &c) const override;
-};
-
-
-class QmlJSCompletionAssistProcessor : public TextEditor::IAssistProcessor
+class QmlJSCompletionAssistProcessor : public TextEditor::AsyncProcessor
 {
 public:
     QmlJSCompletionAssistProcessor();
-    ~QmlJSCompletionAssistProcessor();
+    ~QmlJSCompletionAssistProcessor() override;
 
-    TextEditor::IAssistProposal *perform(const TextEditor::AssistInterface *interface) override;
+    TextEditor::IAssistProposal *performAsync() override;
 
 private:
     TextEditor::IAssistProposal *createContentProposal() const;
@@ -107,19 +70,17 @@ private:
                           const QStringList &patterns = QStringList());
 
     int m_startPosition;
-    QScopedPointer<const QmlJSCompletionAssistInterface> m_interface;
     QList<TextEditor::AssistProposalItemInterface *> m_completions;
-//    TextEditor::SnippetAssistCollector m_snippetCollector;
+    TextEditor::SnippetAssistCollector m_snippetCollector;
 };
 
 } // Internal
 
-class QMLJSEDITOR_EXPORT QmlJSCompletionAssistInterface : public TextEditor::AssistInterface
+class QmlJSCompletionAssistInterface : public TextEditor::AssistInterface
 {
 public:
-    QmlJSCompletionAssistInterface(QTextDocument *textDocument,
-                                   int position,
-                                   const QString &fileName,
+    QmlJSCompletionAssistInterface(const QTextCursor &cursor,
+                                   const Utils::FilePath &fileName,
                                    TextEditor::AssistReason reason,
                                    const QmlJSTools::SemanticInfo &info);
     const QmlJSTools::SemanticInfo &semanticInfo() const;
@@ -131,9 +92,23 @@ private:
     QmlJSTools::SemanticInfo m_semanticInfo;
 };
 
-QStringList QMLJSEDITOR_EXPORT qmlJSAutoComplete(QTextDocument *textDocument,
+
+class QmlJSCompletionAssistProvider : public TextEditor::CompletionAssistProvider
+{
+    Q_OBJECT
+
+public:
+    TextEditor::IAssistProcessor *createProcessor(const TextEditor::AssistInterface *) const override;
+
+    int activationCharSequenceLength() const override;
+    bool isActivationCharSequence(const QString &sequence) const override;
+    bool isContinuationChar(const QChar &c) const override;
+};
+
+
+QStringList qmlJSAutoComplete(QTextDocument *textDocument,
                                                  int position,
-                                                 const QString &fileName,
+                                                 const Utils::FilePath &fileName,
                                                  TextEditor::AssistReason reason,
                                                  const QmlJSTools::SemanticInfo &info);
 

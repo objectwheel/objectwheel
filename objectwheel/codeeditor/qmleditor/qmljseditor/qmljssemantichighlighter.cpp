@@ -1,31 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljssemantichighlighter.h"
-#include "qmljshighlighter.h"
-#include "qmlcodedocument.h"
+
+#include "qmljseditordocument.h"
 
 #include <qmljs/qmljsdocument.h>
 #include <qmljs/qmljsscopechain.h>
@@ -38,15 +16,15 @@
 #include <qmljs/parser/qmljsastvisitor_p.h>
 #include <qmljs/qmljsstaticanalysismessage.h>
 #include <texteditor/syntaxhighlighter.h>
-#include <qmlcodedocument.h>
+#include <texteditor/textdocument.h>
 #include <texteditor/texteditorconstants.h>
 #include <texteditor/texteditorsettings.h>
+#include <texteditor/fontsettings.h>
 #include <utils/algorithm.h>
 #include <utils/qtcassert.h>
-#include <utils/runextensions.h>
-#include <codeeditorsettings.h>
-#include <fontcolorssettings.h>
 
+#include <QtConcurrent/QtConcurrent>
+#include <QDebug>
 #include <QTextDocument>
 #include <QThreadPool>
 
@@ -55,13 +33,11 @@ using namespace QmlJS::AST;
 
 namespace QmlJSEditor {
 
-using namespace Internal;
-
 namespace {
 
 static bool isIdScope(const ObjectValue *scope, const QList<const QmlComponentChain *> &chain)
 {
-    foreach (const QmlComponentChain *c, chain) {
+    for (const QmlComponentChain *c : chain) {
         if (c->idScope() == scope)
             return true;
         if (isIdScope(scope, c->instantiatingComponents()))
@@ -73,7 +49,7 @@ static bool isIdScope(const ObjectValue *scope, const QList<const QmlComponentCh
 class CollectStateNames : protected Visitor
 {
     QStringList m_stateNames;
-    bool m_inStateType;
+    bool m_inStateType = false;
     ScopeChain m_scopeChain;
     const CppComponentValue *m_statePrototype;
 
@@ -101,7 +77,7 @@ protected:
             ast->accept(this);
     }
 
-    bool preVisit(Node *ast)
+    bool preVisit(Node *ast) override
     {
         return ast->uiObjectMemberCast()
                 || cast<UiProgram *>(ast)
@@ -128,7 +104,7 @@ protected:
         return false;
     }
 
-    bool visit(UiObjectDefinition *ast)
+    bool visit(UiObjectDefinition *ast) override
     {
         const bool old = m_inStateType;
         m_inStateType = hasStatePrototype(ast);
@@ -137,7 +113,7 @@ protected:
         return false;
     }
 
-    bool visit(UiObjectBinding *ast)
+    bool visit(UiObjectBinding *ast) override
     {
         const bool old = m_inStateType;
         m_inStateType = hasStatePrototype(ast);
@@ -146,7 +122,7 @@ protected:
         return false;
     }
 
-    bool visit(UiScriptBinding *ast)
+    bool visit(UiScriptBinding *ast) override
     {
         if (!m_inStateType)
             return false;
@@ -155,10 +131,10 @@ protected:
         if (ast->qualifiedId->name != QLatin1String("name"))
             return false;
 
-        ExpressionStatement *expStmt = cast<ExpressionStatement *>(ast->statement);
+        auto expStmt = cast<const ExpressionStatement *>(ast->statement);
         if (!expStmt)
             return false;
-        StringLiteral *strLit = cast<StringLiteral *>(expStmt->expression);
+        auto strLit = cast<const StringLiteral *>(expStmt->expression);
         if (!strLit || strLit->value.isEmpty())
             return false;
 
@@ -166,15 +142,27 @@ protected:
 
         return false;
     }
+
+    void throwRecursionDepthError() override
+    {
+        qWarning("Warning: Hit maximum recursion depth while visitin AST in CollectStateNames");
+    }
 };
 
 class CollectionTask : protected Visitor
 {
 public:
-    CollectionTask(QFutureInterface<SemanticHighlighter::Use> futureInterface,
-                   const QmlJSTools::SemanticInfo &semanticInfo)
-        : m_futureInterface(futureInterface)
+    enum Flags {
+        AddMessagesHighlights,
+        SkipMessagesHighlights,
+    };
+    CollectionTask(QPromise<SemanticHighlighter::Use> &promise,
+                   const QmlJSTools::SemanticInfo &semanticInfo,
+                   const TextEditor::FontSettings &fontSettings,
+                   Flags flags)
+        : m_promise(promise)
         , m_semanticInfo(semanticInfo)
+        , m_fontSettings(fontSettings)
         , m_scopeChain(semanticInfo.scopeChain())
         , m_scopeBuilder(&m_scopeChain)
         , m_lineOfLastUse(0)
@@ -189,9 +177,11 @@ public:
             m_delayedUses.reserve(nMessages);
             m_diagnosticRanges.reserve(nMessages);
             m_extraFormats.reserve(nMessages);
-            addMessages(m_scopeChain.document()->diagnosticMessages(), m_scopeChain.document());
-            addMessages(m_semanticInfo.semanticMessages, m_semanticInfo.document);
-            addMessages(m_semanticInfo.staticAnalysisMessages, m_semanticInfo.document);
+            if (flags == AddMessagesHighlights) {
+                addMessages(m_scopeChain.document()->diagnosticMessages(), m_scopeChain.document());
+                addMessages(m_semanticInfo.semanticMessages, m_semanticInfo.document);
+                addMessages(m_semanticInfo.staticAnalysisMessages, m_semanticInfo.document);
+            }
 
             Utils::sort(m_delayedUses, sortByLinePredicate);
         }
@@ -221,24 +211,28 @@ public:
 protected:
     void accept(Node *ast)
     {
+        if (m_promise.isCanceled())
+            return;
         if (ast)
             ast->accept(this);
     }
 
     void scopedAccept(Node *ast, Node *child)
     {
+        if (m_promise.isCanceled())
+            return;
         m_scopeBuilder.push(ast);
         accept(child);
         m_scopeBuilder.pop();
     }
 
-    void processName(const QStringRef &name, SourceLocation location)
+    void processName(QStringView name, SourceLocation location)
     {
         if (name.isEmpty())
             return;
 
         const QString &nameStr = name.toString();
-        const ObjectValue *scope = 0;
+        const ObjectValue *scope = nullptr;
         const Value *value = m_scopeChain.lookup(nameStr, &scope);
         if (!value || !scope)
             return;
@@ -266,8 +260,11 @@ protected:
             }
         }
 
-        if (type != SemanticHighlighter::UnknownType)
-            addUse(location, type);
+        if (type != SemanticHighlighter::UnknownType) {
+            // do not add uses of length 0 - this messes up highlighting (e.g. anon functions)
+            if (location.length != 0)
+                addUse(location, type);
+        }
     }
 
     void processTypeId(UiQualifiedId *typeId)
@@ -285,13 +282,13 @@ protected:
         addUse(fullLocationForQualifiedId(localId), SemanticHighlighter::BindingNameType);
     }
 
-    bool visit(UiImport *ast)
+    bool visit(UiImport *ast) override
     {
         processName(ast->importId, ast->importIdToken);
         return true;
     }
 
-    bool visit(UiObjectDefinition *ast)
+    bool visit(UiObjectDefinition *ast) override
     {
         if (m_scopeChain.document()->bind()->isGroupedPropertyBinding(ast))
             processBindingName(ast->qualifiedTypeNameId);
@@ -301,7 +298,7 @@ protected:
         return false;
     }
 
-    bool visit(UiObjectBinding *ast)
+    bool visit(UiObjectBinding *ast) override
     {
         processTypeId(ast->qualifiedTypeNameId);
         processBindingName(ast->qualifiedId);
@@ -309,23 +306,23 @@ protected:
         return false;
     }
 
-    bool visit(UiScriptBinding *ast)
+    bool visit(UiScriptBinding *ast) override
     {
         processBindingName(ast->qualifiedId);
         scopedAccept(ast, ast->statement);
         return false;
     }
 
-    bool visit(UiArrayBinding *ast)
+    bool visit(UiArrayBinding *ast) override
     {
         processBindingName(ast->qualifiedId);
         return true;
     }
 
-    bool visit(UiPublicMember *ast)
+    bool visit(UiPublicMember *ast) override
     {
-        if (ast->typeToken.isValid() && ast->isValid()) {
-            if (m_scopeChain.context()->lookupType(m_scopeChain.document().data(), QStringList(ast->memberTypeName().toString())))
+        if (ast->typeToken.isValid() && ast->memberType) {
+            if (m_scopeChain.context()->lookupType(m_scopeChain.document().data(), QStringList(ast->memberType->name.toString())))
                 addUse(ast->typeToken, SemanticHighlighter::QmlTypeType);
         }
         if (ast->identifierToken.isValid())
@@ -339,31 +336,32 @@ protected:
         return false;
     }
 
-    bool visit(FunctionExpression *ast)
+    bool visit(FunctionExpression *ast) override
     {
         processName(ast->name, ast->identifierToken);
         scopedAccept(ast, ast->body);
         return false;
     }
 
-    bool visit(FunctionDeclaration *ast)
+    bool visit(FunctionDeclaration *ast) override
     {
         return visit(static_cast<FunctionExpression *>(ast));
     }
 
-    bool visit(VariableDeclaration *ast)
+    bool visit(PatternElement *ast) override
     {
-        processName(ast->name, ast->identifierToken);
+        if (ast->isVariableDeclaration())
+            processName(ast->bindingIdentifier, ast->identifierToken);
         return true;
     }
 
-    bool visit(IdentifierExpression *ast)
+    bool visit(IdentifierExpression *ast) override
     {
         processName(ast->name, ast->identifierToken);
         return false;
     }
 
-    bool visit(StringLiteral *ast)
+    bool visit(StringLiteral *ast) override
     {
         if (ast->value.isEmpty())
             return false;
@@ -378,7 +376,7 @@ protected:
     void addMessages(QList<DiagnosticMessage> messages,
             const Document::Ptr &doc)
     {
-        foreach (const DiagnosticMessage &d, messages) {
+        for (const DiagnosticMessage &d : messages) {
             int line = d.loc.startLine;
             int column = qMax(1U, d.loc.startColumn);
             int length = d.loc.length;
@@ -397,13 +395,11 @@ protected:
                 length = end-begin;
             }
 
-            const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-
             QTextCharFormat format;
             if (d.isWarning())
-                format = settings->toTextCharFormat(C_WARNING);
+                format = m_fontSettings.toTextCharFormat(TextEditor::C_WARNING);
             else
-                format = settings->toTextCharFormat(C_ERROR);
+                format = m_fontSettings.toTextCharFormat(TextEditor::C_ERROR);
 
             format.setToolTip(d.message);
 
@@ -415,7 +411,7 @@ protected:
     void addMessages(const QList<StaticAnalysis::Message> &messages,
                      const Document::Ptr &doc)
     {
-        foreach (const StaticAnalysis::Message &d, messages) {
+        for (const StaticAnalysis::Message &d : messages) {
             int line = d.location.startLine;
             int column = qMax(1U, d.location.startColumn);
             int length = d.location.length;
@@ -434,17 +430,15 @@ protected:
                 length = end-begin;
             }
 
-            const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-
             QTextCharFormat format;
             if (d.severity == Severity::Warning
                     || d.severity == Severity::MaybeWarning
                     || d.severity == Severity::ReadingTypeInfoWarning) {
-                format = settings->toTextCharFormat(C_WARNING);
+                format = m_fontSettings.toTextCharFormat(TextEditor::C_WARNING);
             } else if (d.severity == Severity::Error || d.severity == Severity::MaybeError) {
-                format = settings->toTextCharFormat(C_ERROR);
+                format = m_fontSettings.toTextCharFormat(TextEditor::C_ERROR);
             } else if (d.severity == Severity::Hint) {
-                format = settings->toTextCharFormat(C_WARNING);
+                format = m_fontSettings.toTextCharFormat(TextEditor::C_WARNING);
                 format.setUnderlineColor(Qt::darkGreen);
             }
 
@@ -453,6 +447,11 @@ protected:
             collectRanges(begin, length, format);
             addDelayedUse(SemanticHighlighter::Use(line, column, length, addFormat(format)));
         }
+    }
+
+    void throwRecursionDepthError() override
+    {
+        qWarning("Warning: Hit Maximum recursion depth when visiting AST in CollectionTask");
     }
 
 private:
@@ -511,18 +510,20 @@ private:
             return;
 
         Utils::sort(m_uses, sortByLinePredicate);
-        m_futureInterface.reportResults(m_uses);
+        for (const SemanticHighlighter::Use &use : std::as_const(m_uses))
+            m_promise.addResult(use);
         m_uses.clear();
         m_uses.reserve(chunkSize);
     }
 
-    QFutureInterface<SemanticHighlighter::Use> m_futureInterface;
+    QPromise<SemanticHighlighter::Use> &m_promise;
     const QmlJSTools::SemanticInfo &m_semanticInfo;
+    const TextEditor::FontSettings &m_fontSettings;
     ScopeChain m_scopeChain;
     ScopeBuilder m_scopeBuilder;
     QStringList m_stateNames;
     QVector<SemanticHighlighter::Use> m_uses;
-    unsigned m_lineOfLastUse;
+    int m_lineOfLastUse;
     QVector<SemanticHighlighter::Use> m_delayedUses;
     int m_nextExtraFormat;
     int m_currentDelayedUse;
@@ -532,7 +533,7 @@ private:
 
 } // anonymous namespace
 
-SemanticHighlighter::SemanticHighlighter(QmlCodeDocument *document)
+SemanticHighlighter::SemanticHighlighter(QmlJSEditorDocument *document)
     : QObject(document)
     , m_document(document)
     , m_startRevision(0)
@@ -547,9 +548,11 @@ void SemanticHighlighter::rerun(const QmlJSTools::SemanticInfo &semanticInfo)
 {
     m_watcher.cancel();
 
-    m_startRevision = m_document->revision();
-    m_watcher.setFuture(Utils::runAsync(QThread::LowestPriority,
-                                        &SemanticHighlighter::run, this, semanticInfo));
+    m_startRevision = m_document->document()->revision();
+    auto future = QtConcurrent::run(&SemanticHighlighter::run, this,
+                                  semanticInfo, TextEditor::TextEditorSettings::fontSettings());
+    m_watcher.setFuture(future);
+    m_futureSynchronizer.addFuture(future);
 }
 
 void SemanticHighlighter::cancel()
@@ -561,50 +564,56 @@ void SemanticHighlighter::applyResults(int from, int to)
 {
     if (m_watcher.isCanceled())
         return;
-    if (m_startRevision != m_document->revision())
+    if (m_startRevision != m_document->document()->revision())
         return;
 
-    TextEditor::SemanticHighlighter::incrementalApplyExtraAdditionalFormats(
-                m_document->syntaxHighlighter(), m_watcher.future(), from, to, m_extraFormats);
+    if (m_enableHighlighting)
+        TextEditor::SemanticHighlighter::incrementalApplyExtraAdditionalFormats(
+            m_document->syntaxHighlighter(), m_watcher.future(), from, to, m_extraFormats);
 }
 
 void SemanticHighlighter::finished()
 {
     if (m_watcher.isCanceled())
         return;
-    if (m_startRevision != m_document->revision())
+    if (m_startRevision != m_document->document()->revision())
         return;
 
-    m_document->setDiagnosticRanges(m_diagnosticRanges);
+    if (m_enableWarnings)
+        m_document->setDiagnosticRanges(m_diagnosticRanges);
 
-    TextEditor::SemanticHighlighter::clearExtraAdditionalFormatsUntilEnd(
-                m_document->syntaxHighlighter(), m_watcher.future());
+    if (m_enableHighlighting)
+        TextEditor::SemanticHighlighter::clearExtraAdditionalFormatsUntilEnd(
+            m_document->syntaxHighlighter(), m_watcher.future());
 }
 
-void SemanticHighlighter::run(QFutureInterface<SemanticHighlighter::Use> &futureInterface, const QmlJSTools::SemanticInfo &semanticInfo)
+void SemanticHighlighter::run(QPromise<Use> &promise,
+                              const QmlJSTools::SemanticInfo &semanticInfo,
+                              const TextEditor::FontSettings &fontSettings)
 {
-    if (semanticInfo.isValid()) {
-        CollectionTask task(futureInterface, semanticInfo);
-        reportMessagesInfo(task.diagnosticRanges(), task.extraFormats());
-        task.run();
-    }
+    CollectionTask task(promise,
+                        semanticInfo,
+                        fontSettings,
+                        (m_enableWarnings ? CollectionTask::AddMessagesHighlights
+                                          : CollectionTask::SkipMessagesHighlights));
+    reportMessagesInfo(task.diagnosticRanges(), task.extraFormats());
+    task.run();
 }
 
-void SemanticHighlighter::updateFontSettings()
+void SemanticHighlighter::updateFontSettings(const TextEditor::FontSettings &fontSettings)
 {
-    const FontColorsSettings* settings = CodeEditorSettings::fontColorsSettings();
-    m_formats[LocalIdType] = settings->toTextCharFormat(C_QML_LOCAL_ID);
-    m_formats[ExternalIdType] = settings->toTextCharFormat(C_QML_EXTERNAL_ID);
-    m_formats[QmlTypeType] = settings->toTextCharFormat(C_QML_TYPE_ID);
-    m_formats[RootObjectPropertyType] = settings->toTextCharFormat(C_QML_ROOT_OBJECT_PROPERTY);
-    m_formats[ScopeObjectPropertyType] = settings->toTextCharFormat(C_QML_SCOPE_OBJECT_PROPERTY);
-    m_formats[ExternalObjectPropertyType] = settings->toTextCharFormat(C_QML_EXTERNAL_OBJECT_PROPERTY);
-    m_formats[JsScopeType] = settings->toTextCharFormat(C_JS_SCOPE_VAR);
-    m_formats[JsImportType] = settings->toTextCharFormat(C_JS_IMPORT_VAR);
-    m_formats[JsGlobalType] = settings->toTextCharFormat(C_JS_GLOBAL_VAR);
-    m_formats[LocalStateNameType] = settings->toTextCharFormat(C_QML_STATE_NAME);
-    m_formats[BindingNameType] = settings->toTextCharFormat(C_BINDING);
-    m_formats[FieldType] = settings->toTextCharFormat(C_FIELD);
+    m_formats[LocalIdType] = fontSettings.toTextCharFormat(TextEditor::C_QML_LOCAL_ID);
+    m_formats[ExternalIdType] = fontSettings.toTextCharFormat(TextEditor::C_QML_EXTERNAL_ID);
+    m_formats[QmlTypeType] = fontSettings.toTextCharFormat(TextEditor::C_QML_TYPE_ID);
+    m_formats[RootObjectPropertyType] = fontSettings.toTextCharFormat(TextEditor::C_QML_ROOT_OBJECT_PROPERTY);
+    m_formats[ScopeObjectPropertyType] = fontSettings.toTextCharFormat(TextEditor::C_QML_SCOPE_OBJECT_PROPERTY);
+    m_formats[ExternalObjectPropertyType] = fontSettings.toTextCharFormat(TextEditor::C_QML_EXTERNAL_OBJECT_PROPERTY);
+    m_formats[JsScopeType] = fontSettings.toTextCharFormat(TextEditor::C_JS_SCOPE_VAR);
+    m_formats[JsImportType] = fontSettings.toTextCharFormat(TextEditor::C_JS_IMPORT_VAR);
+    m_formats[JsGlobalType] = fontSettings.toTextCharFormat(TextEditor::C_JS_GLOBAL_VAR);
+    m_formats[LocalStateNameType] = fontSettings.toTextCharFormat(TextEditor::C_QML_STATE_NAME);
+    m_formats[BindingNameType] = fontSettings.toTextCharFormat(TextEditor::C_BINDING);
+    m_formats[FieldType] = fontSettings.toTextCharFormat(TextEditor::C_FIELD);
 }
 
 void SemanticHighlighter::reportMessagesInfo(const QVector<QTextLayout::FormatRange> &diagnosticRanges,
@@ -615,13 +624,23 @@ void SemanticHighlighter::reportMessagesInfo(const QVector<QTextLayout::FormatRa
     // but will use them only after a signal sent by that same thread, maybe we should transfer
     // them more explicitly
     m_extraFormats = formats;
-    m_extraFormats.unite(m_formats);
+    Utils::addToHash(&m_extraFormats, m_formats);
     m_diagnosticRanges = diagnosticRanges;
 }
 
 int SemanticHighlighter::startRevision() const
 {
     return m_startRevision;
+}
+
+void SemanticHighlighter::setEnableWarnings(bool e)
+{
+    m_enableWarnings = e;
+}
+
+void SemanticHighlighter::setEnableHighlighting(bool e)
+{
+    m_enableHighlighting = e;
 }
 
 } // namespace QmlJSEditor

@@ -1,39 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
 #include <texteditor/semantichighlighter.h>
+#include <utils/futuresynchronizer.h>
 #include <QFutureWatcher>
 #include <QTextLayout>
 #include <QVector>
 
-class QmlCodeDocument;
-
 namespace QmlJS {
-namespace AST { class SourceLocation; }
+class SourceLocation;
 }
 
 namespace TextEditor { class FontSettings; }
@@ -42,7 +19,7 @@ namespace QmlJSTools { class SemanticInfo; }
 
 namespace QmlJSEditor {
 
-namespace Internal {
+class QmlJSEditorDocument;
 
 class SemanticHighlighter : public QObject
 {
@@ -66,31 +43,37 @@ public:
         Max // number of the last used value (to generate the warning formats)
     };
 
-    typedef TextEditor::HighlightingResult Use;
+    using Use = TextEditor::HighlightingResult;
 
-    SemanticHighlighter(QmlCodeDocument *document);
+    SemanticHighlighter(QmlJSEditorDocument *document);
 
     void rerun(const QmlJSTools::SemanticInfo &scopeChain);
     void cancel();
 
     int startRevision() const;
+    void setEnableWarnings(bool e);
+    void setEnableHighlighting(bool e);
 
-    void updateFontSettings();
+    void updateFontSettings(const TextEditor::FontSettings &fontSettings);
     void reportMessagesInfo(const QVector<QTextLayout::FormatRange> &diagnosticMessages,
                             const QHash<int,QTextCharFormat> &formats);
 
 private:
     void applyResults(int from, int to);
     void finished();
-    void run(QFutureInterface<Use> &futureInterface, const QmlJSTools::SemanticInfo &semanticInfo);
+    void run(QPromise<Use> &promise,
+             const QmlJSTools::SemanticInfo &semanticInfo,
+             const TextEditor::FontSettings &fontSettings);
 
     QFutureWatcher<Use>  m_watcher;
-    QmlCodeDocument *m_document;
+    QmlJSEditorDocument *m_document;
     int m_startRevision;
     QHash<int, QTextCharFormat> m_formats;
     QHash<int, QTextCharFormat> m_extraFormats;
     QVector<QTextLayout::FormatRange> m_diagnosticRanges;
+    Utils::FutureSynchronizer m_futureSynchronizer;
+    bool m_enableWarnings = true;
+    bool m_enableHighlighting = true;
 };
 
-} // namespace Internal
 } // namespace QmlJSEditor

@@ -1,33 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "uncommentselection.h"
-#include <QPlainTextEdit>
-#include <QTextBlock>
 
-using namespace Utils;
+#include "qtcassert.h"
+#include "multitextcursor.h"
+
+#include <QTextBlock>
+#include <QTextCursor>
+#include <QTextDocument>
+
+namespace Utils {
 
 CommentDefinition CommentDefinition::CppStyle = CommentDefinition("//", "/*", "*/");
 CommentDefinition CommentDefinition::HashStyle = CommentDefinition("#");
@@ -74,12 +57,14 @@ static bool isComment(const QString &text, int index,
 }
 
 
-void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &definition)
+QTextCursor unCommentSelection(const QTextCursor &cursorIn,
+                               const CommentDefinition &definition,
+                               bool preferSingleLine)
 {
     if (!definition.isValid())
-        return;
+        return cursorIn;
 
-    QTextCursor cursor = edit->textCursor();
+    QTextCursor cursor = cursorIn;
     QTextDocument *doc = cursor.document();
     cursor.beginEditBlock();
 
@@ -103,7 +88,7 @@ void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &de
 
     bool hasSelection = cursor.hasSelection();
 
-    if (hasSelection && definition.hasMultiLineStyle()) {
+    if (hasSelection && definition.hasMultiLineStyle() && !preferSingleLine) {
 
         QString startText = startBlock.text();
         int startPos = start - startBlock.position();
@@ -145,6 +130,7 @@ void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &de
     } else if (!hasSelection && !definition.hasSingleLineStyle()) {
 
         QString text = startBlock.text().trimmed();
+
         doMultiLineStyleUncomment = text.startsWith(definition.multiLineStart)
                                     && text.endsWith(definition.multiLineEnd);
         doMultiLineStyleComment = !doMultiLineStyleUncomment && !text.isEmpty();
@@ -209,7 +195,7 @@ void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &de
                 }
             } else {
                 const QString text = block.text();
-                foreach (QChar c, text) {
+                for (QChar c : text) {
                     if (!c.isSpace()) {
                         if (definition.isAfterWhiteSpaces)
                             cursor.setPosition(block.position() + text.indexOf(c));
@@ -225,9 +211,9 @@ void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &de
 
     cursor.endEditBlock();
 
+    cursor = cursorIn;
     // adjust selection when commenting out
     if (hasSelection && !doMultiLineStyleUncomment && !doSingleLineStyleUncomment) {
-        cursor = edit->textCursor();
         if (!doMultiLineStyleComment)
             start = startBlock.position(); // move the comment into the selection
         int lastSelPos = anchorIsStart ? cursor.position() : cursor.anchor();
@@ -238,6 +224,34 @@ void Utils::unCommentSelection(QPlainTextEdit *edit, const CommentDefinition &de
             cursor.setPosition(lastSelPos);
             cursor.setPosition(start, QTextCursor::KeepAnchor);
         }
-        edit->setTextCursor(cursor);
     }
+    return cursor;
 }
+
+MultiTextCursor unCommentSelection(const MultiTextCursor &cursorIn,
+                                   const CommentDefinition &definiton,
+                                   bool preferSingleLine)
+{
+    if (cursorIn.isNull())
+        return cursorIn;
+    if (!cursorIn.hasMultipleCursors())
+        return MultiTextCursor({unCommentSelection(cursorIn.mainCursor(), definiton, preferSingleLine)});
+    QMap<int, QTextCursor> cursors;
+    for (const QTextCursor &c : cursorIn) {
+        QTextBlock block = c.document()->findBlock(c.selectionStart());
+        QTC_ASSERT(block.isValid(), continue);
+        QTextBlock end = c.document()->findBlock(c.selectionEnd());
+        QTC_ASSERT(end.isValid(), continue);
+        end = end.next();
+        while (block != end && block.isValid()) {
+            if (!cursors.contains(block.blockNumber()))
+                cursors.insert(block.blockNumber(), QTextCursor(block));
+            block = block.next();
+        }
+    }
+    for (const QTextCursor &c : cursors)
+        unCommentSelection(c, definiton, /*always prefer single line for multi cursor*/ true);
+    return cursorIn;
+}
+
+} // namespace Utils

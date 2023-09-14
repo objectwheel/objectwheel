@@ -264,7 +264,7 @@ UpdateSettingsWidget::UpdateSettingsWidget(QWidget* parent) : SettingsWidget(par
     });
     connect(m_showCacheFolderButton, &QPushButton::clicked, this, [=] {
         if (QFileInfo::exists(ApplicationCore::updatesPath())) {
-            Utils::FileUtils::showInFolder(this, ApplicationCore::updatesPath());
+            Utils::FileUtils::showInGraphicalShell(this, ApplicationCore::updatesPath());
         } else {
             UtilityFunctions::showMessage(this, tr("No cache found"),
                                           tr("There is nothing to worry about!"),

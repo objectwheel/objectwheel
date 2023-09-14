@@ -48,6 +48,38 @@ struct InitInfo {
     QHash<QString, QVector<QPair<QString, QString>>> children;
 };
 
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, Enum& e)
+{
+    in >> e.name;
+    in >> e.scope;
+    in >> e.value;
+    in >> e.keys;
+    return in;
+}
+
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const Enum& e)
+{
+    out << e.name;
+    out << e.scope;
+    out << e.value;
+    out << e.keys;
+    return out;
+}
+
+UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, InitInfo& info)
+{
+    in >> info.forms;
+    in >> info.children;
+    return in;
+}
+
+UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const InitInfo& info)
+{
+    out << info.forms;
+    out << info.children;
+    return out;
+}
+
 UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, PropertyNode& node)
 {
     in >> node.cleanClassName;
@@ -101,38 +133,6 @@ UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const RenderInfo&
     out << info.errors;
     out << info.events;
     out << info.properties;
-    return out;
-}
-
-UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, Enum& e)
-{
-    in >> e.name;
-    in >> e.scope;
-    in >> e.value;
-    in >> e.keys;
-    return in;
-}
-
-UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const Enum& e)
-{
-    out << e.name;
-    out << e.scope;
-    out << e.value;
-    out << e.keys;
-    return out;
-}
-
-UTILS_EXPORT inline QDataStream& operator>> (QDataStream& in, InitInfo& info)
-{
-    in >> info.forms;
-    in >> info.children;
-    return in;
-}
-
-UTILS_EXPORT inline QDataStream& operator<< (QDataStream& out, const InitInfo& info)
-{
-    out << info.forms;
-    out << info.children;
     return out;
 }
 

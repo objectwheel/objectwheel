@@ -1,29 +1,11 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "iassistprocessor.h"
+
+#include "assistinterface.h"
+
+#include <utils/qtcassert.h>
 
 using namespace TextEditor;
 
@@ -36,11 +18,17 @@ using namespace TextEditor;
     \sa IAssistProposal, IAssistProvider
 */
 
-IAssistProcessor::IAssistProcessor()
-{}
+IAssistProcessor::IAssistProcessor() = default;
 
-IAssistProcessor::~IAssistProcessor()
-{}
+IAssistProcessor::~IAssistProcessor() = default;
+
+IAssistProposal *IAssistProcessor::start(std::unique_ptr<AssistInterface> &&interface)
+{
+    QTC_ASSERT(!running(), return nullptr);
+    m_interface = std::move(interface);
+    QTC_ASSERT(m_interface, return nullptr);
+    return perform();
+}
 
 void IAssistProcessor::setAsyncProposalAvailable(IAssistProposal *proposal)
 {
@@ -49,20 +37,32 @@ void IAssistProcessor::setAsyncProposalAvailable(IAssistProposal *proposal)
 }
 
 void IAssistProcessor::setAsyncCompletionAvailableHandler(
-        const IAssistProcessor::AsyncCompletionsAvailableHandler &finalizer)
+        const IAssistProcessor::AsyncCompletionsAvailableHandler &handler)
 {
-    m_asyncCompletionsAvailableHandler = finalizer;
+    m_asyncCompletionsAvailableHandler = handler;
 }
 
+bool IAssistProcessor::running() { return false; }
+
+bool IAssistProcessor::needsRestart() const { return false; }
+
+void IAssistProcessor::cancel() {}
+
+AssistInterface *IAssistProcessor::interface() { return m_interface.get(); }
+const AssistInterface *IAssistProcessor::interface() const { return m_interface.get(); }
+
+#ifdef WITH_TESTS
+void IAssistProcessor::setupAssistInterface(std::unique_ptr<AssistInterface> &&interface)
+{
+    m_interface = std::move(interface);
+}
+#endif
+
 /*!
-    \fn IAssistProposal *TextEditor::IAssistProcessor::perform(const AssistInterface *interface)
+    \fn IAssistProposal *TextEditor::IAssistProcessor::start()
 
     Computes a proposal and returns it. Access to the document is made through the \a interface.
-    If this is an asynchronous processor the \a interface will be detached.
 
     The processor takes ownership of the interface. Also, one should be careful in the case of
     sharing data across asynchronous processors since there might be more than one instance of
-    them computing a proposal at a particular time.
-
-    \sa AssistInterface::detach()
-*/
+    them computing a proposal at a particular time.*/

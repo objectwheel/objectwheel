@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmljsbundle.h"
 
@@ -29,16 +7,12 @@
 
 #include <QString>
 #include <QFile>
+#include <QRegularExpression>
 #include <QTextStream>
 #include <QHash>
 
 namespace QmlJS {
 typedef PersistentTrie::Trie Trie;
-
-QmlBundle::QmlBundle(const QmlBundle &o)
-    : m_name(o.m_name), m_searchPaths(o.searchPaths()), m_installPaths(o.installPaths()),
-      m_supportedImports(o.m_supportedImports), m_implicitImports(o.m_implicitImports)
-{ }
 
 QmlBundle::QmlBundle()
 { }
@@ -157,21 +131,20 @@ void QmlBundle::printEscaped(QTextStream &s, const QString &str)
             iEnd = str.constEnd();
     while (i != iEnd) {
         if ((*i) != QLatin1Char('"')) {
-            s << QStringRef(&str, static_cast<int>(iLast - str.constBegin())
-                            , static_cast<int>(i - iLast) ).toString()
+            s << str.mid(static_cast<int>(iLast - str.constBegin()), static_cast<int>(i - iLast))
               << QLatin1Char('\\');
             iLast = i;
         }
         ++i;
     }
-    s << QStringRef(&str, static_cast<int>(iLast - str.constBegin())
-                    , static_cast<int>(i - iLast) ).toString();
+    s << str.mid(static_cast<int>(iLast - str.constBegin()), static_cast<int>(i - iLast));
 }
 
 void QmlBundle::writeTrie(QTextStream &stream, const Trie &t, const QString &indent) {
     stream << QLatin1Char('[');
     bool firstLine = true;
-    foreach (const QString &i, t.stringList()) {
+    const QStringList list = t.stringList();
+    for (const QString &i : list) {
         if (firstLine)
             firstLine = false;
         else
@@ -214,8 +187,10 @@ QString QmlBundle::toString(const QString &indent)
 }
 
 QStringList QmlBundle::maybeReadTrie(Trie &trie, Utils::JsonObjectValue *config,
-                                 const QString &path, const QString &propertyName, bool required)
+                                     const QString &path, const QString &propertyName,
+                                     bool required, bool stripVersions)
 {
+    static const QRegularExpression versionNumberAtEnd("^(.+)( \\d+\\.\\d+)$");
     QStringList res;
     if (!config->hasMember(propertyName)) {
         if (required)
@@ -224,12 +199,19 @@ QStringList QmlBundle::maybeReadTrie(Trie &trie, Utils::JsonObjectValue *config,
         return res;
     }
     Utils::JsonValue *imp0 = config->member(propertyName);
-    Utils::JsonArrayValue *imp = ((imp0 != 0) ? imp0->toArray() : 0);
-    if (imp != 0) {
-        foreach (Utils::JsonValue *v, imp->elements()) {
-            Utils::JsonStringValue *impStr = ((v != 0) ? v->toString() : 0);
-            if (impStr != 0) {
-                trie.insert(impStr->value());
+    Utils::JsonArrayValue *imp = ((imp0 != nullptr) ? imp0->toArray() : nullptr);
+    if (imp != nullptr) {
+        const QList<Utils::JsonValue *> elements = imp->elements();
+        for (Utils::JsonValue *v : elements) {
+            Utils::JsonStringValue *impStr = ((v != nullptr) ? v->toString() : nullptr);
+            if (impStr != nullptr) {
+                QString value = impStr->value();
+                if (stripVersions) {
+                    const QRegularExpressionMatch match = versionNumberAtEnd.match(value);
+                    if (match.hasMatch())
+                        value = match.captured(1);
+                }
+                trie.insert(value);
             } else {
                 res.append(QString::fromLatin1("Expected all elements of array in property \"%1\" "
                                                "to be strings in QmlBundle at %2.")
@@ -244,7 +226,7 @@ QStringList QmlBundle::maybeReadTrie(Trie &trie, Utils::JsonObjectValue *config,
     return res;
 }
 
-bool QmlBundle::readFrom(QString path, QStringList *errors)
+bool QmlBundle::readFrom(QString path, bool stripVersions, QStringList *errors)
 {
     Utils::JsonMemoryPool pool;
 
@@ -256,7 +238,7 @@ bool QmlBundle::readFrom(QString path, QStringList *errors)
         return false;
     }
     JsonObjectValue *config = JsonValue::create(QString::fromUtf8(f.readAll()), &pool)->toObject();
-    if (config == 0) {
+    if (config == nullptr) {
         if (errors)
             (*errors) << QString::fromLatin1("Could not parse json object in file at %1 .").arg(path);
         return false;
@@ -264,8 +246,8 @@ bool QmlBundle::readFrom(QString path, QStringList *errors)
     QStringList errs;
     if (config->hasMember(QLatin1String("name"))) {
         JsonValue *n0 = config->member(QLatin1String("name"));
-        JsonStringValue *n = ((n0 != 0) ? n0->toString() : 0);
-        if (n != 0)
+        JsonStringValue *n = ((n0 != nullptr) ? n0->toString() : nullptr);
+        if (n != nullptr)
             m_name = n->value();
         else
             errs.append(QString::fromLatin1("Property \"name\" in QmlBundle at %1 is expected "
@@ -276,8 +258,8 @@ bool QmlBundle::readFrom(QString path, QStringList *errors)
     }
     errs << maybeReadTrie(m_searchPaths, config, path, QLatin1String("searchPaths"));
     errs << maybeReadTrie(m_installPaths, config, path, QLatin1String("installPaths"));
-    errs << maybeReadTrie(m_supportedImports, config, path, QLatin1String("supportedImports")
-                             , true);
+    errs << maybeReadTrie(m_supportedImports, config, path, QLatin1String("supportedImports"),
+                          true, stripVersions);
     errs << maybeReadTrie(m_implicitImports, config, path, QLatin1String("implicitImports"));
     if (errors)
         (*errors) << errs;
@@ -301,14 +283,14 @@ void QmlLanguageBundles::mergeBundleForLanguage(Dialect l, const QmlBundle &bund
         m_bundles.insert(l,bundle);
 }
 
-QList<Dialect> QmlLanguageBundles::languages() const
+const QList<Dialect> QmlLanguageBundles::languages() const
 {
     return m_bundles.keys();
 }
 
 void QmlLanguageBundles::mergeLanguageBundles(const QmlLanguageBundles &o)
 {
-    foreach (Dialect l, o.languages())
+    for (Dialect l : o.languages())
         mergeBundleForLanguage(l, o.bundleForLanguage(l));
 }
 

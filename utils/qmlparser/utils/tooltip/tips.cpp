@@ -1,73 +1,76 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "tips.h"
 #include "tooltip.h"
-#include "reuse.h"
 
-#include <utils/qtcassert.h>
+#include "../qtcassert.h"
 
-#include <QRect>
 #include <QColor>
+#include <QFontMetrics>
+#include <QGuiApplication>
+#include <QPaintEvent>
 #include <QPainter>
 #include <QPen>
-#include <QPixmap>
+#include <QPoint>
+#include <QRect>
+#include <QResizeEvent>
 #include <QStyle>
-#include <QFontMetrics>
-#include <QTextDocument>
 #include <QStylePainter>
 #include <QStyleOptionFrame>
-#include <QResizeEvent>
-#include <QPaintEvent>
+#include <QTextDocument>
+#include <QScreen>
 #include <QVBoxLayout>
+#include <QWidget>
 
-#include <textimagehandler.h>
-#include <private/qwidgettextcontrol_p.h>
+#include <memory>
 
 namespace Utils {
 namespace Internal {
 
-QTipLabel::QTipLabel(QWidget *parent) :
+TipLabel::TipLabel(QWidget *parent) :
     QLabel(parent, Qt::ToolTip | Qt::BypassGraphicsProxyWidget)
 {
 }
 
-void QTipLabel::setHelpId(const QString &id)
+void TipLabel::setContextHelp(const QVariant &help)
 {
-    m_helpId = id;
+    m_contextHelp = help;
     update();
 }
 
-QString QTipLabel::helpId() const
+QVariant TipLabel::contextHelp() const
 {
-    return m_helpId;
+    return m_contextHelp;
 }
 
+const QMetaObject *TipLabel::metaObject() const
+{
+    // CSS Tooltip styling depends on a the name of this class.
+    // So set up a minimalist QMetaObject to fake a class name "QTipLabel":
+
+    static const uint tip_label_meta_data[15] = { 9 /* moc revision */ };
+
+    static const struct {
+        const uint offsetsAndSize[2];
+        char stringdata0[24];
+    } qt_meta_stringdata = { {8, sizeof("QTipLabel")}, "QTipLabel" };
+
+    static const QMetaObject tipMetaObject {
+        &QLabel::staticMetaObject,                    // SuperData superdata
+        qt_meta_stringdata.offsetsAndSize,            // const uint *stringdata;
+        tip_label_meta_data,                          // const uint *data;
+        nullptr,                                      // StaticMetacallFunction static_metacall;
+        nullptr,                                      // const SuperData *relatedMetaObjects;
+        nullptr,                                      // QtPrivate::QMetaTypeInterface *const *metaTypes;
+        nullptr,                                      // void *extradata;
+    };
+
+    return &tipMetaObject;
+}
 
 ColorTip::ColorTip(QWidget *parent)
-    : QTipLabel(parent)
+    : TipLabel(parent)
 {
     resize(40, 40);
 }
@@ -85,10 +88,9 @@ void ColorTip::setContent(const QVariant &content)
     tilePainter.fillRect(size, size, size, size, col);
 }
 
-void ColorTip::configure(const QPoint &pos, QWidget *w)
+void ColorTip::configure(const QPoint &pos)
 {
     Q_UNUSED(pos)
-    Q_UNUSED(w)
 
     update();
 }
@@ -98,14 +100,14 @@ bool ColorTip::canHandleContentReplacement(int typeId) const
     return typeId == ToolTip::ColorContent;
 }
 
-bool ColorTip::equals(int typeId, const QVariant &other, const QString &otherHelpId) const
+bool ColorTip::equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const
 {
-    return typeId == ToolTip::ColorContent && otherHelpId == helpId() && other == m_color;
+    return typeId == ToolTip::ColorContent && otherContextHelp == contextHelp() && other == m_color;
 }
 
 void ColorTip::paintEvent(QPaintEvent *event)
 {
-    QTipLabel::paintEvent(event);
+    TipLabel::paintEvent(event);
 
     QPainter painter(this);
     painter.setBrush(m_color);
@@ -119,53 +121,50 @@ void ColorTip::paintEvent(QPaintEvent *event)
     painter.drawRect(borderRect);
 }
 
-TextTip::TextTip(QWidget *parent) : QTipLabel(parent)
+TextTip::TextTip(QWidget *parent) : TipLabel(parent)
 {
     setForegroundRole(QPalette::ToolTipText);
     setBackgroundRole(QPalette::ToolTipBase);
     ensurePolished();
-    setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, 0, this));
+    setMargin(1 + style()->pixelMetric(QStyle::PM_ToolTipLabelFrameWidth, nullptr, this));
     setFrameStyle(QFrame::NoFrame);
     setAlignment(Qt::AlignLeft);
     setIndent(1);
-    setWindowOpacity(style()->styleHint(QStyle::SH_ToolTipLabel_Opacity, 0, this) / 255.0);
+    setWindowOpacity(style()->styleHint(QStyle::SH_ToolTipLabel_Opacity, nullptr, this) / 255.0);
 }
 
-static bool likelyContainsLink(const QString &s)
+static bool likelyContainsLink(const QString &s, const Qt::TextFormat &format)
 {
-    return s.contains(QLatin1String("href"), Qt::CaseInsensitive);
+    if (s.contains(QLatin1String("href"), Qt::CaseInsensitive))
+        return true;
+    if (format == Qt::MarkdownText)
+        return s.contains("](");
+    return false;
 }
 
 void TextTip::setContent(const QVariant &content)
 {
-    m_text = content.toString();
-    bool containsLink = likelyContainsLink(m_text);
+    if (content.canConvert<QString>()) {
+        m_text = content.toString();
+    } else if (content.canConvert<TextItem>()) {
+        auto item = content.value<TextItem>();
+        m_text = item.first;
+        m_format = item.second;
+    }
+
+    bool containsLink = likelyContainsLink(m_text, m_format);
     setOpenExternalLinks(containsLink);
 }
 
 bool TextTip::isInteractive() const
 {
-    return likelyContainsLink(m_text);
+    return likelyContainsLink(m_text, m_format);
 }
 
-void TextTip::configure(const QPoint &pos, QWidget *w)
+void TextTip::configure(const QPoint &pos)
 {
-    if (helpId().isEmpty())
-        setText(m_text);
-    else
-        setText(QString::fromLatin1("<table><tr><td valign=middle>%1</td><td>&nbsp;&nbsp;"
-                                    "<img src=\":/images/f1.svg\"></td>"
-                                    "</tr></table>").arg(m_text));
-
-    // NOTE: Tooltip blurry image bug fix
-    // setText("<html></html>"); // Make sure it creates QWidgetTextControl
-    if (auto control = findChild<QWidgetTextControl*>()) {
-        QAbstractTextDocumentLayout* layout = control->document()->documentLayout();
-        if (auto object = dynamic_cast<QObject*>(layout->handlerForObject(QTextFormat::ImageObject))) {
-            if (!object->inherits("TextImageHandler"))
-                layout->registerHandler(QTextFormat::ImageObject, new TextImageHandler(layout));
-        }
-    }
+    setTextFormat(m_format);
+    setText(m_text);
 
     // Make it look good with the default ToolTip font on Mac, which has a small descent.
     QFontMetrics fm(font());
@@ -176,7 +175,12 @@ void TextTip::configure(const QPoint &pos, QWidget *w)
     // Try to find a nice width without unnecessary wrapping.
     setWordWrap(false);
     int tipWidth = sizeHint().width();
-    const int screenWidth = screenGeometry(pos, w).width();
+
+    QScreen *screen = QGuiApplication::screenAt(pos);
+    if (!screen)
+        screen = QGuiApplication::primaryScreen();
+
+    const int screenWidth = screen->availableGeometry().width();
     const int maxDesiredWidth = int(screenWidth * .5);
     if (tipWidth > maxDesiredWidth) {
         setWordWrap(true);
@@ -196,16 +200,19 @@ int TextTip::showTime() const
     return 10000 + 40 * qMax(0, m_text.size() - 100);
 }
 
-bool TextTip::equals(int typeId, const QVariant &other, const QString &otherHelpId) const
+bool TextTip::equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const
 {
-    return typeId == ToolTip::TextContent && otherHelpId == helpId() && other.toString() == m_text;
+    return typeId == ToolTip::TextContent && otherContextHelp == contextHelp()
+           && ((other.canConvert<QString>() && other.toString() == m_text)
+               || (other.canConvert<TextItem>()
+                   && other.value<TextItem>() == TextItem(m_text, m_format)));
 }
 
 void TextTip::paintEvent(QPaintEvent *event)
 {
     QStylePainter p(this);
     QStyleOptionFrame opt;
-    opt.init(this);
+    opt.initFrom(this);
     p.drawPrimitive(QStyle::PE_PanelTipLabel, opt);
     p.end();
 
@@ -216,7 +223,7 @@ void TextTip::resizeEvent(QResizeEvent *event)
 {
     QStyleHintReturnMask frameMask;
     QStyleOption option;
-    option.init(this);
+    option.initFrom(this);
     if (style()->styleHint(QStyle::SH_ToolTip_Mask, &option, this, &frameMask))
         setMask(frameMask.region);
 
@@ -224,7 +231,7 @@ void TextTip::resizeEvent(QResizeEvent *event)
 }
 
 WidgetTip::WidgetTip(QWidget *parent) :
-    QTipLabel(parent), m_layout(new QVBoxLayout)
+    TipLabel(parent), m_layout(new QVBoxLayout)
 {
     m_layout->setContentsMargins(0, 0, 0, 0);
     setLayout(m_layout);
@@ -235,7 +242,7 @@ void WidgetTip::setContent(const QVariant &content)
     m_widget = content.value<QWidget *>();
 }
 
-void WidgetTip::configure(const QPoint &pos, QWidget *)
+void WidgetTip::configure(const QPoint &pos)
 {
     QTC_ASSERT(m_widget && m_layout->count() == 0, return);
 
@@ -271,18 +278,15 @@ void WidgetTip::pinToolTipWidget(QWidget *parent)
 bool WidgetTip::canHandleContentReplacement(int typeId) const
 {
     // Always create a new widget.
-    Q_UNUSED(typeId);
+    Q_UNUSED(typeId)
     return false;
 }
 
-bool WidgetTip::equals(int typeId, const QVariant &other, const QString &otherHelpId) const
+bool WidgetTip::equals(int typeId, const QVariant &other, const QVariant &otherContextHelp) const
 {
-    return typeId == ToolTip::WidgetContent && otherHelpId == helpId()
+    return typeId == ToolTip::WidgetContent && otherContextHelp == contextHelp()
             && other.value<QWidget *>() == m_widget;
 }
-
-// need to include it here to force it to be inside the namespaces
-#include "moc_tips.cpp"
 
 } // namespace Internal
 } // namespace Utils

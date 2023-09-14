@@ -1,33 +1,11 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2021 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include <utils_global.h>
+#include "qmljs/parser/qmljssourcelocation_p.h"
 
-#include <QtCore/qglobal.h>
+#include <utils_global.h>
 
 //
 //  W A R N I N G
@@ -42,52 +20,38 @@
 
 namespace QmlJS { namespace AST {
 
-class SourceLocation
-{
-public:
-    explicit SourceLocation(quint32 offset = 0, quint32 length = 0, quint32 line = 0, quint32 column = 0)
-        : offset(offset), length(length),
-          startLine(line), startColumn(column)
-    { }
-
-    bool isValid() const { return length != 0; }
-
-    quint32 begin() const { return offset; }
-    quint32 end() const { return offset + length; }
-
-// attributes
-    // ### encode
-    quint32 offset;
-    quint32 length;
-    quint32 startLine;
-    quint32 startColumn;
-};
-
+class BaseVisitor;
 class Visitor;
 class Node;
 class ExpressionNode;
 class Statement;
+class TypeExpression;
 class ThisExpression;
 class IdentifierExpression;
 class NullExpression;
 class TrueLiteral;
 class FalseLiteral;
+class SuperLiteral;
 class NumericLiteral;
 class StringLiteral;
+class TemplateLiteral;
 class RegExpLiteral;
-class ArrayLiteral;
-class ObjectLiteral;
-class ElementList;
+class Pattern;
+class ArrayPattern;
+class ObjectPattern;
+class PatternElement;
+class PatternElementList;
+class PatternProperty;
+class PatternPropertyList;
 class Elision;
-class PropertyAssignmentList;
-class PropertyGetterSetter;
-class PropertyNameAndValue;
 class PropertyName;
 class IdentifierPropertyName;
 class StringLiteralPropertyName;
 class NumericLiteralPropertyName;
+class ComputedPropertyName;
 class ArrayMemberExpression;
 class FieldMemberExpression;
+class TaggedTemplate;
 class NewMemberExpression;
 class NewExpression;
 class CallExpression;
@@ -106,20 +70,19 @@ class NotExpression;
 class BinaryExpression;
 class ConditionalExpression;
 class Expression; // ### rename
+class YieldExpression;
 class Block;
+class LeftHandSideExpression;
 class StatementList;
 class VariableStatement;
 class VariableDeclarationList;
-class VariableDeclaration;
 class EmptyStatement;
 class ExpressionStatement;
 class IfStatement;
 class DoWhileStatement;
 class WhileStatement;
 class ForStatement;
-class LocalForStatement;
 class ForEachStatement;
-class LocalForEachStatement;
 class ContinueStatement;
 class BreakStatement;
 class ReturnStatement;
@@ -137,14 +100,28 @@ class Finally;
 class FunctionDeclaration;
 class FunctionExpression;
 class FormalParameterList;
-class FunctionBody;
+class ExportSpecifier;
+class ExportsList;
+class ExportClause;
+class ExportDeclaration;
 class Program;
-class SourceElements;
-class SourceElement;
-class FunctionSourceElement;
-class StatementSourceElement;
+class ImportSpecifier;
+class ImportsList;
+class NamedImports;
+class NameSpaceImport;
+class NamedImport;
+class ImportClause;
+class FromClause;
+class ImportDeclaration;
+class ESModule;
 class DebuggerStatement;
 class NestedExpression;
+class ClassExpression;
+class ClassDeclaration;
+class ClassElementList;
+class TypeArgument;
+class Type;
+class TypeAnnotation;
 
 // ui elements
 class UiProgram;
@@ -153,6 +130,7 @@ class UiImport;
 class UiPublicMember;
 class UiParameterList;
 class UiObjectDefinition;
+class UiInlineComponent;
 class UiObjectInitializer;
 class UiObjectBinding;
 class UiScriptBinding;
@@ -162,9 +140,13 @@ class UiObjectMember;
 class UiObjectMemberList;
 class UiArrayMemberList;
 class UiQualifiedId;
-class UiQualifiedPragmaId;
 class UiHeaderItemList;
 class UiEnumDeclaration;
 class UiEnumMemberList;
+class UiVersionSpecifier;
+class UiRequired;
+class UiAnnotation;
+class UiAnnotationList;
 
-} } // namespace AST
+} // namespace AST
+} // namespace QmlJS

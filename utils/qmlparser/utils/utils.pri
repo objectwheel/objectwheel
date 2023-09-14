@@ -1,6 +1,10 @@
+include($$PWD/tasking/tasking.pri)
 include($$PWD/tooltip/tooltip.pri)
 
 SOURCES += \
+    $$PWD/id.cpp \
+    $$PWD/futuresynchronizer.cpp \
+    $$PWD/filepath.cpp \
     $$PWD/fileutils.cpp \
     $$PWD/hostosinfo.cpp \
     $$PWD/json.cpp \
@@ -16,12 +20,43 @@ SOURCES += \
     $$PWD/filesystemwatcher.cpp \
     $$PWD/htmldocextractor.cpp \
     $$PWD/qtcolorbutton.cpp \
+    $$PWD/namevaluedictionary.cpp \
+    $$PWD/searchresultitem.cpp \
+    $$PWD/stringutils.cpp \
+    $$PWD/multitextcursor.cpp \
+    $$PWD/namevalueitem.cpp \
+    $$PWD/globalfilechangeblocker.cpp \
+    $$PWD/devicefileaccess.cpp \
+    $$PWD/guard.cpp \
+    $$PWD/commandline.cpp \
+    $$PWD/camelcasecursor.cpp \
+    $$PWD/macroexpander.cpp \
     $$PWD/uncommentselection.cpp
 
 HEADERS += \
+    $$PWD/id.h \
+    $$PWD/macroexpander.h \
+    $$PWD/commandline.h \
+    $$PWD/guard.h \
+    $$PWD/globalfilechangeblocker.h \
+    $$PWD/devicefileaccess.h \
+    $$PWD/camelcasecursor.h \
+    $$PWD/searchresultitem.h \
+    $$PWD/stringutils.h \
+    $$PWD/multitextcursor.h \
+    $$PWD/namevalueitem.h \
+    $$PWD/namevaluedictionary.h \
+    $$PWD/utilstr.h \
+    $$PWD/environmentfwd.h \
+    $$PWD/predicates.h \
+    $$PWD/futuresynchronizer.h \
+    $$PWD/expected.h \
+    $$PWD/expected.hpp \
+    $$PWD/filepath.h \
+    $$PWD/filepathinfo.h \
+    $$PWD/osspecificaspects.h \
+    $$PWD/utiltypes.h \
     $$PWD/fileutils.h \
-    $$PWD/optional.h \
-    $$PWD/linecolumn.h \
     $$PWD/functiontraits.h \
     $$PWD/hostosinfo.h \
     $$PWD/json.h \
@@ -30,13 +65,11 @@ HEADERS += \
     $$PWD/runextensions.h \
     $$PWD/savefile.h \
     $$PWD/changeset.h \
-    $$PWD/declarationmacros.h \
     $$PWD/fuzzymatcher.h \
     $$PWD/textutils.h \
     $$PWD/faketooltip.h \
     $$PWD/environment.h \
     $$PWD/filesystemwatcher.h \
-    $$PWD/executeondestruction.h \
     $$PWD/htmldocextractor.h \
     $$PWD/link.h \
     $$PWD/settingsutils.h \

@@ -1,7 +1,7 @@
 HEADERS += \
         $$PWD/codeassist/textdocumentmanipulatorinterface.h \
         $$PWD/codeassist/textdocumentmanipulator.h \
-        $$PWD/codeassist/runner.h \
+        $$PWD/codeassist/asyncprocessor.h \
         $$PWD/codeassist/keywordscompletionassist.h \
         $$PWD/codeassist/ifunctionhintproposalmodel.h \
         $$PWD/codeassist/iassistprovider.h \
@@ -22,19 +22,18 @@ HEADERS += \
         $$PWD/codeassist/assistproposaliteminterface.h \
         $$PWD/codeassist/codeassistant.h \
         \
+        $$PWD/texteditortr.h \
         $$PWD/typingsettings.h \
         $$PWD/textstyles.h \
         $$PWD/texteditorsettings.h \
         $$PWD/texteditoroverlay.h \
         $$PWD/texteditorconstants.h \
-        $$PWD/texteditor_global.h \
         $$PWD/tabsettings.h \
         $$PWD/syntaxhighlighter.h \
         $$PWD/storagesettings.h \
         $$PWD/semantichighlighter.h \
         $$PWD/quickfix.h \
         $$PWD/indenter.h \
-        $$PWD/helpitem.h \
         $$PWD/completionsettings.h \
         $$PWD/colorschemeedit.h \
         $$PWD/colorscheme.h \
@@ -63,7 +62,7 @@ SOURCES += \
         $$PWD/codeassist/iassistprovider.cpp \
         $$PWD/codeassist/ifunctionhintproposalmodel.cpp \
         $$PWD/codeassist/keywordscompletionassist.cpp \
-        $$PWD/codeassist/runner.cpp \
+        $$PWD/codeassist/asyncprocessor.cpp \
         $$PWD/codeassist/textdocumentmanipulator.cpp \
         \
         $$PWD/autocompleter.cpp \
@@ -72,8 +71,6 @@ SOURCES += \
         $$PWD/colorscheme.cpp \
         $$PWD/colorschemeedit.cpp \
         $$PWD/completionsettings.cpp \
-        $$PWD/helpitem.cpp \
-        $$PWD/indenter.cpp \
         $$PWD/quickfix.cpp \
         $$PWD/semantichighlighter.cpp \
         $$PWD/storagesettings.cpp \
@@ -87,5 +84,3 @@ SOURCES += \
         $$PWD/icodestylepreferences.cpp \
         $$PWD/refactoroverlay.cpp
 
-FORMS += \
-        $$PWD/colorschemeedit.ui

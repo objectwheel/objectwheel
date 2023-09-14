@@ -1,6 +1,7 @@
 #include <lineedit.h>
 #include <paintutils.h>
 #include <private/qlineedit_p.h>
+#include <QPainterPath>
 #include <QStylePainter>
 
 const int QLineEditPrivate::verticalMargin(1);

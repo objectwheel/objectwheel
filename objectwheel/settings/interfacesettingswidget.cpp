@@ -367,7 +367,7 @@ void InterfaceSettingsWidget::fill()
 {
     m_themeBox->addItem(tr("Light"));
     m_languageBox->addItem(QIcon(":/images/flags/en.svg"), tr("English"));
-    m_fontFamilyBox->addItems(QFontDatabase().families());
+    m_fontFamilyBox->addItems(QFontDatabase::families());
     m_fontSizeBox->addItems({"8", "9", "10", "11", "12", "13", "14", "15", "16",
                              "18", "24", "36", "48", "64", "72", "96", "144"});
 }

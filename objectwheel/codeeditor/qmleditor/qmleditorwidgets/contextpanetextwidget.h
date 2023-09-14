@@ -1,51 +1,30 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmleditorwidgets_global.h"
 #include <QWidget>
 
-QT_BEGIN_NAMESPACE
+class QComboBox;
+class QFontComboBox;
+class QLabel;
+class QToolButton;
 class QVariant;
-namespace Ui { class ContextPaneTextWidget; }
-QT_END_NAMESPACE
 
 namespace QmlJS { class PropertyReader; }
 
 namespace QmlEditorWidgets {
 
-class CustomColorDialog;
+class ColorButton;
+class FontSizeSpinBox;
 
-class QMLEDITORWIDGETS_EXPORT ContextPaneTextWidget : public QWidget
+class ContextPaneTextWidget : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit ContextPaneTextWidget(QWidget *parent = 0);
-    ~ContextPaneTextWidget();
+    explicit ContextPaneTextWidget(QWidget *parent = nullptr);
+
     void setProperties(QmlJS::PropertyReader *propertyReader);
     void setVerticalAlignmentVisible(bool);
     void setStyleVisible(bool);
@@ -63,8 +42,7 @@ public:
     void onCurrentFontChanged(const QFont &font);
     void onHorizontalAlignmentChanged();
     void onVerticalAlignmentChanged();
-    void onStyleComboBoxChanged(const QString &style);
-
+    void onStyleComboBoxChanged(int index);
 
 signals:
     void propertyChanged(const QString &, const QVariant &);
@@ -72,13 +50,33 @@ signals:
     void removeAndChangeProperty(const QString &, const QString &, const QVariant &, bool removeFirst);
 
 protected:
-    void timerEvent(QTimerEvent *event);
+    void timerEvent(QTimerEvent *event) override;
 
 private:
-    Ui::ContextPaneTextWidget *ui;
+    QFontComboBox *m_fontComboBox;
+    ColorButton *m_colorButton;
+    FontSizeSpinBox *m_fontSizeSpinBox;
+
+    QToolButton *m_boldButton;
+    QToolButton *m_italicButton;
+    QToolButton *m_underlineButton;
+    QToolButton *m_strikeoutButton;
+
+    QLabel *m_styleLabel;
+    QComboBox *m_styleComboBox;
+    ColorButton *m_textColorButton;
+
+    QToolButton *m_leftAlignmentButton;
+    QToolButton *m_centerHAlignmentButton;
+    QToolButton *m_rightAlignmentButton;
+
+    QToolButton *m_topAlignmentButton;
+    QToolButton *m_centerVAlignmentButton;
+    QToolButton *m_bottomAlignmentButton;
+
     QString m_verticalAlignment;
     QString m_horizontalAlignment;
-    int m_fontSizeTimer;
+    int m_fontSizeTimer = -1;
 };
 
 } //QmlDesigner

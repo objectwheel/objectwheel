@@ -1,30 +1,9 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "keywordscompletionassist.h"
 
+#include <coreplugin/coreconstants.h>
 #include <texteditor/codeassist/assistinterface.h>
 #include <texteditor/codeassist/genericproposal.h>
 #include <texteditor/codeassist/functionhintproposal.h>
@@ -32,9 +11,13 @@
 #include <texteditor/completionsettings.h>
 #include <texteditor/texteditorsettings.h>
 #include <texteditor/texteditorconstants.h>
-#include <qmlcodeeditor.h>
+#include <texteditor/texteditor.h>
+
+#include <QDir>
+#include <QFileInfo>
 
 #include <utils/algorithm.h>
+#include <utils/utilsicons.h>
 
 namespace TextEditor {
 
@@ -43,10 +26,10 @@ namespace TextEditor {
 // --------------------------
 // Note: variables and functions must be sorted
 Keywords::Keywords(const QStringList &variables, const QStringList &functions, const QMap<QString, QStringList> &functionArgs)
-    : m_variables(variables), m_functions(functions), m_functionArgs(functionArgs)
+    : m_variables(Utils::sorted(variables)),
+      m_functions(Utils::sorted(functions)),
+      m_functionArgs(functionArgs)
 {
-    Utils::sort(m_variables);
-    Utils::sort(m_functions);
 }
 
 bool Keywords::isVariable(const QString &word) const
@@ -153,78 +136,93 @@ QString KeywordsFunctionHintModel::text(int index) const
 
 int KeywordsFunctionHintModel::activeArgument(const QString &prefix) const
 {
-    Q_UNUSED(prefix);
+    Q_UNUSED(prefix)
     return 1;
 }
 
 // ---------------------------------
 // KeywordsCompletionAssistProcessor
 // ---------------------------------
-KeywordsCompletionAssistProcessor::KeywordsCompletionAssistProcessor(Keywords keywords)
-//    : m_snippetCollector(QString(), QIcon(":/texteditor/images/snippet.png"))
-    : m_variableIcon(QLatin1String(":/codemodel/images/keyword.png"))
+KeywordsCompletionAssistProcessor::KeywordsCompletionAssistProcessor(const Keywords &keywords)
+    : m_snippetCollector(QString(), QIcon(":/texteditor/images/snippet.png"))
+    , m_variableIcon(QLatin1String(":/codemodel/images/keyword.png"))
     , m_functionIcon(QLatin1String(":/codemodel/images/member.png"))
     , m_keywords(keywords)
 {}
 
-IAssistProposal *KeywordsCompletionAssistProcessor::perform(const AssistInterface *interface)
+IAssistProposal *KeywordsCompletionAssistProcessor::performAsync()
 {
-    QScopedPointer<const AssistInterface> assistInterface(interface);
-    if (isInComment(interface))
+    if (isInComment(interface()))
         return nullptr;
 
-    int pos = interface->position();
+    int pos = interface()->position();
 
     // Find start position
-    QChar chr = interface->characterAt(pos - 1);
+    QChar chr = interface()->characterAt(pos - 1);
     if (chr == '(')
         --pos;
     // Skip to the start of a name
     do {
-        chr = interface->characterAt(--pos);
+        chr = interface()->characterAt(--pos);
     } while (chr.isLetterOrNumber() || chr == '_');
 
     ++pos;
 
     int startPosition = pos;
 
-    if (interface->reason() == IdleEditor) {
-        QChar characterUnderCursor = interface->characterAt(interface->position());
-        if (characterUnderCursor.isLetterOrNumber())
-            return nullptr;
-        if (interface->position() - startPosition < 3)
-            return 0;
+    if (interface()->reason() == IdleEditor) {
+        QChar characterUnderCursor = interface()->characterAt(interface()->position());
+        if (characterUnderCursor.isLetterOrNumber() || interface()->position() - startPosition
+                < TextEditorSettings::completionSettings().m_characterThreshold) {
+            QList<AssistProposalItemInterface *> items;
+            if (m_dynamicCompletionFunction)
+                m_dynamicCompletionFunction(interface(), &items, startPosition);
+            if (items.isEmpty())
+                return nullptr;
+            return new GenericProposal(startPosition, items);
+        }
     }
 
     // extract word
     QString word;
     do {
-        word += interface->characterAt(pos);
-        chr = interface->characterAt(++pos);
+        word += interface()->characterAt(pos);
+        chr = interface()->characterAt(++pos);
     } while ((chr.isLetterOrNumber() || chr == '_') && chr != '(');
 
-    if (m_keywords.isFunction(word) && interface->characterAt(pos) == '(') {
+    if (m_keywords.isFunction(word) && interface()->characterAt(pos) == '(') {
         QStringList functionSymbols = m_keywords.argsForFunction(word);
         if (functionSymbols.size() == 0)
             return nullptr;
         FunctionHintProposalModelPtr model(new KeywordsFunctionHintModel(functionSymbols));
         return new FunctionHintProposal(startPosition, model);
     } else {
-        QList<AssistProposalItemInterface *> items/* = m_snippetCollector.collect()*/;
-        items.append(generateProposalList(m_keywords.variables(), m_variableIcon));
-        items.append(generateProposalList(m_keywords.functions(), m_functionIcon));
+        const int originalStartPos = startPosition;
+        QList<AssistProposalItemInterface *> items;
+        if (m_dynamicCompletionFunction)
+            m_dynamicCompletionFunction(interface(), &items, startPosition);
+        if (startPosition == originalStartPos) {
+            items.append(m_snippetCollector.collect());
+            items.append(generateProposalList(m_keywords.variables(), m_variableIcon));
+            items.append(generateProposalList(m_keywords.functions(), m_functionIcon));
+        }
         return new GenericProposal(startPosition, items);
     }
 }
 
-void KeywordsCompletionAssistProcessor::setSnippetGroup(const QString &/*id*/)
+void KeywordsCompletionAssistProcessor::setSnippetGroup(const QString &id)
 {
-//    m_snippetCollector.setGroupId(id);
+    m_snippetCollector.setGroupId(id);
 }
 
-void KeywordsCompletionAssistProcessor::setKeywords(Keywords keywords)
+void KeywordsCompletionAssistProcessor::setKeywords(const Keywords &keywords)
 {
     m_keywords = keywords;
+}
+
+void KeywordsCompletionAssistProcessor::setDynamicCompletionFunction(DynamicCompletionFunction func)
+{
+    m_dynamicCompletionFunction = func;
 }
 
 bool KeywordsCompletionAssistProcessor::isInComment(const AssistInterface *interface) const
@@ -252,16 +250,76 @@ KeywordsCompletionAssistProvider::KeywordsCompletionAssistProvider(const Keyword
     , m_snippetGroup(snippetGroup)
 { }
 
-IAssistProvider::RunType KeywordsCompletionAssistProvider::runType() const
+void KeywordsCompletionAssistProvider::setDynamicCompletionFunction(
+        const DynamicCompletionFunction &func)
 {
-    return Synchronous;
+    m_completionFunc = func;
 }
 
-IAssistProcessor *KeywordsCompletionAssistProvider::createProcessor() const
+IAssistProcessor *KeywordsCompletionAssistProvider::createProcessor(const AssistInterface *) const
 {
     auto processor = new KeywordsCompletionAssistProcessor(m_keyWords);
     processor->setSnippetGroup(m_snippetGroup);
+    processor->setDynamicCompletionFunction(m_completionFunc);
     return processor;
 }
+
+void pathComplete(const AssistInterface *interface, QList<AssistProposalItemInterface *> *items,
+                  int &startPosition)
+{
+    if (!items)
+        return;
+
+    if (interface->filePath().isEmpty())
+        return;
+
+    // For pragmatic reasons, we don't support spaces in file names here.
+    static const auto canOccurInFilePath = [](const QChar &c) {
+        return c.isLetterOrNumber() || c == '.' || c == '/' || c == '_' || c == '-';
+    };
+
+    int pos = interface->position();
+    QChar chr;
+    // Skip to the start of a name
+    do {
+        chr = interface->characterAt(--pos);
+    } while (canOccurInFilePath(chr));
+
+    const int startPos= ++pos;
+
+    if (interface->reason() == IdleEditor && interface->position() - startPos < 3)
+        return;
+
+    const QString word = interface->textAt(startPos, interface->position() - startPos);
+    QDir baseDir = interface->filePath().toFileInfo().absoluteDir();
+    const int lastSlashPos = word.lastIndexOf(QLatin1Char('/'));
+
+    QString prefix = word;
+    if (lastSlashPos != -1) {
+        prefix = word.mid(lastSlashPos +1);
+        if (!baseDir.cd(word.left(lastSlashPos)))
+            return;
+    }
+
+    const QFileInfoList entryInfoList
+            = baseDir.entryInfoList(QDir::AllEntries | QDir::NoDotAndDotDot);
+    for (const QFileInfo &entry : entryInfoList) {
+        const QString &fileName = entry.fileName();
+        if (fileName.startsWith(prefix)) {
+            AssistProposalItem *item = new AssistProposalItem;
+            if (entry.isDir()) {
+                item->setText(fileName + QLatin1String("/"));
+                item->setIcon(Utils::Icons::DIR.icon());
+            } else {
+                item->setText(fileName);
+                item->setIcon(Utils::Icons::UNKNOWN_FILE.icon());
+            }
+            *items << item;
+        }
+    }
+    if (!items->empty())
+        startPosition = startPos;
+}
+
 
 } // namespace TextEditor

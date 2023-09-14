@@ -38,7 +38,7 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_issuesButton->setFixedHeight(22);
     m_issuesButton->setCursor(Qt::PointingHandCursor);
     m_issuesButton->setText(tr("Issues") + " [0]");
-    m_issuesButton->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_1);
+    m_issuesButton->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_1);
     m_issuesButton->setToolTip(tr("Activate issues list") + UtilityFunctions::shortcutSymbol(m_issuesButton->shortcut()));
 
     ApplicationStyle::setButtonStyle(m_consoleButton, ApplicationStyle::Disclosure);
@@ -47,7 +47,7 @@ OutputPane::OutputPane(QWidget* parent) : QWidget(parent)
     m_consoleButton->setFixedHeight(22);
     m_consoleButton->setCursor(Qt::PointingHandCursor);
     m_consoleButton->setText(tr("Console"));
-    m_consoleButton->setShortcut(Qt::CTRL + Qt::ALT + Qt::Key_2);
+    m_consoleButton->setShortcut(Qt::CTRL | Qt::ALT | Qt::Key_2);
     m_consoleButton->setToolTip(tr("Activate console output") + UtilityFunctions::shortcutSymbol(m_consoleButton->shortcut()));
 
     updateIcons();

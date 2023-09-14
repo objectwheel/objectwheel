@@ -517,12 +517,12 @@ QmlCodeEditor::QmlCodeEditor(QWidget* parent) : QPlainTextEdit(parent)
     m_copyAction->setShortcut(QKeySequence::Copy);
     m_pasteAction->setShortcut(QKeySequence::Paste);
     m_deleteAction->setShortcut(QKeySequence::Delete);
-    m_toggleCommentAction->setShortcut(Qt::CTRL + Qt::Key_Less);
+    m_toggleCommentAction->setShortcut(Qt::CTRL | Qt::Key_Less);
     m_autoIndentAction->setShortcut(Qt::Key_Tab);
     m_selectAllAction->setShortcut(QKeySequence::SelectAll);
     m_closeAction->setShortcut(QKeySequence::Close);
     m_saveAction->setShortcut(QKeySequence::Save);
-    m_saveAllAction->setShortcut(Qt::CTRL + Qt::SHIFT + Qt::Key_S);
+    m_saveAllAction->setShortcut(Qt::CTRL | Qt::SHIFT | Qt::Key_S);
 
     m_undoAction->setText(tr("Undo"));
     m_redoAction->setText(tr("Redo"));
@@ -865,12 +865,12 @@ void QmlCodeEditor::slotCodeStyleSettingsChanged(const QVariant &)
 
 }
 
-void QmlCodeEditor::setLanguageSettingsId(Core::Id settingsId)
+void QmlCodeEditor::setLanguageSettingsId(Utils::Id settingsId)
 {
     m_tabSettingsId = settingsId;
 }
 
-Core::Id QmlCodeEditor::languageSettingsId() const
+Utils::Id QmlCodeEditor::languageSettingsId() const
 {
     return m_tabSettingsId;
 }
@@ -1344,7 +1344,7 @@ void QmlCodeEditor::updateRowBar(const QRect& rect, int dy)
         m_rowBar->update();
     } else if (rect.width() > 4) { // wider than cursor width, not just cursor blinking
         m_rowBar->update(0, rect.y(), m_rowBar->width(), rect.height());
-        if (!m_searchExpr.isEmpty()) {
+        if (!m_searchExpr.pattern().isEmpty()) {
             const int m = m_searchResultOverlay->dropShadowWidth();
             viewport()->update(rect.adjusted(-m, -m, m, m));
         }
@@ -2286,7 +2286,7 @@ void QmlCodeEditor::paintSearchResultOverlay(const PaintEventData &data,
 {
     m_searchResultOverlay->clear();
 
-    if (m_searchExpr.isEmpty())
+    if (m_searchExpr.pattern().isEmpty())
         return;
 
     const int margin = 5;
@@ -2330,7 +2330,7 @@ QTextBlock QmlCodeEditor::nextVisibleBlock(const QTextBlock &block,
 void QmlCodeEditor::highlightSearchResults(const QTextBlock &block,
                                            TextEditor::Internal::TextEditorOverlay *overlay)
 {
-    if (m_searchExpr.isEmpty())
+    if (m_searchExpr.pattern().isEmpty())
         return;
 
     int blockPosition = block.position();
@@ -2409,13 +2409,27 @@ void QmlCodeEditor::paintCurrentLineHighlight(const PaintEventData &data, QPaint
 
 void QmlCodeEditor::highlightSearchResultsSlot(const QString &txt, FindFlags findFlags)
 {
-    if (m_searchExpr.pattern() == txt)
-        return;
-    m_searchExpr.setPattern(txt);
-    m_searchExpr.setPatternSyntax((findFlags & FindRegularExpression) ?
-                                      QRegExp::RegExp : QRegExp::FixedString);
-    m_searchExpr.setCaseSensitivity((findFlags & FindCaseSensitively) ?
-                                        Qt::CaseSensitive : Qt::CaseInsensitive);
+    if (findFlags & FindRegularExpression) {
+        if (m_searchExpr.pattern() == txt)
+            return;
+    } else {
+        if (m_searchExpr.pattern() == QRegularExpression::escape(txt))
+            return;
+    }
+
+    QRegularExpression::PatternOptions ops = m_searchExpr.patternOptions();
+
+    if (findFlags & FindRegularExpression)
+        m_searchExpr.setPattern(txt);
+    else
+        m_searchExpr.setPattern(QRegularExpression::escape(txt));
+
+    if (findFlags & FindCaseSensitively)
+        ops &= ~QRegularExpression::CaseInsensitiveOption;
+    else
+        ops |= QRegularExpression::CaseInsensitiveOption;
+
+    m_searchExpr.setPatternOptions(ops);
     m_findFlags = findFlags;
 
     viewport()->update(viewport()->visibleRegion());
@@ -2427,7 +2441,7 @@ void QmlCodeEditor::updateUses()
         return;
 
     QList<QTextEdit::ExtraSelection> selections;
-    foreach (const AST::SourceLocation &loc,
+    foreach (const SourceLocation &loc,
              codeDocument()->semanticInfo().idLocations.value(wordUnderCursor())) {
         if (!loc.isValid())
             continue;
@@ -2745,7 +2759,7 @@ void QmlCodeEditor::openLinkUnderCursor()
 }
 
 void QmlCodeEditor::findLinkAt(const QTextCursor &cursor,
-                               Utils::ProcessLinkCallback &&processLinkCallback)
+                               Utils::LinkHandler &&processLinkCallback)
 {
     const SemanticInfo semanticInfo = codeDocument()->semanticInfo();
     if (! semanticInfo.isValid())
@@ -2803,7 +2817,7 @@ void QmlCodeEditor::findLinkAt(const QTextCursor &cursor,
         return processLinkCallback(Utils::Link());
 
     Utils::Link link;
-    link.targetFileName = fileName;
+    link.targetFilePath = fileName;
     link.targetLine = line;
     link.targetColumn = column - 1; // adjust the column
 
@@ -2897,11 +2911,11 @@ void QmlCodeEditor::requestUpdateLink(QMouseEvent *e, bool immediate)
             return;
 
         // Check that the mouse was actually on the text somewhere
-        bool onText = cursorRect(cursor).right() >= e->x();
+        bool onText = cursorRect(cursor).right() >= e->pos().x();
         if (!onText) {
             QTextCursor nextPos = cursor;
             nextPos.movePosition(QTextCursor::Right);
-            onText = cursorRect(nextPos).right() >= e->x();
+            onText = cursorRect(nextPos).right() >= e->pos().x();
         }
 
         if (onText) {
@@ -3341,10 +3355,10 @@ void QmlCodeEditor::paintReplacement(PaintEventData &data, QPainter &painter,
         //                if (right.endsWith(QLatin1Char(';'))) {
         //                    right.chop(1);
         //                    right = right.trimmed();
-        //                    replacement.append(right.rightRef(right.endsWith('/') ? 2 : 1));
+        //                    replacement.append(right.right(right.endsWith('/') ? 2 : 1));
         //                    replacement.append(QLatin1Char(';'));
         //                } else { BUG
-        //                    replacement.append(right.rightRef(right.endsWith('/') ? 2 : 1));
+        //                    replacement.append(right.right(right.endsWith('/') ? 2 : 1));
         //                }
         //            }
         //        }

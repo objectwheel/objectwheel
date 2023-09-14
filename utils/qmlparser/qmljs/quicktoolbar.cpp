@@ -277,7 +277,7 @@ void QuickToolBar::setProperty(const QString &propertyName, const QVariant &valu
 {
 
     QString stringValue = value.toString();
-    if (value.type() == QVariant::Color)
+    if (value.type() == QMetaType::QColor)
         stringValue = QLatin1Char('\"') + value.toString() + QLatin1Char('\"');
 
     if (cast<UiObjectDefinition*>(m_node) || cast<UiObjectBinding*>(m_node)) {

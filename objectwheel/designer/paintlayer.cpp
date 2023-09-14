@@ -12,6 +12,7 @@
 #include <interfacesettings.h>
 
 #include <QPainter>
+#include <QPainterPath>
 #include <QtMath>
 
 // TODO: Do not treat "baseline" anchors as "top"

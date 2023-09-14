@@ -28,7 +28,7 @@ PropertiesPane::PropertiesPane(QWidget* parent) : QWidget(parent)
     m_searchEdit->addAction(PaintUtils::renderOverlaidPixmap(":/images/search.svg", "#595959", QSize(16, 16), this),
                             QLineEdit::LeadingPosition);
 
-    m_idEdit->setValidator(new QRegExpValidator(QRegExp("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
+    m_idEdit->setValidator(new QRegularExpressionValidator(QRegularExpression("([a-z_][a-zA-Z0-9_]+)?"), m_idEdit));
     m_idEdit->setStyleSheet("QLineEdit { border: none; background: transparent; }");
     m_idEdit->setFocusPolicy(Qt::StrongFocus);
     m_idEdit->setSizePolicy(QSizePolicy::Ignored, m_idEdit->sizePolicy().verticalPolicy());

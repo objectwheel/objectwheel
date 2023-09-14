@@ -275,7 +275,7 @@ static QString cleanClassName(const QMetaObject* metaObject)
 
 static bool isPropertyValid(const QMetaProperty& property)
 {
-    const QVariant::Type type = property.type();
+    const QMetaType::Type type = property.metaType();
     const QString typeName = property.typeName();
     const QString propertyName = property.name();
 
@@ -290,63 +290,61 @@ static bool isPropertyValid(const QMetaProperty& property)
         return false;
     }
 
-    if (type != QVariant::BitArray
-            && type != QVariant::Bitmap
-            && type != QVariant::Bool
-            && type != QVariant::Brush
-            && type != QVariant::ByteArray
-            && type != QVariant::Char
-            && type != QVariant::Color
-            && type != QVariant::Cursor
-            && type != QVariant::Date
-            && type != QVariant::DateTime
-            && type != QVariant::Double
-            && type != QVariant::EasingCurve
-            && type != QVariant::Uuid
-            && type != QVariant::ModelIndex
-            && type != QVariant::PersistentModelIndex
-            && type != QVariant::Font
-            && type != QVariant::Hash
-            && type != QVariant::Icon
-            && type != QVariant::Image
-            && type != QVariant::Int
-            && type != QVariant::KeySequence
-            && type != QVariant::Line
-            && type != QVariant::LineF
-            && type != QVariant::List
-            && type != QVariant::Locale
-            && type != QVariant::LongLong
-            && type != QVariant::Map
-            && type != QVariant::Matrix
-            && type != QVariant::Transform
-            && type != QVariant::Matrix4x4
-            && type != QVariant::Palette
-            && type != QVariant::Pen
-            && type != QVariant::Pixmap
-            && type != QVariant::Point
-            && type != QVariant::PointF
-            && type != QVariant::Polygon
-            && type != QVariant::PolygonF
-            && type != QVariant::Quaternion
-            && type != QVariant::Rect
-            && type != QVariant::RectF
-            && type != QVariant::RegExp
-            && type != QVariant::RegularExpression
-            && type != QVariant::Region
-            && type != QVariant::Size
-            && type != QVariant::SizeF
-            && type != QVariant::SizePolicy
-            && type != QVariant::String
-            && type != QVariant::StringList
-            && type != QVariant::TextFormat
-            && type != QVariant::TextLength
-            && type != QVariant::Time
-            && type != QVariant::UInt
-            && type != QVariant::ULongLong
-            && type != QVariant::Url
-            && type != QVariant::Vector2D
-            && type != QVariant::Vector3D
-            && type != QVariant::Vector4D) {
+    if (type != QMetaType::QBitArray
+            && type != QMetaType::QBitmap
+            && type != QMetaType::Bool
+            && type != QMetaType::QBrush
+            && type != QMetaType::QByteArray
+            && type != QMetaType::QChar
+            && type != QMetaType::QColor
+            && type != QMetaType::QCursor
+            && type != QMetaType::QDate
+            && type != QMetaType::QDateTime
+            && type != QMetaType::Double
+            && type != QMetaType::QEasingCurve
+            && type != QMetaType::QUuid
+            && type != QMetaType::QModelIndex
+            && type != QMetaType::QPersistentModelIndex
+            && type != QMetaType::QFont
+            && type != QMetaType::QVariantHash
+            && type != QMetaType::QIcon
+            && type != QMetaType::QImage
+            && type != QMetaType::Int
+            && type != QMetaType::QKeySequence
+            && type != QMetaType::QLine
+            && type != QMetaType::QLineF
+            && type != QMetaType::QVariantList
+            && type != QMetaType::QLocale
+            && type != QMetaType::LongLong
+            && type != QMetaType::QVariantMap
+            && type != QMetaType::QTransform
+            && type != QMetaType::QMatrix4x4
+            && type != QMetaType::QPalette
+            && type != QMetaType::QPen
+            && type != QMetaType::QPixmap
+            && type != QMetaType::QPoint
+            && type != QMetaType::QPointF
+            && type != QMetaType::QPolygon
+            && type != QMetaType::QPolygonF
+            && type != QMetaType::QQuaternion
+            && type != QMetaType::QRect
+            && type != QMetaType::QRectF
+            && type != QMetaType::QRegularExpression
+            && type != QMetaType::QRegion
+            && type != QMetaType::QSize
+            && type != QMetaType::QSizeF
+            && type != QMetaType::QSizePolicy
+            && type != QMetaType::QString
+            && type != QMetaType::QStringList
+            && type != QMetaType::QTextFormat
+            && type != QMetaType::QTextLength
+            && type != QMetaType::QTime
+            && type != QMetaType::UInt
+            && type != QMetaType::ULongLong
+            && type != QMetaType::QUrl
+            && type != QMetaType::QVector2D
+            && type != QMetaType::QVector3D
+            && type != QMetaType::QVector4D) {
         return false;
     }
 
@@ -936,7 +934,7 @@ QVector<PropertyNode> RenderUtils::properties(const RenderEngine::ControlInstanc
                 if (property.isEnumType()) {
                     auto metaEnum = property.enumerator();
                     enums.append(KnownEnums::extractEnum(property, metaEnum, object));
-                } else if (property.type() == QVariant::Int) {
+                } else if (property.type() == QMetaType::Int) {
                     const QString& enumIdentifier = className + QStringLiteral(".") + property.name();
                     if (KnownEnums::isKnownEnum(enumIdentifier))
                         enums.append(KnownEnums::knownEnum(property, object, enumIdentifier));

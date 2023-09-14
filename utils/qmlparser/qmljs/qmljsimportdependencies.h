@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -40,13 +18,11 @@
 
 #include <functional>
 
-QT_BEGIN_NAMESPACE
 class QCryptographicHash;
-QT_END_NAMESPACE
 
 namespace QmlJS {
 class ImportInfo;
-class ViewerContext;
+struct ViewerContext;
 namespace Internal { class ImportDependenciesPrivate; }
 class ImportDependencies;
 
@@ -117,7 +93,7 @@ public:
     QString toString() const;
 };
 
-uint qHash(const ImportKey &info);
+size_t qHash(const ImportKey &info);
 bool operator ==(const ImportKey &i1, const ImportKey &i2);
 bool operator !=(const ImportKey &i1, const ImportKey &i2);
 bool operator <(const ImportKey &i1, const ImportKey &i2);
@@ -127,16 +103,36 @@ class UTILS_EXPORT Export
 public:
     static QString libraryTypeName();
     Export();
-    Export(ImportKey exportName, const QString &pathRequired, bool intrinsic = false,
+    Export(ImportKey exportName,
+           const Utils::FilePath &pathRequired,
+           bool intrinsic = false,
            const QString &typeName = libraryTypeName());
     ImportKey exportName;
-    QString pathRequired;
+    Utils::FilePath pathRequired;
     QString typeName;
     bool intrinsic;
     bool visibleInVContext(const ViewerContext &vContext) const;
+
+
+    friend bool operator==(const Export &i1, const Export &i2)
+    {
+        return i1.exportName == i2.exportName
+                && i1.pathRequired == i2.pathRequired
+                && i1.intrinsic == i2.intrinsic
+                && i1.typeName == i2.typeName;
+    }
+
+    friend bool operator!=(const Export &i1, const Export &i2)
+    {
+        return !(i1 == i2);
+    }
+
+    friend bool operator<(const Export &i1, const Export &i2)
+    {
+        return std::tie(i1.intrinsic, i1.pathRequired, i1.typeName, i1.exportName)
+            < std::tie(i2.intrinsic, i2.pathRequired, i2.typeName, i2.exportName);
+    }
 };
-bool operator ==(const Export &i1, const Export &i2);
-bool operator !=(const Export &i1, const Export &i2);
 
 class UTILS_EXPORT CoreImport
 {
@@ -144,6 +140,14 @@ public:
     CoreImport();
     CoreImport(const QString &importId, const QList<Export> &possibleExports = QList<Export>(),
                Dialect language = Dialect::Qml, const QByteArray &fingerprint = QByteArray());
+    template<typename E>
+    void addPossibleExport(E &&e)
+    {
+        auto found = std::lower_bound(possibleExports.begin(), possibleExports.end(), e);
+        if (found == possibleExports.end() || e != *found)
+            possibleExports.insert(found, std::forward<E>(e));
+    }
+
     QString importId;
     QList<Export> possibleExports;
     Dialect language;
@@ -204,10 +208,14 @@ public:
     void addCoreImport(const CoreImport &import);
     void removeCoreImport(const QString &importId);
 
-    void addExport(const QString &importId, const ImportKey &importKey,
-                     const QString &requiredPath, const QString &typeName = Export::libraryTypeName());
-    void removeExport(const QString &importId, const ImportKey &importKey,
-                      const QString &requiredPath, const QString &typeName = Export::libraryTypeName());
+    void addExport(const QString &importId,
+                   const ImportKey &importKey,
+                   const Utils::FilePath &requiredPath,
+                   const QString &typeName = Export::libraryTypeName());
+    void removeExport(const QString &importId,
+                      const ImportKey &importKey,
+                      const Utils::FilePath &requiredPath,
+                      const QString &typeName = Export::libraryTypeName());
 
     void iterateOnLibraryImports(const ViewerContext &vContext,
                                  std::function<bool(const ImportMatchStrength &,

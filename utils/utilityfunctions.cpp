@@ -2,7 +2,6 @@
 #include <delayer.h>
 #include <paintutils.h>
 #include <crossplatform.h>
-#include <async.h>
 #include <filesystemutils.h>
 #include <hashfactory.h>
 
@@ -29,6 +28,7 @@
 #include <QKeyEvent>
 #include <QToolTip>
 #include <QCborMap>
+#include <QtConcurrent/QtConcurrent>
 
 Q_DECLARE_METATYPE(QMargins)
 
@@ -163,10 +163,9 @@ void copyFiles(const QString& rootPath, const QList<QUrl>& urls, QWidget* parent
             }
         }
 
-        QFuture<void> future = Async::run(QThreadPool::globalInstance(),
-                                          &FileSystemUtils::copy,
-                                          path, rootPath, false, false);
-        Delayer::delay(std::bind(&QFuture<void>::isRunning, &future));
+        QFuture<bool> future = QtConcurrent::run(&FileSystemUtils::copy,
+                                                 path, rootPath, false, false);
+        Delayer::delay(std::bind(&QFuture<bool>::isRunning, &future));
     }
 
     progress.setValue(urls.size());

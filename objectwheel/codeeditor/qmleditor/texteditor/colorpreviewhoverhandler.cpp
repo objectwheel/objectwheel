@@ -1,38 +1,16 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "colorpreviewhoverhandler.h"
-#include <qmlcodeeditor.h>
+#include "texteditor.h"
 
-////#include <coreplugin/icore.h>
-#include <utils/executeondestruction.h>
+#include <coreplugin/icore.h>
 #include <utils/tooltip/tooltip.h>
 #include <utils/qtcassert.h>
 
-#include <QPoint>
 #include <QColor>
+#include <QPoint>
+#include <QScopeGuard>
 #include <QTextBlock>
 
 using namespace Core;
@@ -109,9 +87,9 @@ static QColor fromEnumString(const QString &s)
         {QLatin1String("transparent"), QColor(Qt::transparent)}
     };
 
-    for (uint ii = 0; ii < sizeof(table) / sizeof(table[0]); ++ii) {
-        if (s == table[ii].name)
-            return table[ii].color;
+    for (const auto &enumColor : table) {
+        if (s == enumColor.name)
+            return enumColor.color;
     }
 
     return QColor();
@@ -189,11 +167,9 @@ static QString removeWhitespace(const QString &s)
 {
     QString ret;
     ret.reserve(s.size());
-    for (int ii = 0; ii < s.length(); ++ii) {
-        const QChar c = s[ii];
+    for (QChar c : s) {
         if (!c.isSpace())
             ret += c;
-
     }
     return ret;
 }
@@ -224,7 +200,7 @@ static bool extractFuncAndArgs(const QString &s,
     retFuncName = removeWhitespace(s.mid(funcStart, funcEnd - funcStart + 1));
 
     QString argStr = s.mid(openBrace + 1, closeBrace - openBrace - 1);
-    retArgs = argStr.split(QLatin1Char(','), QString::KeepEmptyParts);
+    retArgs = argStr.split(',');
 
     return true;
 }
@@ -356,11 +332,10 @@ static QColor colorFromFuncAndArgs(const QString &func, const QStringList &args)
     return colorFromArgs(args, spec);
 }
 
-void ColorPreviewHoverHandler::identifyMatch(QmlCodeEditor *editorWidget,
-                                             int pos,
-                                             ReportPriority report)
+void ColorPreviewHoverHandler::identifyMatch(TextEditorWidget *editorWidget,
+                                             int pos, ReportPriority report)
 {
-    Utils::ExecuteOnDestruction reportPriority([this, report](){ report(priority()); });
+    const QScopeGuard cleanup([this, report] { report(priority()); });
 
     if (editorWidget->extraSelectionTooltip(pos).isEmpty()) {
         const QTextBlock tb = editorWidget->document()->findBlock(pos);
@@ -381,7 +356,7 @@ void ColorPreviewHoverHandler::identifyMatch(QmlCodeEditor *editorWidget,
     }
 }
 
-void ColorPreviewHoverHandler::operateTooltip(QmlCodeEditor *editorWidget, const QPoint &point)
+void ColorPreviewHoverHandler::operateTooltip(TextEditorWidget *editorWidget, const QPoint &point)
 {
     if (m_colorTip.isValid())
         Utils::ToolTip::show(point, m_colorTip, editorWidget);

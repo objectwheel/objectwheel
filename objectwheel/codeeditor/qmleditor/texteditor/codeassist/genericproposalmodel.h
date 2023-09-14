@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -29,7 +7,6 @@
 #include "assistenums.h"
 
 #include <texteditor/completionsettings.h>
-#include <texteditor/texteditor_global.h>
 #include <utils/fuzzymatcher.h>
 
 #include <QHash>
@@ -41,11 +18,11 @@ namespace TextEditor {
 
 class AssistProposalItemInterface;
 
-class TEXTEDITOR_EXPORT GenericProposalModel : public IAssistProposalModel
+class GenericProposalModel : public IAssistProposalModel
 {
 public:
     GenericProposalModel();
-    ~GenericProposalModel();
+    ~GenericProposalModel() override;
 
     void reset() override;
     int size() const override;
@@ -53,6 +30,7 @@ public:
 
     virtual QIcon icon(int index) const;
     virtual QString detail(int index) const;
+    virtual Qt::TextFormat detailFormat(int index) const;
     virtual int persistentId(int index) const;
     virtual bool containsDuplicates() const;
     virtual void removeDuplicates();
@@ -63,6 +41,7 @@ public:
     virtual QString proposalPrefix() const;
     virtual bool keepPerfectMatch(AssistReason reason) const;
     virtual AssistProposalItemInterface *proposalItem(int index) const;
+    virtual int indexOf(const std::function<bool (AssistProposalItemInterface *)> &predicate) const;
 
     void loadContent(const QList<AssistProposalItemInterface *> &items);
 

@@ -21,6 +21,7 @@
 #include <QListWidget>
 #include <QScrollBar>
 #include <QPainter>
+#include <QPainterPath>
 #include <QScreen>
 #include <QFileDialog>
 #include <QComboBox>

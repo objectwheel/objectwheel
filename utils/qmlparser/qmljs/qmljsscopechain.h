@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
@@ -48,7 +26,7 @@ public:
     ~QmlComponentChain();
 
     Document::Ptr document() const;
-    QList<const QmlComponentChain *> instantiatingComponents() const;
+    const QList<const QmlComponentChain *> instantiatingComponents() const;
 
     const ObjectValue *idScope() const;
     const ObjectValue *rootObjectScope() const;
@@ -72,7 +50,7 @@ public:
     Document::Ptr document() const;
     const ContextPtr &context() const;
 
-    const Value *lookup(const QString &name, const ObjectValue **foundInScope = 0) const;
+    const Value *lookup(const QString &name, const ObjectValue **foundInScope = nullptr) const;
     const Value *evaluate(AST::Node *node) const;
 
     const ObjectValue *globalScope() const;
@@ -84,7 +62,7 @@ public:
     QSharedPointer<const QmlComponentChain> qmlComponentChain() const;
     void setQmlComponentChain(const QSharedPointer<const QmlComponentChain> &qmlComponentChain);
 
-    QList<const ObjectValue *> qmlScopeObjects() const;
+    const QList<const ObjectValue *> qmlScopeObjects() const;
     void setQmlScopeObjects(const QList<const ObjectValue *> &qmlScopeObjects);
 
     const TypeScope *qmlTypes() const;
@@ -98,6 +76,8 @@ public:
     void appendJsScope(const ObjectValue *scope);
 
     QList<const ObjectValue *> all() const;
+
+    static void setSkipmakeComponentChain(bool b);
 
 private:
     void update() const;
@@ -119,6 +99,8 @@ private:
 
     mutable bool m_modified;
     mutable QList<const ObjectValue *> m_all;
+
+    static bool s_setSkipmakeComponentChain;
 };
 
 } // namespace QmlJS

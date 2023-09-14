@@ -15,5 +15,4 @@ HEADERS += \
         $$PWD/qmljsindenter.h \
         $$PWD/qmljsbundleprovider.h \
         $$PWD/qmljsfunctionfilter.h \
-        $$PWD/qmljstools_global.h \
         $$PWD/qmljstoolsconstants.h

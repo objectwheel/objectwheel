@@ -1,27 +1,5 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "qmlexpressionundercursor.h"
 
@@ -43,11 +21,8 @@ class ExpressionUnderCursor
     Scanner scanner;
 
 public:
-    ExpressionUnderCursor()
-        : start(0), end(0)
-    {}
-
-    int start, end;
+    int start = 0;
+    int end = 0;
 
     int startState(const QTextBlock &block) const
     {
@@ -117,20 +92,20 @@ using namespace QmlJSEditor;
 using namespace QmlJSEditor::Internal;
 
 QmlExpressionUnderCursor::QmlExpressionUnderCursor()
-    : _expressionNode(0), _expressionOffset(0), _expressionLength(0)
+    : _expressionNode(nullptr), _expressionOffset(0), _expressionLength(0)
 {}
 
 ExpressionNode *QmlExpressionUnderCursor::operator()(const QTextCursor &cursor)
 {
-    _expressionNode = 0;
+    _expressionNode = nullptr;
     _expressionOffset = -1;
     _expressionLength = -1;
 
     ExpressionUnderCursor expressionUnderCursor;
     _text = expressionUnderCursor(cursor);
 
-    Document::MutablePtr newDoc = Document::create(
-                QLatin1String("<expression>"), Dialect::JavaScript);
+    Document::MutablePtr newDoc = Document::create(Utils::FilePath::fromString("<expression>"),
+                                                   Dialect::JavaScript);
     newDoc->setSource(_text);
     newDoc->parseExpression();
     exprDoc = newDoc;

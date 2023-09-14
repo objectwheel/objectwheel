@@ -1,36 +1,13 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #pragma once
 
-#include "qmleditorwidgets_global.h"
 #include <QAbstractSpinBox>
 
 namespace QmlEditorWidgets {
 
-class QMLEDITORWIDGETS_EXPORT FontSizeSpinBox : public QAbstractSpinBox
+class FontSizeSpinBox : public QAbstractSpinBox
 {
     Q_OBJECT
 
@@ -39,14 +16,14 @@ class QMLEDITORWIDGETS_EXPORT FontSizeSpinBox : public QAbstractSpinBox
      Q_PROPERTY(int value READ value WRITE setValue NOTIFY valueChanged)
 
 public:
-    explicit FontSizeSpinBox(QWidget *parent = 0);
+    explicit FontSizeSpinBox(QWidget *parent = nullptr);
 
      bool isPixelSize() { return !m_isPointSize; }
      bool isPointSize() { return m_isPointSize; }
 
-     void stepBy(int steps);
+     void stepBy(int steps) override;
 
-     QValidator::State validate (QString &input, int &pos) const;
+     QValidator::State validate (QString &input, int &pos) const override;
      int value() const { return m_value; }
 
 signals:
@@ -75,11 +52,11 @@ public:
      }
 
 
-     void clear();
+     void clear() override;
      void setValue (int val);
 
  protected:
-    StepEnabled stepEnabled() const;
+    StepEnabled stepEnabled() const override;
 
 private:
     void onEditingFinished();

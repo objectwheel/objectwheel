@@ -55,7 +55,6 @@ const QMap<QString, QString> AndroidPlatformWidget::orientationMap {
 const QMap<QString, QString> AndroidPlatformWidget::qtModuleMap {
     { "Qt Bluetooth", "bluetooth" },
     { "Qt Concurrent", "concurrent" },
-    { "Qt Gamepad", "gamepad" },
     { "Qt Location", "location" },
     { "Qt Multimedia", "multimedia" },
     { "Qt Nfc", "nfc" },
@@ -65,7 +64,6 @@ const QMap<QString, QString> AndroidPlatformWidget::qtModuleMap {
     { "Qt Positioning", "positioning" },
     { "Qt Print Support", "printsupport" },
     { "Qt Purchasing", "purchasing" },
-    { "Qt Qml Models", "qmlmodels" },
     { "Qt Qml Worker Script", "qmlworkerscript" },
     { "Qt Quick Templates 2", "quicktemplates2" },
     { "Qt Quick Test", "qmltest" },

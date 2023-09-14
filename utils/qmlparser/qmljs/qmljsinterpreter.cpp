@@ -1,43 +1,25 @@
-/****************************************************************************
-**
-** Copyright (C) 2016 The Qt Company Ltd.
-** Contact: https://www.qt.io/licensing/
-**
-** This file is part of Qt Creator.
-**
-** Commercial License Usage
-** Licensees holding valid commercial Qt licenses may use this file in
-** accordance with the commercial license agreement provided with the
-** Software or, alternatively, in accordance with the terms contained in
-** a written agreement between you and The Qt Company. For licensing terms
-** and conditions see https://www.qt.io/terms-conditions. For further
-** information use the contact form at https://www.qt.io/contact-us.
-**
-** GNU General Public License Usage
-** Alternatively, this file may be used under the terms of the GNU
-** General Public License version 3 as published by the Free Software
-** Foundation with exceptions as appearing in the file LICENSE.GPL3-EXCEPT
-** included in the packaging of this file. Please review the following
-** information to ensure the GNU General Public License requirements will
-** be met: https://www.gnu.org/licenses/gpl-3.0.html.
-**
-****************************************************************************/
+// Copyright (C) 2016 The Qt Company Ltd.
+// SPDX-License-Identifier: LicenseRef-Qt-Commercial OR GPL-3.0-only WITH Qt-GPL-exception-1.0
 
 #include "parser/qmljsast_p.h"
+
+#include "qmljsinterpreter.h"
+
 #include "qmljsconstants.h"
 #include "qmljscontext.h"
 #include "qmljsevaluate.h"
-#include "qmljsinterpreter.h"
 #include "qmljsmodelmanagerinterface.h"
 #include "qmljsscopeastpath.h"
 #include "qmljsscopebuilder.h"
 #include "qmljsscopechain.h"
+#include "qmljstr.h"
 #include "qmljstypedescriptionreader.h"
 #include "qmljsvalueowner.h"
 
 #include <utils/qtcassert.h>
 
 #include <QApplication>
+#include <QDebug>
 #include <QDir>
 #include <QFile>
 #include <QString>
@@ -99,31 +81,31 @@ class LookupMember: public MemberProcessor
 
 public:
     LookupMember(const QString &name)
-        : m_name(name), m_value(0) {}
+        : m_name(name), m_value(nullptr) {}
 
     const Value *value() const { return m_value; }
 
-    virtual bool processProperty(const QString &name, const Value *value, const PropertyInfo &)
+    bool processProperty(const QString &name, const Value *value, const PropertyInfo &) override
     {
         return process(name, value);
     }
 
-    virtual bool processEnumerator(const QString &name, const Value *value)
+    bool processEnumerator(const QString &name, const Value *value) override
     {
         return process(name, value);
     }
 
-    virtual bool processSignal(const QString &name, const Value *value)
+    bool processSignal(const QString &name, const Value *value) override
     {
         return process(name, value);
     }
 
-    virtual bool processSlot(const QString &name, const Value *value)
+    bool processSlot(const QString &name, const Value *value) override
     {
         return process(name, value);
     }
 
-    virtual bool processGeneratedSlot(const QString &name, const Value *value)
+    bool processGeneratedSlot(const QString &name, const Value *value) override
     {
         return process(name, value);
     }
@@ -174,7 +156,7 @@ bool FakeMetaObjectWithOrigin::operator ==(const FakeMetaObjectWithOrigin &o) co
     return fakeMetaObject == o.fakeMetaObject;
 }
 
-uint qHash(const FakeMetaObjectWithOrigin &fmoo)
+size_t qHash(const FakeMetaObjectWithOrigin &fmoo)
 {
     return qHash(fmoo.fakeMetaObject);
 }
@@ -260,7 +242,7 @@ static QString generatedSlotName(const QString &base)
         if (c != QLatin1Char('_'))
             break;
     }
-    slotName += base.midRef(firstChar);
+    slotName += base.mid(firstChar);
     return slotName;
 }
 
@@ -290,7 +272,7 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
         signatures->reserve(m_metaObject->methodCount());
         for (int index = 0; index < m_metaObject->methodCount(); ++index)
             signatures->append(new MetaFunction(m_metaObject->method(index), valueOwner()));
-        if (!m_metaSignatures.testAndSetOrdered(0, signatures)) {
+        if (!m_metaSignatures.testAndSetOrdered(nullptr, signatures)) {
             delete signatures;
             signatures = m_metaSignatures.loadRelaxed();
         }
@@ -357,6 +339,14 @@ void CppComponentValue::processMembers(MemberProcessor *processor) const
             attachedType->processMembers(processor);
     }
 
+    // look at extension types
+    const QString &extensionTypeName = m_metaObject->extensionTypeName();
+    if (!extensionTypeName.isEmpty()) {
+        const CppComponentValue *extensionType = valueOwner()->cppQmlTypes().objectByCppName(extensionTypeName);
+        if (extensionType && extensionType != this) // ### only weak protection against infinite loops
+            extensionType->processMembers(processor);
+    }
+
     ObjectValue::processMembers(processor);
 }
 
@@ -394,6 +384,8 @@ const Value *CppComponentValue::valueForCppName(const QString &typeName) const
         return valueOwner()->realValue();
     } else if (typeName == QLatin1String("QFont")) {
         return valueOwner()->qmlFontObject();
+    } else if (typeName == QLatin1String("QPalette")) {
+        return valueOwner()->qmlPaletteObject();
     } else if (typeName == QLatin1String("QPoint")
             || typeName == QLatin1String("QPointF")
             || typeName == QLatin1String("QVector2D")) {
@@ -438,7 +430,7 @@ const CppComponentValue *CppComponentValue::prototype() const
   Use this function rather than calling prototype() in a loop, as it avoids
   cycles.
 */
-QList<const CppComponentValue *> CppComponentValue::prototypes() const
+const QList<const CppComponentValue *> CppComponentValue::prototypes() const
 {
     QList<const CppComponentValue *> protos;
     for (const CppComponentValue *it = this; it; it = it->prototype()) {
@@ -468,7 +460,7 @@ QString CppComponentValue::defaultPropertyName() const
 
 QString CppComponentValue::propertyType(const QString &propertyName) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         int propIdx = iter->propertyIndex(propertyName);
         if (propIdx != -1)
@@ -479,7 +471,7 @@ QString CppComponentValue::propertyType(const QString &propertyName) const
 
 bool CppComponentValue::isListProperty(const QString &propertyName) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         int propIdx = iter->propertyIndex(propertyName);
         if (propIdx != -1)
@@ -490,7 +482,7 @@ bool CppComponentValue::isListProperty(const QString &propertyName) const
 
 FakeMetaEnum CppComponentValue::getEnum(const QString &typeName, const CppComponentValue **foundInScope) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         const int index = iter->enumeratorIndex(typeName);
         if (index != -1) {
@@ -500,13 +492,13 @@ FakeMetaEnum CppComponentValue::getEnum(const QString &typeName, const CppCompon
         }
     }
     if (foundInScope)
-        *foundInScope = 0;
+        *foundInScope = nullptr;
     return FakeMetaEnum();
 }
 
 const QmlEnumValue *CppComponentValue::getEnumValue(const QString &typeName, const CppComponentValue **foundInScope) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         if (const QmlEnumValue *e = it->m_enums.value(typeName)) {
             if (foundInScope)
                 *foundInScope = it;
@@ -514,8 +506,8 @@ const QmlEnumValue *CppComponentValue::getEnumValue(const QString &typeName, con
         }
     }
     if (foundInScope)
-        *foundInScope = 0;
-    return 0;
+        *foundInScope = nullptr;
+    return nullptr;
 }
 
 const ObjectValue *CppComponentValue::signalScope(const QString &signalName) const
@@ -534,7 +526,7 @@ const ObjectValue *CppComponentValue::signalScope(const QString &signalName) con
             const QStringList &parameterTypes = method.parameterTypes();
             QTC_ASSERT(parameterNames.size() == parameterTypes.size(), continue);
 
-            ObjectValue *scope = valueOwner()->newObject(/*prototype=*/0);
+            ObjectValue *scope = valueOwner()->newObject(/*prototype=*/nullptr);
             for (int i = 0; i < parameterNames.size(); ++i) {
                 const QString &name = parameterNames.at(i);
                 const QString &type = parameterTypes.at(i);
@@ -544,7 +536,7 @@ const ObjectValue *CppComponentValue::signalScope(const QString &signalName) con
             }
             scopes->insert(generatedSlotName(method.methodName()), scope);
         }
-        if (!m_signalScopes.testAndSetOrdered(0, scopes)) {
+        if (!m_signalScopes.testAndSetOrdered(nullptr, scopes)) {
             delete scopes;
             scopes = m_signalScopes.loadRelaxed();
         }
@@ -555,7 +547,7 @@ const ObjectValue *CppComponentValue::signalScope(const QString &signalName) con
 
 bool CppComponentValue::isWritable(const QString &propertyName) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         int propIdx = iter->propertyIndex(propertyName);
         if (propIdx != -1)
@@ -566,7 +558,7 @@ bool CppComponentValue::isWritable(const QString &propertyName) const
 
 bool CppComponentValue::isPointer(const QString &propertyName) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         int propIdx = iter->propertyIndex(propertyName);
         if (propIdx != -1)
@@ -585,7 +577,7 @@ bool CppComponentValue::hasLocalProperty(const QString &typeName) const
 
 bool CppComponentValue::hasProperty(const QString &propertyName) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         int propIdx = iter->propertyIndex(propertyName);
         if (propIdx != -1)
@@ -596,7 +588,7 @@ bool CppComponentValue::hasProperty(const QString &propertyName) const
 
 bool CppComponentValue::isDerivedFrom(FakeMetaObject::ConstPtr base) const
 {
-    foreach (const CppComponentValue *it, prototypes()) {
+    for (const CppComponentValue *it : prototypes()) {
         FakeMetaObject::ConstPtr iter = it->m_metaObject;
         if (iter == base)
             return true;
@@ -701,144 +693,144 @@ Value::~Value()
 {
 }
 
-bool Value::getSourceLocation(QString *, int *, int *) const
+bool Value::getSourceLocation(Utils::FilePath *, int *, int *) const
 {
     return false;
 }
 
 const NullValue *Value::asNullValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const UndefinedValue *Value::asUndefinedValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const UnknownValue *Value::asUnknownValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const NumberValue *Value::asNumberValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const IntValue *Value::asIntValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const RealValue *Value::asRealValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const BooleanValue *Value::asBooleanValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const StringValue *Value::asStringValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const UrlValue *Value::asUrlValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ObjectValue *Value::asObjectValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const FunctionValue *Value::asFunctionValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const Reference *Value::asReference() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ColorValue *Value::asColorValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const AnchorLineValue *Value::asAnchorLineValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const CppComponentValue *Value::asCppComponentValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ASTObjectValue *Value::asAstObjectValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const QmlEnumValue *Value::asQmlEnumValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const QmlPrototypeReference *Value::asQmlPrototypeReference() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ASTPropertyReference *Value::asAstPropertyReference() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ASTVariableReference *Value::asAstVariableReference() const
 {
-    return 0;
+    return nullptr;
 }
 
 const Internal::QtObjectPrototypeReference *Value::asQtObjectPrototypeReference() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ASTSignal *Value::asAstSignal() const
 {
-    return 0;
+    return nullptr;
 }
 
 const ASTFunctionValue *Value::asAstFunctionValue() const
 {
-    return 0;
+    return nullptr;
 }
 
 const Function *Value::asFunction() const
 {
-    return 0;
+    return nullptr;
 }
 
 const MetaFunction *Value::asMetaFunction() const
 {
-    return 0;
+    return nullptr;
 }
 
 const JSImportScope *Value::asJSImportScope() const
 {
-    return 0;
+    return nullptr;
 }
 
 const TypeScope *Value::asTypeScope() const
 {
-    return 0;
+    return nullptr;
 }
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -1003,7 +995,7 @@ bool MemberProcessor::processGeneratedSlot(const QString &, const Value *)
 
 ObjectValue::ObjectValue(ValueOwner *valueOwner, const QString &originId)
     : m_valueOwner(valueOwner), m_originId(originId),
-      _prototype(0)
+      _prototype(nullptr)
 {
     valueOwner->registerValue(this);
 }
@@ -1052,6 +1044,11 @@ void ObjectValue::setMember(const QString &name, const Value *value)
     m_members[name].value = value;
 }
 
+void ObjectValue::setMember(QStringView name, const Value *value)
+{
+    m_members[name.toString()].value = value;
+}
+
 void ObjectValue::setPropertyInfo(const QString &name, const PropertyInfo &propertyInfo)
 {
     m_members[name].propertyInfo = propertyInfo;
@@ -1072,32 +1069,9 @@ void ObjectValue::accept(ValueVisitor *visitor) const
     visitor->visit(this);
 }
 
-bool ObjectValue::checkPrototype(const ObjectValue *, QSet<const ObjectValue *> *) const
-{
-#if 0
-    const int previousSize = processed->size();
-    processed->insert(this);
-
-    if (previousSize != processed->size()) {
-        if (this == proto)
-            return false;
-
-        if (prototype() && ! prototype()->checkPrototype(proto, processed))
-            return false;
-
-        return true;
-    }
-#endif
-    return false;
-}
-
 void ObjectValue::processMembers(MemberProcessor *processor) const
 {
-    QHashIterator<QString, PropertyData> it(m_members);
-
-    while (it.hasNext()) {
-        it.next();
-
+    for (auto it = m_members.cbegin(), end = m_members.cend(); it != end; ++it) {
         if (! processor->processProperty(it.key(), it.value().value, it.value().propertyInfo))
             break;
     }
@@ -1121,7 +1095,7 @@ const Value *ObjectValue::lookupMember(const QString &name, const Context *conte
         }
     }
 
-    const ObjectValue *prototypeObject = 0;
+    const ObjectValue *prototypeObject = nullptr;
 
     if (examinePrototypes && context) {
         PrototypeIterator iter(this, context);
@@ -1134,13 +1108,13 @@ const Value *ObjectValue::lookupMember(const QString &name, const Context *conte
     }
 
     if (foundInObject)
-        *foundInObject = 0;
+        *foundInObject = nullptr;
 
-    return 0;
+    return nullptr;
 }
 
 PrototypeIterator::PrototypeIterator(const ObjectValue *start, const Context *context)
-    : m_current(0)
+    : m_current(nullptr)
     , m_next(start)
     , m_context(context)
     , m_error(NoError)
@@ -1150,7 +1124,7 @@ PrototypeIterator::PrototypeIterator(const ObjectValue *start, const Context *co
 }
 
 PrototypeIterator::PrototypeIterator(const ObjectValue *start, const ContextPtr &context)
-    : m_current(0)
+    : m_current(nullptr)
     , m_next(start)
     , m_context(context.data())
     , m_error(NoError)
@@ -1178,7 +1152,7 @@ bool PrototypeIterator::hasNext()
     }
     if (m_prototypes.contains(m_next)) {
         m_error = CycleError;
-        m_next = 0;
+        m_next = nullptr;
         return false;
     }
     return true;
@@ -1189,17 +1163,17 @@ const ObjectValue *PrototypeIterator::next()
     if (hasNext()) {
         m_current = m_next;
         m_prototypes += m_next;
-        m_next = 0;
+        m_next = nullptr;
         return m_current;
     }
-    return 0;
+    return nullptr;
 }
 
 const ObjectValue *PrototypeIterator::peekNext()
 {
     if (hasNext())
         return m_next;
-    return 0;
+    return nullptr;
 }
 
 PrototypeIterator::Error PrototypeIterator::error() const
@@ -1268,7 +1242,7 @@ void FunctionValue::accept(ValueVisitor *visitor) const
 
 Function::Function(ValueOwner *valueOwner)
     : FunctionValue(valueOwner)
-    , m_returnValue(0)
+    , m_returnValue(nullptr)
     , m_optionalNamedArgumentCount(0)
     , m_isVariadic(false)
 {
@@ -1355,7 +1329,7 @@ CppQmlTypesLoader::BuiltinObjects CppQmlTypesLoader::loadQmlTypes(const QFileInf
     QHash<QString, FakeMetaObject::ConstPtr> newObjects;
     QStringList newDependencies;
 
-    foreach (const QFileInfo &qmlTypeFile, qmlTypeFiles) {
+    for (const QFileInfo &qmlTypeFile : qmlTypeFiles) {
         QString error, warning;
         QFile file(qmlTypeFile.absoluteFilePath());
         if (file.open(QIODevice::ReadOnly)) {
@@ -1363,19 +1337,17 @@ CppQmlTypesLoader::BuiltinObjects CppQmlTypesLoader::loadQmlTypes(const QFileInf
             file.close();
 
 
-            parseQmlTypeDescriptions(contents, &newObjects, 0, &newDependencies, &error, &warning,
+            parseQmlTypeDescriptions(contents, &newObjects, nullptr, &newDependencies, &error, &warning,
                                      qmlTypeFile.absoluteFilePath());
         } else {
             error = file.errorString();
         }
         if (!error.isEmpty()) {
-            errors->append(TypeDescriptionReader::tr(
-                               "Errors while loading qmltypes from %1:\n%2").arg(
+            errors->append(Tr::tr("Errors while loading qmltypes from %1:\n%2").arg(
                                qmlTypeFile.absoluteFilePath(), error));
         }
         if (!warning.isEmpty()) {
-            warnings->append(TypeDescriptionReader::tr(
-                                 "Warnings while loading qmltypes from %1:\n%2").arg(
+            warnings->append(Tr::tr("Warnings while loading qmltypes from %1:\n%2").arg(
                                  qmlTypeFile.absoluteFilePath(), warning));
         }
     }
@@ -1416,7 +1388,7 @@ void CppQmlTypesLoader::parseQmlTypeDescriptions(const QByteArray &contents,
 }
 
 CppQmlTypes::CppQmlTypes(ValueOwner *valueOwner)
-    : m_cppContextProperties(0)
+    : m_cppContextProperties(nullptr)
     , m_valueOwner(valueOwner)
 
 {
@@ -1429,8 +1401,8 @@ template <typename T>
 void CppQmlTypes::load(const QString &originId, const T &fakeMetaObjects, const QString &overridePackage)
 {
     QList<CppComponentValue *> newCppTypes;
-    foreach (const FakeMetaObject::ConstPtr &fmo, fakeMetaObjects) {
-        foreach (const FakeMetaObject::Export &exp, fmo->exports()) {
+    for (const FakeMetaObject::ConstPtr &fmo : fakeMetaObjects) {
+        for (const FakeMetaObject::Export &exp : fmo->exports()) {
             QString package = exp.package;
             if (package.isEmpty())
                 package = overridePackage;
@@ -1451,7 +1423,7 @@ void CppQmlTypes::load(const QString &originId, const T &fakeMetaObjects, const 
     }
 
     // set prototypes of cpp types
-    foreach (CppComponentValue *object, newCppTypes) {
+    for (CppComponentValue *object : std::as_const(newCppTypes)) {
         const QString &protoCppName = object->metaObject()->superclassName();
         const CppComponentValue *proto = objectByCppName(protoCppName);
         if (proto)
@@ -1470,11 +1442,12 @@ QList<const CppComponentValue *> CppQmlTypes::createObjectsForImport(const QStri
     QList<const CppComponentValue *> newObjects;
 
     // make new exported objects
-    foreach (const FakeMetaObjectWithOrigin &fmoo, m_fakeMetaObjectsByPackage.value(package)) {
+    const QSet<FakeMetaObjectWithOrigin> fmoos = m_fakeMetaObjectsByPackage.value(package);
+    for (const FakeMetaObjectWithOrigin &fmoo : fmoos) {
         const FakeMetaObject::ConstPtr &fmo = fmoo.fakeMetaObject;
         // find the highest-version export for each alias
         QHash<QString, FakeMetaObject::Export> bestExports;
-        foreach (const FakeMetaObject::Export &exp, fmo->exports()) {
+        for (const FakeMetaObject::Export &exp : fmo->exports()) {
             if (exp.package != package || (version.isValid() && exp.version > version))
                 continue;
 
@@ -1494,7 +1467,7 @@ QList<const CppComponentValue *> CppQmlTypes::createObjectsForImport(const QStri
             continue;
 
         ComponentVersion cppVersion;
-        foreach (const FakeMetaObject::Export &bestExport, bestExports) {
+        for (const FakeMetaObject::Export &bestExport : std::as_const(bestExports)) {
             QString name = bestExport.type;
             bool exported = true;
             if (name.isEmpty()) {
@@ -1524,7 +1497,7 @@ QList<const CppComponentValue *> CppQmlTypes::createObjectsForImport(const QStri
     // set their prototypes, creating them if necessary
     // this ensures that the prototypes of C++ objects are resolved correctly and with the correct
     // revision, and cannot be hidden by other objects.
-    foreach (const CppComponentValue *cobject, newObjects) {
+    for (const CppComponentValue *cobject : std::as_const(newObjects)) {
         CppComponentValue *object = const_cast<CppComponentValue *>(cobject);
         while (!object->prototype()) {
             const QString &protoCppName = object->metaObject()->superclassName();
@@ -1602,13 +1575,13 @@ const ObjectValue *CppQmlTypes::cppContextProperties() const
 
 
 ConvertToNumber::ConvertToNumber(ValueOwner *valueOwner)
-    : m_valueOwner(valueOwner), m_result(0)
+    : m_valueOwner(valueOwner), m_result(nullptr)
 {
 }
 
 const Value *ConvertToNumber::operator()(const Value *value)
 {
-    const Value *previousValue = switchResult(0);
+    const Value *previousValue = switchResult(nullptr);
 
     if (value)
         value->accept(this);
@@ -1665,13 +1638,13 @@ void ConvertToNumber::visit(const FunctionValue *object)
 }
 
 ConvertToString::ConvertToString(ValueOwner *valueOwner)
-    : m_valueOwner(valueOwner), m_result(0)
+    : m_valueOwner(valueOwner), m_result(nullptr)
 {
 }
 
 const Value *ConvertToString::operator()(const Value *value)
 {
-    const Value *previousValue = switchResult(0);
+    const Value *previousValue = switchResult(nullptr);
 
     if (value)
         value->accept(this);
@@ -1728,13 +1701,13 @@ void ConvertToString::visit(const FunctionValue *object)
 }
 
 ConvertToObject::ConvertToObject(ValueOwner *valueOwner)
-    : m_valueOwner(valueOwner), m_result(0)
+    : m_valueOwner(valueOwner), m_result(nullptr)
 {
 }
 
 const Value *ConvertToObject::operator()(const Value *value)
 {
-    const Value *previousValue = switchResult(0);
+    const Value *previousValue = switchResult(nullptr);
 
     if (value)
         value->accept(this);
@@ -1850,16 +1823,16 @@ ASTObjectValue::ASTObjectValue(UiQualifiedId *typeName,
                                const Document *doc,
                                ValueOwner *valueOwner)
     : ObjectValue(valueOwner, doc->importId()),
-      m_typeName(typeName), m_initializer(initializer), m_doc(doc), m_defaultPropertyRef(0)
+      m_typeName(typeName), m_initializer(initializer), m_doc(doc), m_defaultPropertyRef(nullptr)
 {
     if (m_initializer) {
         for (UiObjectMemberList *it = m_initializer->members; it; it = it->next) {
             UiObjectMember *member = it->member;
             if (UiPublicMember *def = cast<UiPublicMember *>(member)) {
-                if (def->type == UiPublicMember::Property && !def->name.isEmpty() && def->isValid()) {
+                if (def->type == UiPublicMember::Property && !def->name.isEmpty()) {
                     ASTPropertyReference *ref = new ASTPropertyReference(def, m_doc, valueOwner);
                     m_properties.append(ref);
-                    if (def->defaultToken.isValid())
+                    if (def->defaultToken().isValid())
                         m_defaultPropertyRef = ref;
                 } else if (def->type == UiPublicMember::Signal && !def->name.isEmpty()) {
                     ASTSignal *ref = new ASTSignal(def, m_doc, valueOwner);
@@ -1879,7 +1852,7 @@ const ASTObjectValue *ASTObjectValue::asAstObjectValue() const
     return this;
 }
 
-bool ASTObjectValue::getSourceLocation(QString *fileName, int *line, int *column) const
+bool ASTObjectValue::getSourceLocation(Utils::FilePath *fileName, int *line, int *column) const
 {
     *fileName = m_doc->fileName();
     *line = m_typeName->identifierToken.startLine;
@@ -1889,15 +1862,15 @@ bool ASTObjectValue::getSourceLocation(QString *fileName, int *line, int *column
 
 void ASTObjectValue::processMembers(MemberProcessor *processor) const
 {
-    foreach (ASTPropertyReference *ref, m_properties) {
+    for (ASTPropertyReference *ref : m_properties) {
         uint pFlags = PropertyInfo::Readable;
-        if (!ref->ast()->isReadonlyMember)
+        if (!ref->ast()->isReadonly())
             pFlags |= PropertyInfo::Writeable;
         processor->processProperty(ref->ast()->name.toString(), ref, PropertyInfo(pFlags));
         // ### Should get a different value?
         processor->processGeneratedSlot(ref->onChangedSlotName(), ref);
     }
-    foreach (ASTSignal *ref, m_signals) {
+    for (ASTSignal *ref : m_signals) {
         processor->processSignal(ref->ast()->name.toString(), ref);
         // ### Should get a different value?
         processor->processGeneratedSlot(ref->slotName(), ref);
@@ -1931,7 +1904,7 @@ const Document *ASTObjectValue::document() const
     return m_doc;
 }
 
-ASTVariableReference::ASTVariableReference(VariableDeclaration *ast, const Document *doc, ValueOwner *valueOwner)
+ASTVariableReference::ASTVariableReference(PatternElement *ast, const Document *doc, ValueOwner *valueOwner)
     : Reference(valueOwner)
     , m_ast(ast)
     , m_doc(doc)
@@ -1947,7 +1920,7 @@ const ASTVariableReference *ASTVariableReference::asAstVariableReference() const
     return this;
 }
 
-const VariableDeclaration *ASTVariableReference::ast() const
+const PatternElement *ASTVariableReference::ast() const
 {
     return m_ast;
 }
@@ -1955,19 +1928,21 @@ const VariableDeclaration *ASTVariableReference::ast() const
 const Value *ASTVariableReference::value(ReferenceContext *referenceContext) const
 {
     // may be assigned to later
-    if (!m_ast->expression)
+    ExpressionNode *exp = ((m_ast->initializer) ? m_ast->initializer : m_ast->bindingTarget);
+    if (!exp)
         return valueOwner()->unknownValue();
 
     Document::Ptr doc = m_doc->ptr();
     ScopeChain scopeChain(doc, referenceContext->context());
     ScopeBuilder builder(&scopeChain);
-    builder.push(ScopeAstPath(doc)(m_ast->expression->firstSourceLocation().begin()));
+    builder.push(ScopeAstPath(doc)(exp->firstSourceLocation().begin()));
 
     Evaluate evaluator(&scopeChain, referenceContext);
-    return evaluator(m_ast->expression);
+    const Value *res = evaluator(exp);
+    return res;
 }
 
-bool ASTVariableReference::getSourceLocation(QString *fileName, int *line, int *column) const
+bool ASTVariableReference::getSourceLocation(Utils::FilePath *fileName, int *line, int *column) const
 {
     *fileName = m_doc->fileName();
     *line = m_ast->identifierToken.startLine;
@@ -1981,17 +1956,17 @@ class UsesArgumentsArray : protected Visitor
     bool m_usesArgumentsArray;
 
 public:
-    bool operator()(FunctionBody *ast)
+    bool operator()(StatementList *ast)
     {
-        if (!ast || !ast->elements)
+        if (!ast)
             return false;
         m_usesArgumentsArray = false;
-        Node::accept(ast->elements, this);
+        Node::accept(ast, this);
         return m_usesArgumentsArray;
     }
 
 protected:
-    bool visit(ArrayMemberExpression *ast)
+    bool visit(ArrayMemberExpression *ast) override
     {
         if (IdentifierExpression *idExp = cast<IdentifierExpression *>(ast->base)) {
             if (idExp->name == QLatin1String("arguments"))
@@ -2001,7 +1976,12 @@ protected:
     }
 
     // don't go into nested functions
-    bool visit(FunctionBody *) { return false; }
+    bool visit(Program *) override { return false; }
+    bool visit(StatementList *) override { return false; }
+
+    void throwRecursionDepthError() override {
+        qWarning("Warning: Hit maximum recursion error visiting AST in UsesArgumentsArray");
+    }
 };
 } // anonymous namespace
 
@@ -2013,7 +1993,7 @@ ASTFunctionValue::ASTFunctionValue(FunctionExpression *ast, const Document *doc,
     setPrototype(valueOwner->functionPrototype());
 
     for (FormalParameterList *it = ast->formals; it; it = it->next)
-        m_argumentNames.append(it->name.toString());
+        m_argumentNames.append(it->element->bindingIdentifier.toString());
 
     m_isVariadic = UsesArgumentsArray()(ast->body);
 }
@@ -2053,7 +2033,7 @@ const ASTFunctionValue *ASTFunctionValue::asAstFunctionValue() const
     return this;
 }
 
-bool ASTFunctionValue::getSourceLocation(QString *fileName, int *line, int *column) const
+bool ASTFunctionValue::getSourceLocation(Utils::FilePath *fileName, int *line, int *column) const
 {
     *fileName = m_doc->fileName();
     *line = m_ast->identifierToken.startLine;
@@ -2110,7 +2090,7 @@ const ASTPropertyReference *ASTPropertyReference::asAstPropertyReference() const
     return this;
 }
 
-bool ASTPropertyReference::getSourceLocation(QString *fileName, int *line, int *column) const
+bool ASTPropertyReference::getSourceLocation(Utils::FilePath *fileName, int *line, int *column) const
 {
     *fileName = m_doc->fileName();
     *line = m_ast->identifierToken.startLine;
@@ -2121,10 +2101,9 @@ bool ASTPropertyReference::getSourceLocation(QString *fileName, int *line, int *
 const Value *ASTPropertyReference::value(ReferenceContext *referenceContext) const
 {
     if (m_ast->statement
-            && (!m_ast->isValid()
-                || m_ast->memberTypeName() == QLatin1String("variant")
-                || m_ast->memberTypeName() == QLatin1String("var")
-                || m_ast->memberTypeName() == QLatin1String("alias"))) {
+            && (m_ast->memberType->toString() == QLatin1String("variant")
+                || m_ast->memberType->toString() == QLatin1String("var")
+                || m_ast->memberType->toString() == QLatin1String("alias"))) {
 
         // Adjust the context for the current location - expensive!
         // ### Improve efficiency by caching the 'use chain' constructed in ScopeBuilder.
@@ -2140,7 +2119,7 @@ const Value *ASTPropertyReference::value(ReferenceContext *referenceContext) con
         return evaluator(m_ast->statement);
     }
 
-    const QString memberType = m_ast->memberTypeName().toString();
+    const QString memberType = m_ast->memberType->toString();
 
     const Value *builtin = valueOwner()->defaultValueForBuiltinType(memberType);
     if (!builtin->asUndefinedValue())
@@ -2161,10 +2140,10 @@ ASTSignal::ASTSignal(UiPublicMember *ast, const Document *doc, ValueOwner *value
     const QString &signalName = ast->name.toString();
     m_slotName = generatedSlotName(signalName);
 
-    ObjectValue *v = valueOwner->newObject(/*prototype=*/0);
+    ObjectValue *v = valueOwner->newObject(/*prototype=*/nullptr);
     for (UiParameterList *it = ast->parameters; it; it = it->next) {
         if (!it->name.isEmpty())
-            v->setMember(it->name.toString(), valueOwner->defaultValueForBuiltinType(it->type->name.toString()));
+            v->setMember(it->name.toString(), valueOwner->defaultValueForBuiltinType(it->type->toString()));
     }
     m_bodyScope = v;
 }
@@ -2191,9 +2170,9 @@ const Value *ASTSignal::argument(int index) const
     UiParameterList *param = m_ast->parameters;
     for (int i = 0; param && i < index; ++i)
         param = param->next;
-    if (!param || param->type->name.isEmpty())
+    if (!param || param->type->toString().isEmpty())
         return valueOwner()->unknownValue();
-    return valueOwner()->defaultValueForBuiltinType(param->type->name.toString());
+    return valueOwner()->defaultValueForBuiltinType(param->type->toString());
 }
 
 QString ASTSignal::argumentName(int index) const
@@ -2206,7 +2185,7 @@ QString ASTSignal::argumentName(int index) const
     return param->name.toString();
 }
 
-bool ASTSignal::getSourceLocation(QString *fileName, int *line, int *column) const
+bool ASTSignal::getSourceLocation(Utils::FilePath *fileName, int *line, int *column) const
 {
     *fileName = m_doc->fileName();
     *line = m_ast->identifierToken.startLine;
@@ -2217,19 +2196,13 @@ bool ASTSignal::getSourceLocation(QString *fileName, int *line, int *column) con
 
 ImportInfo::ImportInfo()
     : m_type(ImportType::Invalid)
-    , m_ast(0)
+    , m_ast(nullptr)
 {
 }
 
 ImportInfo ImportInfo::moduleImport(QString uri, ComponentVersion version,
                                     const QString &as, UiImport *ast)
 {
-    // treat Qt 4.7 as QtQuick 1.0
-    if (uri == QLatin1String("Qt") && version == ComponentVersion(4, 7)) {
-        uri = QLatin1String("QtQuick");
-        version = ComponentVersion(1, 0);
-    }
-
     ImportInfo info;
     info.m_type = ImportType::Library;
     info.m_name = uri;
@@ -2241,30 +2214,43 @@ ImportInfo ImportInfo::moduleImport(QString uri, ComponentVersion version,
     return info;
 }
 
-ImportInfo ImportInfo::pathImport(const QString &docPath, const QString &path,
-                                  ComponentVersion version, const QString &as, UiImport *ast)
+ImportInfo ImportInfo::pathImport(const Utils::FilePath &docPath,
+                                  const QString &path,
+                                  ComponentVersion version,
+                                  const QString &as,
+                                  UiImport *ast)
 {
     ImportInfo info;
     info.m_name = path;
 
-    QFileInfo importFileInfo(path);
-    if (!importFileInfo.isAbsolute())
-        importFileInfo = QFileInfo(docPath + QLatin1Char('/') + path);
-    info.m_path = importFileInfo.absoluteFilePath();
+    Utils::FilePath importFilePath = Utils::FilePath::fromString(path);
+    if (!importFilePath.isAbsolutePath())
+        importFilePath = docPath.pathAppended(path);
+    info.m_path = importFilePath.absoluteFilePath().path();
 
-    if (importFileInfo.isFile()) {
+    if (importFilePath.isFile()) {
         info.m_type = ImportType::File;
-    } else if (importFileInfo.isDir()) {
+    } else if (importFilePath.isDir()) {
         info.m_type = ImportType::Directory;
-    } else if (path.startsWith(QLatin1String("qrc:"))) {
-        ModelManagerInterface *model = ModelManagerInterface::instance();
-        info.m_path = path;
-        info.m_type = !model
-                ? ImportType::UnknownFile
-                : model->filesAtQrcPath(info.path()).isEmpty()
-                  ? ImportType::QrcDirectory
-                  : ImportType::QrcFile;
-    } else {
+    }
+//    else if (path.startsWith(QLatin1String("qrc:"))) {
+//        ModelManagerInterface *model = ModelManagerInterface::instance();
+//        info.m_path = path;
+//        info.m_type = !model
+//                ? ImportType::UnknownFile
+//                : model->filesAtQrcPath(info.path()).isEmpty()
+//                  ? ImportType::QrcDirectory
+//                  : ImportType::QrcFile;
+//    }
+    else {
+        Utils::FilePath dir = docPath;
+        while (dir.fileName().startsWith("+"))
+            dir = dir.parentDir();
+
+        const Utils::FilePath docPathStripped = dir.absolutePath();
+        if (docPathStripped != docPath)
+            return pathImport(docPathStripped, path, version, as, ast);
+
         info.m_type = ImportType::UnknownFile;
     }
     info.m_version = version;
@@ -2333,13 +2319,23 @@ UiImport *ImportInfo::ast() const
 }
 
 Import::Import()
-    : object(0), valid(false), used(false)
+    : object(nullptr), valid(false), used(false)
 {}
 
 Import::Import(const Import &other)
     : object(other.object), info(other.info), libraryPath(other.libraryPath),
       valid(other.valid), used(false)
 { }
+
+Import &Import::operator=(const Import &other)
+{
+    object = other.object;
+    info = other.info;
+    libraryPath = other.libraryPath;
+    valid = other.valid;
+    used = false;
+    return *this;
+}
 
 TypeScope::TypeScope(const Imports *imports, ValueOwner *valueOwner)
     : ObjectValue(valueOwner)
@@ -2350,10 +2346,15 @@ TypeScope::TypeScope(const Imports *imports, ValueOwner *valueOwner)
 const Value *TypeScope::lookupMember(const QString &name, const Context *context,
                                            const ObjectValue **foundInObject, bool) const
 {
-    QListIterator<Import> it(m_imports->all());
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    if (const ObjectValue *value = m_imports->resolveAliasAndMarkUsed(name)) {
+        if (foundInObject)
+            *foundInObject = this;
+        return value;
+    }
+
+    const QList<Import> &imports = m_imports->all();
+    for (int pos = imports.size(); --pos >= 0; ) {
+        const Import &i = imports.at(pos);
         const ObjectValue *import = i.object;
         const ImportInfo &info = i.info;
 
@@ -2361,32 +2362,25 @@ const Value *TypeScope::lookupMember(const QString &name, const Context *context
         if (info.type() == ImportType::File || info.type() == ImportType::QrcFile)
             continue;
 
-        if (!info.as().isEmpty()) {
-            if (info.as() == name) {
-                if (foundInObject)
-                    *foundInObject = this;
-                i.used = true;
-                return import;
-            }
-            continue;
-        }
-
         if (const Value *v = import->lookupMember(name, context, foundInObject)) {
-            i.used = true;
-            return v;
+            // FIXME if we have multiple non-aliased imports containing this object we'd have to
+            // disambiguate (and inform the user) about this issue
+            if (info.as().isEmpty()) {
+                i.used = true;
+                return v;
+            }
         }
     }
     if (foundInObject)
-        *foundInObject = 0;
-    return 0;
+        *foundInObject = nullptr;
+    return nullptr;
 }
 
 void TypeScope::processMembers(MemberProcessor *processor) const
 {
-    QListIterator<Import> it(m_imports->all());
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    const QList<Import> &imports = m_imports->all();
+    for (int pos = imports.size(); --pos >= 0; ) {
+        const Import &i = imports.at(pos);
         const ObjectValue *import = i.object;
         const ImportInfo &info = i.info;
 
@@ -2415,35 +2409,17 @@ JSImportScope::JSImportScope(const Imports *imports, ValueOwner *valueOwner)
 const Value *JSImportScope::lookupMember(const QString &name, const Context *,
                                          const ObjectValue **foundInObject, bool) const
 {
-    QListIterator<Import> it(m_imports->all());
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
-        const ObjectValue *import = i.object;
-        const ImportInfo &info = i.info;
-
-        // JS imports are always: import "somefile.js" as Foo
-        if (info.type() != ImportType::File && info.type() != ImportType::QrcFile)
-            continue;
-
-        if (info.as() == name) {
-            if (foundInObject)
-                *foundInObject = this;
-            i.used = true;
-            return import;
-        }
-    }
+    const ObjectValue *value = m_imports->resolveAliasAndMarkUsed(name);
     if (foundInObject)
-        *foundInObject = 0;
-    return 0;
+        *foundInObject = value ? this : nullptr;
+    return value;
 }
 
 void JSImportScope::processMembers(MemberProcessor *processor) const
 {
-    QListIterator<Import> it(m_imports->all());
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    const QList<Import> &imports = m_imports->all();
+    for (int pos = imports.size(); --pos >= 0; ) {
+        const Import &i = imports.at(pos);
         const ObjectValue *import = i.object;
         const ImportInfo &info = i.info;
 
@@ -2463,10 +2439,31 @@ Imports::Imports(ValueOwner *valueOwner)
     , m_importFailed(false)
 {}
 
+class MemberCopy : public MemberProcessor
+{
+public:
+    explicit MemberCopy(ObjectValue *value) : m_value(value) {}
+    bool processProperty(const QString &name, const Value *value,
+                         const PropertyInfo & /*propertyInfo*/) override
+    {
+        m_value->setMember(name, value);
+        return true;
+    }
+private:
+    ObjectValue *m_value = nullptr;
+};
+
 void Imports::append(const Import &import)
 {
     // when doing lookup, imports with 'as' clause are looked at first
     if (!import.info.as().isEmpty()) {
+        const QString alias = import.info.as();
+        if (!m_aliased.contains(alias))
+            m_aliased.insert(alias, m_typeScope->valueOwner()->newObject(nullptr));
+        ObjectValue *obj = m_aliased[alias];
+        MemberCopy copyProcessor(obj);
+        import.object->processMembers(&copyProcessor);
+
         m_imports.append(import);
     } else {
         // find first as-import and prepend
@@ -2496,10 +2493,8 @@ ImportInfo Imports::info(const QString &name, const Context *context) const
     if (dotIdx != -1)
         firstId = firstId.left(dotIdx);
 
-    QListIterator<Import> it(m_imports);
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    for (int pos = m_imports.size(); --pos >= 0; ) {
+        const Import &i = m_imports.at(pos);
         const ObjectValue *import = i.object;
         const ImportInfo &info = i.info;
 
@@ -2520,54 +2515,10 @@ ImportInfo Imports::info(const QString &name, const Context *context) const
     return ImportInfo();
 }
 
-QList<ImportInfo> Imports::infos(const QString &name, const Context *context) const
-{
-    QList<ImportInfo> infos;
-    QString firstId = name;
-    int dotIdx = firstId.indexOf(QLatin1Char('.'));
-    if (dotIdx != -1)
-        firstId = firstId.left(dotIdx);
-
-    QListIterator<Import> it(m_imports);
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
-        const ObjectValue *import = i.object;
-        const ImportInfo &info = i.info;
-
-        if (!info.as().isEmpty()) {
-            if (info.as() == firstId)
-                infos.append(info);
-            continue;
-        }
-
-        if (info.type() == ImportType::File || info.type() == ImportType::QrcFile) {
-            if (import->className() == firstId)
-                infos.append(info);
-        } else {
-            if (import->lookupMember(firstId, context))
-                infos.append(info);
-        }
-    }
-    return infos;
-}
-
-QList<ImportInfo> Imports::allInfos() const
-{
-    QList<ImportInfo> infos;
-    QListIterator<Import> it(m_imports);
-    it.toBack();
-    while (it.hasPrevious())
-        infos.append(it.previous().info);
-    return infos;
-}
-
 QString Imports::nameForImportedObject(const ObjectValue *value, const Context *context) const
 {
-    QListIterator<Import> it(m_imports);
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    for (int pos = m_imports.size(); --pos >= 0; ) {
+        const Import &i = m_imports.at(pos);
         const ObjectValue *import = i.object;
         const ImportInfo &info = i.info;
 
@@ -2599,6 +2550,11 @@ const QList<Import> &Imports::all() const
     return m_imports;
 }
 
+const ObjectValue *Imports::aliased(const QString &name) const
+{
+    return m_aliased.value(name, nullptr);
+}
+
 const TypeScope *Imports::typeScope() const
 {
     return m_typeScope;
@@ -2609,6 +2565,20 @@ const JSImportScope *Imports::jsImportScope() const
     return m_jsImportScope;
 }
 
+const ObjectValue *Imports::resolveAliasAndMarkUsed(const QString &name) const
+{
+    if (const ObjectValue *value = m_aliased.value(name, nullptr)) {
+        // mark all respective ImportInfo objects to avoid dropping imports (QmlDesigner) on rewrite
+        for (const Import &i : std::as_const(m_imports)) {
+            const ImportInfo &info = i.info;
+            if (info.as() == name)
+                i.used = true; // FIXME: This evilly modifies a 'const' object
+        }
+        return value;
+    }
+    return nullptr;
+}
+
 #ifdef QT_DEBUG
 
 class MemberDumper: public MemberProcessor
@@ -2616,39 +2586,46 @@ class MemberDumper: public MemberProcessor
 public:
     MemberDumper() {}
 
-    virtual bool processProperty(const QString &, const Value *, const PropertyInfo &)
+    bool processProperty(const QString &name, const Value *, const PropertyInfo &pInfo) override
     {
+        qCDebug(qmljsLog) << "property: " << name << " flags:" << pInfo.toString();
         return true;
     }
 
-    virtual bool processEnumerator(const QString &, const Value *)
+    bool processEnumerator(const QString &name, const Value *) override
     {
+        qCDebug(qmljsLog) << "enumerator: " << name;
         return true;
     }
 
-    virtual bool processSignal(const QString &, const Value *)
+    bool processSignal(const QString &name, const Value *) override
     {
+        qCDebug(qmljsLog) << "signal: " << name;
         return true;
     }
 
-    virtual bool processSlot(const QString &, const Value *)
+    bool processSlot(const QString &name, const Value *) override
     {
+        qCDebug(qmljsLog) << "slot: " << name;
         return true;
     }
 
-    virtual bool processGeneratedSlot(const QString &, const Value *)
+    bool processGeneratedSlot(const QString &name, const Value *) override
     {
+        qCDebug(qmljsLog) << "generated slot: " << name;
         return true;
     }
 };
 
 void Imports::dump() const
 {
-    QListIterator<Import> it(m_imports);
-    it.toBack();
-    while (it.hasPrevious()) {
-        const Import &i = it.previous();
+    qCDebug(qmljsLog) << "Imports contents, in search order:";
+    for (int pos = m_imports.size(); --pos >= 0; ) {
+        const Import &i = m_imports.at(pos);
         const ObjectValue *import = i.object;
+        const ImportInfo &info = i.info;
+
+        qCDebug(qmljsLog) << "  " << info.path() << " " << info.version().toString() << " as " << info.as() << " : " << import;
         MemberDumper dumper;
         import->processMembers(&dumper);
     }
